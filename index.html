@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Foodie Circle • Home-cooked marketplace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Space+Grotesk:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-page="home">
+    <div class="page-shell">
+      <header class="site-header">
+        <div class="logo">FoodieCircle</div>
+        <nav class="nav" id="site-nav">
+          <a href="index.html" data-nav="home">Home</a>
+          <a href="customers.html" data-nav="customers">Customers</a>
+          <a href="cooks.html" data-nav="cooks">Cooks</a>
+          <a href="trust.html" data-nav="trust">Trust & Delivery</a>
+        </nav>
+        <button class="nav-toggle" aria-label="Toggle navigation" id="nav-toggle">
+          <span></span><span></span>
+        </button>
+      </header>
+
+      <main>
+        <section
+          class="hero hero--home has-photo"
+          id="hero"
+          style="--photo:url('https://images.pexels.com/photos/6287767/pexels-photo-6287767.jpeg?auto=compress&cs=tinysrgb&w=1600&h=1000&fit=crop');"
+        >
+          <div class="hero__content">
+            <p class="eyebrow">Freshly cooked • Locally delivered</p>
+            <h1>
+              Freshly Cooked Food.<br />
+              From Trusted Local Cooks.<br />
+              Delivered to You.
+            </h1>
+            <p class="lead">
+              No stress. No guesswork. Just delicious, home-style meals made on demand by
+              verified cooks near you.
+            </p>
+            <p class="tagline" id="tagline">Cooked by people. Delivered with care.</p>
+            <div class="hero__actions">
+              <a class="btn primary" href="customers.html">Order Food Now</a>
+              <a class="btn outline" href="cooks.html">Become a Cook</a>
+            </div>
+            <p class="micro">Order a meal. Order a pot. Eat well today.</p>
+          </div>
+          <div
+            class="hero__visual"
+            style="--visual-photo:url('https://images.pexels.com/photos/6999536/pexels-photo-6999536.jpeg?auto=compress&cs=tinysrgb&w=900&h=900&fit=crop');"
+          >
+            <div class="stat-grid">
+              <article>
+                <span>1,200+</span>
+                <p>orders plated every week</p>
+              </article>
+              <article>
+                <span>48 hrs</span>
+                <p>from craving to doorstep</p>
+              </article>
+              <article>
+                <span>4.9/5</span>
+                <p>average delight rating</p>
+              </article>
+              <article>
+                <span>NGN 500M</span>
+                <p>paid out to home cooks</p>
+              </article>
+            </div>
+            <div class="badge badge--top">Real kitchens</div>
+            <div class="badge badge--mid">Verified cooks</div>
+            <div class="badge badge--bottom">Escrow protected</div>
+          </div>
+        </section>
+
+        <section
+          class="trust-zone has-photo"
+          style="--photo:url('https://images.pexels.com/photos/6999535/pexels-photo-6999535.jpeg?auto=compress&cs=tinysrgb&w=1400&h=900&fit=crop');"
+        >
+          <blockquote>
+            “Good food shouldn’t be hard to find. And talent shouldn’t be hidden.”
+          </blockquote>
+          <p>
+            We connect busy people who crave quality meals with talented cooks who deserve
+            more income opportunities — securely, transparently, and reliably.
+          </p>
+        </section>
+
+        <section class="section split-panel" id="customers">
+          <div class="panel">
+            <p class="eyebrow">For customers</p>
+            <h2>Eat better without cooking</h2>
+            <p>
+              Long day at work? Traffic drained you? We’ve got you. Choose freshly cooked
+              meals or whole pots, prepared by real people — not faceless kitchens — and
+              delivered when you need it.
+            </p>
+            <ul class="list-check">
+              <li>Freshly cooked, never reheated</li>
+              <li>Daily meals or family-size pots</li>
+              <li>Custom spice, protein, and sides</li>
+              <li>Delivered right to your door</li>
+            </ul>
+            <a class="btn primary" href="customers.html">Find food near you</a>
+            <div class="image-strip">
+              <span style="background-image:url('https://images.pexels.com/photos/6999540/pexels-photo-6999540.jpeg?auto=compress&cs=tinysrgb&w=700&h=500&fit=crop');"></span>
+              <span style="background-image:url('https://images.pexels.com/photos/6999538/pexels-photo-6999538.jpeg?auto=compress&cs=tinysrgb&w=700&h=500&fit=crop');"></span>
+              <span style="background-image:url('https://images.pexels.com/photos/6999539/pexels-photo-6999539.jpeg?auto=compress&cs=tinysrgb&w=700&h=500&fit=crop');"></span>
+            </div>
+          </div>
+          <div class="panel panel--cards">
+            <article>
+              <h3>Pick your vibe</h3>
+              <p>Jollof, soups, grills, fit-fam bowls, kids plates — curated daily.</p>
+            </article>
+            <article>
+              <h3>Pot or plate</h3>
+              <p>Individual bowls for lunch or entire pots for the family weekend.</p>
+            </article>
+            <article>
+              <h3>Track & relax</h3>
+              <p>Follow the journey from kitchen fire to doorstep on live maps.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section split-panel reverse" id="cooks">
+          <div class="panel panel--image">
+            <img
+              src="https://images.pexels.com/photos/6999534/pexels-photo-6999534.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&fit=crop"
+              alt="Nigerian cook plating food"
+              loading="lazy"
+            />
+          </div>
+          <div class="panel panel--cards">
+            <article>
+              <h3>No restaurant needed</h3>
+              <p>Use your own kitchen, keep your signature style, cook on your schedule.</p>
+            </article>
+            <article>
+              <h3>We handle the rest</h3>
+              <p>Orders, payments, delivery, trust — all managed inside FoodieCircle.</p>
+            </article>
+            <article>
+              <h3>Earn more, faster</h3>
+              <p>Escrow releases funds instantly after delivery confirmation.</p>
+            </article>
+          </div>
+          <div class="panel">
+            <p class="eyebrow">For cooks</p>
+            <h2>You can cook. We help you earn.</h2>
+            <p>
+              No restaurant. No expensive rent. No huge capital. Just your skills, your
+              kitchen, your passion. We amplify your hustle and keep customers coming back.
+            </p>
+            <ul class="list-check">
+              <li>Keep up to 85% of every order</li>
+              <li>Smart menu templates & pricing</li>
+              <li>Delivery partners on standby</li>
+              <li>Community support & training</li>
+            </ul>
+            <a class="btn outline" href="cooks.html">Start selling food</a>
+          </div>
+        </section>
+
+        <section class="section timeline" id="trust">
+          <div class="section__header">
+            <p class="eyebrow">Escrow & trust</p>
+            <h2>Payment you can trust</h2>
+            <p>
+              We use a secure escrow system that protects everyone. No stories. No disputes.
+              No stress.
+            </p>
+          </div>
+          <div class="timeline__grid">
+            <article>
+              <span class="step">01</span>
+              <h3>Customer pays</h3>
+              <p>Funds are held safely the moment an order is placed.</p>
+            </article>
+            <article>
+              <span class="step">02</span>
+              <h3>Cook prepares</h3>
+              <p>Prep updates & kitchen checks keep everyone aligned.</p>
+            </article>
+            <article>
+              <span class="step">03</span>
+              <h3>Delivery happens</h3>
+              <p>Trusted riders handle pickup, insulated carrying, and drop-off.</p>
+            </article>
+            <article>
+              <span class="step">04</span>
+              <h3>Confirm & payout</h3>
+              <p>Customer confirms, escrow releases, cook gets paid instantly.</p>
+            </article>
+          </div>
+        </section>
+
+        <section
+          class="section delivery has-photo"
+          id="delivery"
+          style="--photo:url('https://images.pexels.com/photos/6999541/pexels-photo-6999541.jpeg?auto=compress&cs=tinysrgb&w=1400&h=900&fit=crop');"
+        >
+          <div class="section__header">
+            <p class="eyebrow">Delivery</p>
+            <h2>From kitchen to doorstep</h2>
+            <p>Track your order from the sizzling pot to your door — in real time.</p>
+          </div>
+          <div class="icon-grid">
+            <article class="with-photo" style="--tile-photo:url('https://images.pexels.com/photos/6999542/pexels-photo-6999542.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop');">
+              <h3>Fast pickup</h3>
+              <p>Dedicated rider network stationed across Lagos, Abuja, PH, and more.</p>
+            </article>
+            <article class="with-photo" style="--tile-photo:url('https://images.pexels.com/photos/6999537/pexels-photo-6999537.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop');">
+              <h3>Safe handling</h3>
+              <p>Insulated carriers, leak-proof seals, and temp checks for every trip.</p>
+            </article>
+            <article class="with-photo" style="--tile-photo:url('https://images.pexels.com/photos/6999536/pexels-photo-6999536.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop');">
+              <h3>On-time delivery</h3>
+              <p>Live ETA alerts so you know exactly when to set the table.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section why" id="why">
+          <div class="section__header">
+            <p class="eyebrow">Why it works</p>
+            <h2>This is more than food delivery</h2>
+            <p>It’s a community-powered food economy built for Nigerian cities.</p>
+          </div>
+          <div class="pill-grid">
+            <span>Supports meals & pot orders</span>
+            <span>Empowers everyday cooks</span>
+            <span>Designed for busy lifestyles</span>
+            <span>Scales to families & events</span>
+            <span>Transparent reviews & trust</span>
+            <span>Localized payments & escrow</span>
+          </div>
+        </section>
+
+        <section class="section social-proof" id="stories">
+          <div class="section__header">
+            <p class="eyebrow">Social proof</p>
+            <h2>Real people, real relief</h2>
+          </div>
+          <div class="stories__panel">
+            <button class="stories__nav" data-testimonial="prev" aria-label="Previous story">←</button>
+            <div class="stories__content" id="testimonial-card"></div>
+            <button class="stories__nav" data-testimonial="next" aria-label="Next story">→</button>
+          </div>
+        </section>
+      </main>
+
+      <section class="section cta cta--final" id="cta">
+        <div class="cta__text">
+          <p class="eyebrow">Call to action</p>
+          <h2>Eat well. Earn more. Stress less.</h2>
+          <p>
+            Whether you’re hungry or talented — there’s a place for you here. Good food
+            starts at home, and we bring it straight to the people who need it.
+          </p>
+          <div class="hero__actions">
+            <a class="btn primary" href="customers.html">Order Food Now</a>
+            <a class="btn outline" href="cooks.html">Become a Cook Today</a>
+          </div>
+        </div>
+        <div class="cta__visual">
+          <p class="tagline">“From pot to plate — without stress.”</p>
+          <p class="tagline">“Where great cooks meet busy lives.”</p>
+        </div>
+      </section>
+
+      <footer class="site-footer">
+        <p>© <span id="year"></span> FoodieCircle. Crafted with flavor everywhere.</p>
+        <div class="footer-links">
+          <a href="#">Instagram</a>
+          <a href="#">TikTok</a>
+          <a href="#">Press Kit</a>
+        </div>
+      </footer>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

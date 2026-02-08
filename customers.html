@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FoodieCircle • Order freshly cooked food</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Space+Grotesk:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-page="customers">
+    <div class="page-shell">
+      <header class="site-header">
+        <div class="logo">FoodieCircle</div>
+        <nav class="nav" id="site-nav">
+          <a href="index.html" data-nav="home">Home</a>
+          <a href="customers.html" data-nav="customers">Customers</a>
+          <a href="cooks.html" data-nav="cooks">Cooks</a>
+          <a href="trust.html" data-nav="trust">Trust & Delivery</a>
+        </nav>
+        <button class="nav-toggle" aria-label="Toggle navigation" id="nav-toggle">
+          <span></span><span></span>
+        </button>
+      </header>
+
+      <main>
+        <section
+          class="hero hero--sub has-photo"
+          style="--photo:url('https://images.pexels.com/photos/6287767/pexels-photo-6287767.jpeg?auto=compress&cs=tinysrgb&w=1600&h=1000&fit=crop');"
+        >
+          <div class="hero__content">
+            <p class="eyebrow">For customers</p>
+            <h1>Eat better without touching the stove.</h1>
+            <p class="lead">
+              Order freshly cooked meals or whole pots from trusted neighborhood cooks.
+              Tell us your cravings, spice level, and timing — we handle the rest.
+            </p>
+            <div class="hero__actions">
+              <a class="btn primary" href="#menus">Find food near you</a>
+              <a class="btn outline" href="trust.html">See how it works</a>
+            </div>
+            <p class="micro">Serving Lagos, Abuja, Port Harcourt, Ibadan & counting.</p>
+          </div>
+          <div
+            class="hero__visual"
+            style="--visual-photo:url('https://images.pexels.com/photos/6999536/pexels-photo-6999536.jpeg?auto=compress&cs=tinysrgb&w=900&h=900&fit=crop');"
+          >
+            <div class="stat-grid">
+              <article>
+                <span>15</span>
+                <p>city hubs online</p>
+              </article>
+              <article>
+                <span>600+</span>
+                <p>verified cooks</p>
+              </article>
+              <article>
+                <span>28 mins</span>
+                <p>avg pickup time</p>
+              </article>
+              <article>
+                <span>97%</span>
+                <p>repeat customers</p>
+              </article>
+            </div>
+            <div class="badge badge--top">Track in real time</div>
+            <div class="badge badge--mid">Escrow protected</div>
+            <div class="badge badge--bottom">Custom spice levels</div>
+          </div>
+        </section>
+
+        <section class="section info-grid">
+          <div class="note-card has-photo" style="--photo:url('https://images.pexels.com/photos/6999539/pexels-photo-6999539.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop');">
+            <h3>Fresh, not reheated</h3>
+            <p>Every meal is cooked after your order lands. No chafing dish fatigue.</p>
+          </div>
+          <div class="note-card has-photo" style="--photo:url('https://images.pexels.com/photos/6999538/pexels-photo-6999538.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop');">
+            <h3>Meals or full pots</h3>
+            <p>Grab a solo lunch bowl, or order an entire pot for family dinner.</p>
+          </div>
+          <div class="note-card has-photo" style="--photo:url('https://images.pexels.com/photos/6999540/pexels-photo-6999540.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop');">
+            <h3>Tailored to you</h3>
+            <p>Specify pepper level, protein swaps, allergies, or side preferences.</p>
+          </div>
+          <div class="note-card has-photo" style="--photo:url('https://images.pexels.com/photos/6999534/pexels-photo-6999534.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop');">
+            <h3>Delivered on schedule</h3>
+            <p>Pick exact delivery windows and follow the rider ETA on the map.</p>
+          </div>
+        </section>
+
+        <section class="section split-panel" id="menus">
+          <div class="panel has-photo" style="--photo:url('https://images.pexels.com/photos/6999541/pexels-photo-6999541.jpeg?auto=compress&cs=tinysrgb&w=1200&h=900&fit=crop');">
+            <p class="eyebrow">How to order</p>
+            <h2>Three steps to “food don land”</h2>
+            <ol class="list-check">
+              <li>Browse cooks near you & read real reviews.</li>
+              <li>Choose plates or pots, set quantity, add delivery instructions.</li>
+              <li>Pay securely via escrow, track prep & delivery live.</li>
+            </ol>
+            <a class="btn primary" href="#cta">Order food now</a>
+            <div class="image-strip">
+              <span style="background-image:url('https://images.pexels.com/photos/6999535/pexels-photo-6999535.jpeg?auto=compress&cs=tinysrgb&w=700&h=500&fit=crop');"></span>
+              <span style="background-image:url('https://images.pexels.com/photos/6999536/pexels-photo-6999536.jpeg?auto=compress&cs=tinysrgb&w=700&h=500&fit=crop');"></span>
+              <span style="background-image:url('https://images.pexels.com/photos/6999537/pexels-photo-6999537.jpeg?auto=compress&cs=tinysrgb&w=700&h=500&fit=crop');"></span>
+            </div>
+          </div>
+          <div class="panel panel--cards">
+            <article>
+              <h3>Daily bowls</h3>
+              <p>Office lunch solved — from smoky jollof bowls to grilled protein packs.</p>
+            </article>
+            <article>
+              <h3>Family pots</h3>
+              <p>Party-size soups, stews, and rice dishes portioned by number of mouths.</p>
+            </article>
+            <article>
+              <h3>Wellness edits</h3>
+              <p>Low-sodium, vegan, fit-fam, baby-safe, or allergy friendly options.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section card-grid">
+          <article class="card highlight">
+            <div class="pill">Chef Dera · Lekki</div>
+            <h3>Seafood okra + pounded yam</h3>
+            <p>Feeds 4–5 • Ready in 2 hrs</p>
+          </article>
+          <article class="card">
+            <div class="pill">Chef Bisi · Abuja</div>
+            <h3>Firewood party jollof</h3>
+            <p>Feeds 8 • Includes grilled turkey</p>
+          </article>
+          <article class="card">
+            <div class="pill">Chef Halima · Kano</div>
+            <h3>Fura smoothie drop</h3>
+            <p>Bottle delivery • 6 pack</p>
+          </article>
+          <article class="card">
+            <div class="pill">Chef Manny · PH</div>
+            <h3>Goat pepper soup</h3>
+            <p>Feeds 6 • Night deliveries</p>
+          </article>
+        </section>
+
+        <section class="section faq">
+          <div class="section__header">
+            <p class="eyebrow">FAQs</p>
+            <h2>Your top questions answered</h2>
+          </div>
+          <div class="faq__item">
+            <h3>How do I know the cook is verified?</h3>
+            <p>
+              Every cook passes kitchen inspection, ID verification, taste tests, and customer
+              rating thresholds before going live.
+            </p>
+          </div>
+          <div class="faq__item">
+            <h3>Can I order multiple dishes at once?</h3>
+            <p>Absolutely — build a basket across cooks or book one host for a full menu.</p>
+          </div>
+          <div class="faq__item">
+            <h3>What if I need to cancel?</h3>
+            <p>Cancel within the prep window for a full refund. After prep starts, escrow handles partial refunds.</p>
+          </div>
+          <div class="faq__item">
+            <h3>Do you deliver to offices?</h3>
+            <p>Yes. Add office delivery instructions and our riders will deliver straight to reception.</p>
+          </div>
+        </section>
+      </main>
+
+      <section class="section cta" id="cta">
+        <div class="cta__text">
+          <p class="eyebrow">Ready?</p>
+          <h2>Order a meal. Order a pot. Eat well today.</h2>
+          <p>Tap the button, set your cravings, and let trusted cooks handle dinner.</p>
+          <a class="btn primary" href="#">Start an order</a>
+        </div>
+        <div class="cta__visual">
+          <p class="tagline">Live order tracking · Cashless payments · Delivery you can rely on.</p>
+        </div>
+      </section>
+
+      <footer class="site-footer">
+        <p>© <span id="year"></span> FoodieCircle. Crafted with flavor everywhere.</p>
+        <div class="footer-links">
+          <a href="#">Instagram</a>
+          <a href="#">TikTok</a>
+          <a href="#">Press Kit</a>
+        </div>
+      </footer>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
