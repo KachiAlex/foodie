@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ClipboardList, DollarSign, Leaf, Settings, Sparkles } from "lucide-react";
+import { ClipboardList, Leaf, Settings, Sparkles } from "lucide-react";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import {

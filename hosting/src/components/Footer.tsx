@@ -28,7 +28,7 @@ export function Footer() {
           <div className="col-span-2 md:col-span-4 lg:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <ChefHat className="w-8 h-8 text-orange-500" />
-              <span className="text-2xl font-bold text-white">HomePlate</span>
+              <span className="text-2xl font-bold text-white">Foodie Market</span>
             </div>
             <p className="text-gray-400 mb-6">
               Connecting home chefs with hungry customers. Fresh, local, and delicious.
@@ -70,7 +70,7 @@ export function Footer() {
         <div className="border-t border-gray-800 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm">
-              © 2026 HomePlate. All rights reserved.
+              © 2026 Foodie Market. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
               <a href="#" className="hover:text-orange-500 transition-colors">Privacy Policy</a>

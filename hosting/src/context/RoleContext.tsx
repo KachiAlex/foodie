@@ -18,7 +18,7 @@ interface RoleContextValue {
 }
 
 const RoleContext = createContext<RoleContextValue | undefined>(undefined);
-const STORAGE_KEY = "homeplate_role";
+const STORAGE_KEY = "foodiemarket_role";
 
 export function RoleProvider({ children }: { children: ReactNode }) {
   const analytics = useAnalytics();

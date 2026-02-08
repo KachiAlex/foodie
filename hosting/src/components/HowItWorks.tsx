@@ -35,7 +35,7 @@ export function HowItWorks() {
             Simple Process
           </motion.p>
           <motion.h2 className="text-4xl font-bold text-gray-900" initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} transition={{ delay: 0.15 }}>
-            How HomePlate Works
+            How Foodie Market Works
           </motion.h2>
           <motion.p className="text-lg text-gray-600 max-w-2xl mx-auto" initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
             Place an order in minutes and get homestyle meals cooked by neighborhood chefs.

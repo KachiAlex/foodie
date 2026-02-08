@@ -60,7 +60,7 @@ export function CTASection() {
                 className="bg-white text-orange-600 hover:bg-gray-100 px-8 py-6 text-lg rounded-xl h-auto shadow-lg shadow-orange-900/20"
                 asChild
               >
-                <Link to={`/dashboard/${role}`}>Open {role.charAt(0).toUpperCase() + role.slice(1)} Dashboard</Link>
+                <Link to={`/auth/sign-up?role=${role}`}>Join as {role.charAt(0).toUpperCase() + role.slice(1)}</Link>
               </Button>
               <Button 
                 size="lg" 
@@ -68,7 +68,7 @@ export function CTASection() {
                 className="border-2 border-white text-white hover:bg-white/10 px-8 py-6 text-lg rounded-xl h-auto"
                 asChild
               >
-                <Link to="/dashboard/vendor">Browse Chef Playbook</Link>
+                <Link to={`/auth/sign-in?role=${role}`}>I already have an account</Link>
               </Button>
             </div>
           </motion.div>

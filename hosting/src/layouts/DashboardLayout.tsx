@@ -19,13 +19,13 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ sidebar, title, description, actions, children }: DashboardLayoutProps) {
   const [open, setOpen] = useState(false);
-  const { role, setRole } = useRole();
+  const { setRole } = useRole();
   const navigate = useNavigate();
 
   const SidebarContent = (
     <div className="flex flex-col h-full">
       <Link to="/" className="text-2xl font-bold text-orange-500 mb-6">
-        HomePlate
+        Foodie Market
       </Link>
       <nav className="space-y-1">
         {sidebar.nav.map((item) => (
