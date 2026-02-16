@@ -2,11 +2,12 @@ import type { ChangeEvent, FormEvent } from "react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChefHat, Loader2 } from "lucide-react";
+import { ChefHat, Loader2, MapPin, Camera, ShieldCheck, Video as VideoIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { roleOptions, type Role } from "@/context/RoleContext";
 import { useToast } from "@/context/ToastContext";
+import { compressImageFile } from "@/utils/fileHelpers";
 
 type VendorRequirementFields = {
   address: string;
@@ -22,6 +23,13 @@ const initialVendorState: VendorRequirementFields = {
   kitchenMedia: [],
   idCardCapture: null,
   utilityBill: null,
+};
+
+type MediaPreview = {
+  url: string;
+  name: string;
+  type: string;
+  sizeKb: number;
 };
 
 function validateVendorRequirements(details: VendorRequirementFields) {
@@ -53,12 +61,51 @@ export function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [vendorDetails, setVendorDetails] = useState<VendorRequirementFields>(initialVendorState);
+  const [mediaPreviews, setMediaPreviews] = useState<MediaPreview[]>([]);
+  const [compressingMedia, setCompressingMedia] = useState(false);
+
+  const vendorSteps = [
+    {
+      label: "Address & landmark",
+      complete: Boolean(vendorDetails.address.trim() && vendorDetails.landmark.trim()),
+      Icon: MapPin,
+    },
+    {
+      label: "Kitchen media",
+      complete: vendorDetails.kitchenMedia.length > 0,
+      Icon: Camera,
+    },
+    {
+      label: "Identity & utility",
+      complete: Boolean(vendorDetails.idCardCapture && vendorDetails.utilityBill),
+      Icon: ShieldCheck,
+    },
+  ];
+  const completedSteps = vendorSteps.filter((step) => step.complete).length;
+  const vendorProgress = Math.round((completedSteps / vendorSteps.length) * 100);
 
   useEffect(() => {
     if (user) {
       navigate(`/dashboard/${user.role}`, { replace: true });
     }
   }, [navigate, user]);
+
+  useEffect(() => {
+    if (vendorDetails.kitchenMedia.length === 0) {
+      setMediaPreviews([]);
+      return;
+    }
+    const nextPreviews = vendorDetails.kitchenMedia.map((file) => ({
+      url: URL.createObjectURL(file),
+      name: file.name,
+      type: file.type,
+      sizeKb: Math.max(1, Math.round(file.size / 1024)),
+    }));
+    setMediaPreviews(nextPreviews);
+    return () => {
+      nextPreviews.forEach((preview) => URL.revokeObjectURL(preview.url));
+    };
+  }, [vendorDetails.kitchenMedia]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -101,9 +148,36 @@ export function SignUpPage() {
       setVendorDetails((prev) => ({ ...prev, [field]: value }));
     };
 
-  const handleKitchenMediaChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleKitchenMediaChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files ? Array.from(event.target.files).slice(0, 6) : [];
-    setVendorDetails((prev) => ({ ...prev, kitchenMedia: files }));
+    event.target.value = "";
+    if (files.length === 0) return;
+    setCompressingMedia(true);
+    try {
+      const processed = await Promise.all(
+        files.map((file) => (file.type.startsWith("image/") ? compressImageFile(file) : file)),
+      );
+      setVendorDetails((prev) => ({
+        ...prev,
+        kitchenMedia: [...prev.kitchenMedia, ...processed].slice(0, 6),
+      }));
+    } catch (compressionError) {
+      console.error("Kitchen media compression failed", compressionError);
+      setVendorDetails((prev) => ({
+        ...prev,
+        kitchenMedia: [...prev.kitchenMedia, ...files].slice(0, 6),
+      }));
+    } finally {
+      setCompressingMedia(false);
+    }
+  };
+
+  const removeMediaAt = (index: number) => {
+    setVendorDetails((prev) => {
+      const nextMedia = [...prev.kitchenMedia];
+      nextMedia.splice(index, 1);
+      return { ...prev, kitchenMedia: nextMedia };
+    });
   };
 
   const handleSingleFileChange = (field: "idCardCapture" | "utilityBill") => (event: ChangeEvent<HTMLInputElement>) => {
@@ -227,6 +301,40 @@ export function SignUpPage() {
                     <p className="text-xs text-orange-500">We need a precise kitchen location, visual proof, and identity documents before activating your stall.</p>
                   </div>
 
+                  <div className="space-y-3 rounded-2xl bg-white/70 p-4 text-sm">
+                    <div className="flex items-center justify-between text-xs font-medium text-gray-600">
+                      <span className="uppercase tracking-[0.2em] text-gray-500">Progress</span>
+                      <span>
+                        {completedSteps}/{vendorSteps.length} steps
+                      </span>
+                    </div>
+                    <div className="h-2 rounded-full bg-orange-100">
+                      <div
+                        className="h-2 rounded-full bg-orange-500 transition-all"
+                        style={{ width: `${vendorProgress}%` }}
+                      />
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      {vendorSteps.map(({ label, complete, Icon }) => (
+                        <div
+                          key={label}
+                          className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold ${
+                            complete ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-gray-200 bg-white text-gray-500"
+                          }`}
+                        >
+                          <span
+                            className={`inline-flex h-7 w-7 items-center justify-center rounded-full ${
+                              complete ? "bg-emerald-500 text-white" : "bg-gray-100 text-gray-500"
+                            }`}
+                          >
+                            <Icon className="h-4 w-4" />
+                          </span>
+                          <span>{label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700" htmlFor="vendor-address">
                       Kitchen address (street, city, state)
@@ -269,14 +377,43 @@ export function SignUpPage() {
                       onChange={handleKitchenMediaChange}
                       className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm text-gray-600"
                     />
-                    <p className="text-xs text-gray-500">Upload up to 6 files. At least one clear photo or video of your prep area is required.</p>
-                    {vendorDetails.kitchenMedia.length > 0 && (
-                      <ul className="text-xs text-gray-600">
-                        {vendorDetails.kitchenMedia.map((file) => (
-                          <li key={file.name}>{file.name}</li>
-                        ))}
-                      </ul>
-                    )}
+                    <div className="space-y-2">
+                      <p className="text-xs text-gray-500">Upload up to 6 files. At least one clear photo or video of your prep area is required.</p>
+                      {compressingMedia && <p className="text-xs text-orange-500">Optimizing uploads...</p>}
+                      {mediaPreviews.length > 0 && (
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {mediaPreviews.map((preview, index) => (
+                            <div key={preview.url} className="relative rounded-2xl border border-gray-200 bg-white p-3">
+                              <button
+                                type="button"
+                                className="absolute right-2 top-2 rounded-full bg-white/80 p-1 text-gray-500 hover:text-red-500"
+                                aria-label={`Remove ${preview.name}`}
+                                onClick={() => removeMediaAt(index)}
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                              <div className="flex items-center gap-3">
+                                {preview.type.startsWith("image/") ? (
+                                  <img
+                                    src={preview.url}
+                                    alt={preview.name}
+                                    className="h-16 w-16 rounded-xl object-cover"
+                                  />
+                                ) : (
+                                  <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-orange-100 text-orange-600">
+                                    <VideoIcon className="h-6 w-6" />
+                                  </div>
+                                )}
+                                <div>
+                                  <p className="text-sm font-semibold text-gray-800 truncate">{preview.name}</p>
+                                  <p className="text-xs text-gray-500">{preview.sizeKb} KB · {preview.type || "unknown"}</p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">

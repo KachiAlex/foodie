@@ -1,35 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import type { Role } from "@/context/RoleContext";
 import { useRole } from "@/context/RoleContext";
-
-interface AuthUser {
-  name: string;
-  email: string;
-  role: Role;
-}
-
-interface VendorVerificationPayload {
-  address: string;
-  landmark: string;
-  kitchenMediaCount: number;
-  idCardProvided: boolean;
-  utilityBillProvided: boolean;
-}
-
-interface SignUpPayload {
-  name: string;
-  email: string;
-  password: string;
-  role: Role;
-  vendorVerification?: VendorVerificationPayload;
-}
-
-interface SignInPayload {
-  email: string;
-  password: string;
-  role?: Role;
-}
+import type { AuthUser, SignInPayload, SignUpPayload } from "@/types/auth";
+import { mockSignInRequest, mockSignUpRequest } from "@/services/authApi";
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -67,11 +40,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signUp = useCallback(
-    async ({ name, email, password, role, vendorVerification }: SignUpPayload) => {
-      void password; // placeholder until backend integration
-      void vendorVerification;
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      const nextUser: AuthUser = { name, email, role };
+    async (payload: SignUpPayload) => {
+      const nextUser = await mockSignUpRequest(payload);
       persistUser(nextUser);
       return nextUser;
     },
@@ -79,13 +49,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signIn = useCallback(
-    async ({ email, password, role }: SignInPayload) => {
-      void password;
-      await new Promise((resolve) => setTimeout(resolve, 400));
-      const existing = user;
-      const resolvedRole = role ?? existing?.role ?? "buyer";
-      const resolvedName = existing?.name ?? "Foodie";
-      const nextUser: AuthUser = { name: resolvedName, email, role: resolvedRole };
+    async (payload: SignInPayload) => {
+      const nextUser = await mockSignInRequest(payload, user);
       persistUser(nextUser);
       return nextUser;
     },

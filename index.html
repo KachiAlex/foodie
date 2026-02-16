@@ -12,7 +12,7 @@
     />
     <link rel="stylesheet" href="./styles.css" />
   </head>
-  <body data-page="home">
+  <body data-page="home" data-app-base="./hosting/dist">
     <div class="page-shell">
       <header class="site-header">
         <div class="logo">FoodieCircle</div>
@@ -45,9 +45,42 @@
               verified cooks near you.
             </p>
             <p class="tagline" id="tagline">Cooked by people. Delivered with care.</p>
+            <div class="hero__meta">
+              <article>
+                <span>Right now</span>
+                <strong>68 kitchens live</strong>
+                <p>Across Lagos, Abuja, PH &amp; more</p>
+              </article>
+              <article>
+                <span>Weekend prep</span>
+                <strong>520 pots shared</strong>
+                <p>Families stocked up last week</p>
+              </article>
+            </div>
+            <div class="hero__support">
+              <span>Average delivery 42 mins</span>
+              <span>Chef background checked</span>
+              <span>Escrow-backed payouts</span>
+            </div>
             <div class="hero__actions">
-              <a class="btn primary" href="customers.html">Order Food Now</a>
-              <a class="btn outline" href="cooks.html">Become a Cook</a>
+              <a
+                class="btn primary"
+                href="customers.html"
+                data-role="buyer"
+                data-auth="mock"
+                data-destination="./hosting/dist/dashboard/buyer"
+              >
+                Order Food Now
+              </a>
+              <a
+                class="btn outline"
+                href="cooks.html"
+                data-role="vendor"
+                data-auth="mock"
+                data-destination="./hosting/dist/dashboard/vendor"
+              >
+                Become a Cook
+              </a>
             </div>
             <p class="micro">Order a meal. Order a pot. Eat well today.</p>
           </div>
@@ -73,9 +106,36 @@
                 <p>paid out to home cooks</p>
               </article>
             </div>
+            <div class="order-card">
+              <div>
+                <p class="label">Live order</p>
+                <strong>Nsima + pepper soup</strong>
+                <span>Lekki • arriving 18:45</span>
+              </div>
+              <a class="btn ghost small" href="#delivery">Track route</a>
+            </div>
+            <div class="hero__pulse" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
             <div class="badge badge--top">Real kitchens</div>
             <div class="badge badge--mid">Verified cooks</div>
             <div class="badge badge--bottom">Escrow protected</div>
+          </div>
+        </section>
+
+        <section class="section signal-band" aria-label="Cities we currently cover">
+          <p class="signal-band__tag">Now serving</p>
+          <div class="marquee" aria-hidden="true">
+            <span>Lagos Mainland</span>
+            <span>Lekki &amp; Ajah</span>
+            <span>Abuja</span>
+            <span>Port Harcourt</span>
+            <span>Ibadan</span>
+            <span>Enugu</span>
+            <span>Benin City</span>
+            <span>Ogun</span>
           </div>
         </section>
 
@@ -202,6 +262,97 @@
           </div>
         </section>
 
+        <section class="section payment-flow" id="payment">
+          <div class="section__header split">
+            <div>
+              <p class="eyebrow">Mock checkout</p>
+              <h2>Try the escrow payment flow</h2>
+              <p>Fill the form, watch the steps, and see how we stage funds before cooks get paid.</p>
+            </div>
+            <div class="payment-pill">
+              <span>Sandbox</span>
+              <p>No card charged — just pure demo.</p>
+            </div>
+          </div>
+          <div class="payment-grid">
+            <form class="payment-card" id="payment-form">
+              <div class="form-row">
+                <label>
+                  Full name
+                  <input type="text" name="name" placeholder="Chidinma Okonkwo" required />
+                </label>
+                <label>
+                  Contact email
+                  <input type="email" name="email" placeholder="you@example.com" required />
+                </label>
+              </div>
+              <label>
+                Order value (NGN)
+                <div class="input-group">
+                  <span>NGN</span>
+                  <input type="number" name="amount" min="5000" step="500" value="15000" required />
+                </div>
+              </label>
+              <label>
+                Card digits
+                <input type="text" name="card" placeholder="4111 22•• ••33 4444" maxlength="19" required />
+              </label>
+              <fieldset>
+                <legend>Preferred payment method</legend>
+                <div class="options">
+                  <label><input type="radio" name="method" value="card" checked /> Debit card</label>
+                  <label><input type="radio" name="method" value="transfer" /> Bank transfer</label>
+                  <label><input type="radio" name="method" value="wallet" /> Wallet balance</label>
+                </div>
+              </fieldset>
+              <p class="form-helper">
+                We hold funds in escrow instantly, notify the cook, then auto-release after delivery confirmation.
+              </p>
+              <button type="submit" class="btn primary">Simulate payment</button>
+            </form>
+
+            <div class="payment-card payment-status-card">
+              <h3>Escrow status</h3>
+              <ol class="payment-steps" id="payment-steps">
+                <li>
+                  <div>
+                    <strong>1. Create secure order</strong>
+                    <p>Tokenize card + place hold</p>
+                  </div>
+                  <span>Queued</span>
+                </li>
+                <li>
+                  <div>
+                    <strong>2. Escrow vault funded</strong>
+                    <p>Bank confirms & locks funds</p>
+                  </div>
+                  <span>Queued</span>
+                </li>
+                <li>
+                  <div>
+                    <strong>3. Kitchen notified</strong>
+                    <p>Cook sees countdown + details</p>
+                  </div>
+                  <span>Queued</span>
+                </li>
+                <li>
+                  <div>
+                    <strong>4. Release on confirmation</strong>
+                    <p>Delivery proof triggers payout</p>
+                  </div>
+                  <span>Queued</span>
+                </li>
+              </ol>
+              <div class="payment-status" id="payment-status">Waiting for input</div>
+              <div class="payment-result" id="payment-result" hidden>
+                <p class="result-label">Escrow funded</p>
+                <strong>Cook payout scheduled in 35 mins</strong>
+                <span>We will notify both parties once delivery is confirmed.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section
           class="section delivery has-photo"
           id="delivery"
@@ -251,7 +402,10 @@
           </div>
           <div class="stories__panel">
             <button class="stories__nav" data-testimonial="prev" aria-label="Previous story">←</button>
-            <div class="stories__content" id="testimonial-card"></div>
+            <div class="stories__content">
+              <div id="testimonial-card"></div>
+              <div class="stories__progress" id="testimonial-progress" aria-live="polite"></div>
+            </div>
             <button class="stories__nav" data-testimonial="next" aria-label="Next story">→</button>
           </div>
         </section>
@@ -266,8 +420,24 @@
             starts at home, and we bring it straight to the people who need it.
           </p>
           <div class="hero__actions">
-            <a class="btn primary" href="customers.html">Order Food Now</a>
-            <a class="btn outline" href="cooks.html">Become a Cook Today</a>
+            <a
+              class="btn primary"
+              href="customers.html"
+              data-role="buyer"
+              data-auth="mock"
+              data-destination="./hosting/dist/dashboard/buyer"
+            >
+              Order Food Now
+            </a>
+            <a
+              class="btn outline"
+              href="cooks.html"
+              data-role="vendor"
+              data-auth="mock"
+              data-destination="./hosting/dist/dashboard/vendor"
+            >
+              Become a Cook Today
+            </a>
           </div>
         </div>
         <div class="cta__visual">

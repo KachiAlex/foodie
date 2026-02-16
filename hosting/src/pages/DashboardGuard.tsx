@@ -33,13 +33,16 @@ export function DashboardGuard() {
       navigate(`/dashboard/${roleOptions[0].value}`, { replace: true });
       return;
     }
-    // Future auth gate: verify Firebase role claims before syncing local context.
+    if (user.role !== roleSlug) {
+      navigate(`/dashboard/${user.role}`, { replace: true });
+      return;
+    }
     if (role !== roleSlug) {
       setRole(roleSlug);
     }
   }, [roleSlug, role, setRole, navigate, user]);
 
-  if (!roleSlug || !isRole(roleSlug) || !user) {
+  if (!roleSlug || !isRole(roleSlug) || !user || user.role !== roleSlug) {
     return null;
   }
 

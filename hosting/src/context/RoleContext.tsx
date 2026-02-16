@@ -13,8 +13,6 @@ export const roleOptions: { value: Role; label: string }[] = [
 interface RoleContextValue {
   role: Role;
   setRole: (role: Role) => void;
-  toastMessage: string | null;
-  clearToast: () => void;
 }
 
 const RoleContext = createContext<RoleContextValue | undefined>(undefined);
@@ -27,7 +25,6 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     const stored = window.localStorage.getItem(STORAGE_KEY) as Role | null;
     return stored && roleOptions.some((option) => option.value === stored) ? stored : "buyer";
   });
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -41,20 +38,14 @@ export function RoleProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!hydrated) return;
-    const label = roleOptions.find((option) => option.value === role)?.label ?? role;
-    setToastMessage(`Switched to ${label} workspace`);
     analytics.track("role_switched", { role });
-    const timer = window.setTimeout(() => setToastMessage(null), 2500);
-    return () => window.clearTimeout(timer);
   }, [role, hydrated, analytics]);
 
   const setRole = useCallback((nextRole: Role) => {
     setRoleState(nextRole);
   }, []);
 
-  const clearToast = useCallback(() => setToastMessage(null), []);
-
-  return <RoleContext.Provider value={{ role, setRole, toastMessage, clearToast }}>{children}</RoleContext.Provider>;
+  return <RoleContext.Provider value={{ role, setRole }}>{children}</RoleContext.Provider>;
 }
 
 export function useRole() {
