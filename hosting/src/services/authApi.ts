@@ -14,7 +14,7 @@ const STATIC_USERS: Record<string, { profile: AuthUser; password: string }> = {
 
 export async function mockSignUpRequest(payload: SignUpPayload): Promise<AuthUser> {
   if (payload.email in STATIC_USERS) {
-    throw new Error("This email is reserved by HomePlate.");
+    throw new Error("This email is reserved by Foodie Market.");
   }
   if (payload.role === "vendor" && payload.vendorVerification) {
     console.info("[AuthAPI] Received vendor verification", payload.vendorVerification);

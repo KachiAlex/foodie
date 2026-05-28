@@ -25,7 +25,7 @@ export function DashboardLayout({ sidebar, title, description, actions, children
   const SidebarContent = (
     <div className="flex flex-col h-full">
       <Link to="/" className="text-2xl font-bold text-orange-500 mb-6">
-        HomePlate
+        Foodie Market
       </Link>
       <nav className="space-y-1">
         {sidebar.nav.map((item) => (

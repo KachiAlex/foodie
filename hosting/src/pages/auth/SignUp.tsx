@@ -193,7 +193,7 @@ export function SignUpPage() {
             <div>
               <div className="flex items-center gap-3 text-2xl font-semibold">
                 <ChefHat className="h-8 w-8" />
-                HomePlate
+                Foodie Market
               </div>
               <p className="mt-6 text-lg text-white/80">
                 Join a vibrant marketplace connecting home chefs with local food lovers. Choose your role to unlock curated tools.
@@ -217,7 +217,7 @@ export function SignUpPage() {
           >
             <div className="mb-8 space-y-3">
               <p className="text-sm uppercase tracking-[0.3em] text-gray-400">Get started</p>
-              <h1 className="text-3xl font-semibold text-gray-900">Create your HomePlate account</h1>
+              <h1 className="text-3xl font-semibold text-gray-900">Create your Foodie Market account</h1>
               <p className="text-sm text-gray-500">Pick a role now—you can add more roles later.</p>
             </div>
 

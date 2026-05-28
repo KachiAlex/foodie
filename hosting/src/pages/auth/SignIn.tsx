@@ -42,7 +42,7 @@ export function SignInPage() {
         <div className="grid gap-0 md:grid-cols-2">
           <div className="hidden rounded-l-3xl bg-gray-900 p-12 text-white md:flex md:flex-col">
             <div className="flex items-center gap-3 text-2xl font-semibold">
-              <ChefHat className="h-8 w-8 text-orange-400" /> HomePlate
+              <ChefHat className="h-8 w-8 text-orange-400" /> Foodie Market
             </div>
             <p className="mt-8 text-lg text-white/80">
               Welcome back! Track your bespoke requests, manage vendor bids, and keep dinner plans on autopilot.

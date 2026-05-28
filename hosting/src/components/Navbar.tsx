@@ -27,7 +27,7 @@ export function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             <ChefHat className="w-8 h-8 text-orange-500" />
-            <span className="text-2xl font-bold text-gray-900">HomePlate</span>
+            <span className="text-2xl font-bold text-gray-900">Foodie Market</span>
           </Link>
 
           {/* Search Bar - Desktop */}
@@ -56,7 +56,7 @@ export function Navbar() {
                   <Link to="/auth/sign-in">Sign in</Link>
                 </Button>
                 <Button className="hidden lg:flex bg-orange-500 text-white" asChild>
-                  <Link to="/auth/sign-up">Join HomePlate</Link>
+                  <Link to="/auth/sign-up">Join Foodie Market</Link>
                 </Button>
               </>
             ) : (
