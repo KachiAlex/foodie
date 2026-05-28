@@ -1,7 +1,6 @@
 import { Star, MapPin, Clock } from "lucide-react";
-import { Button } from "./ui/button";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 
 export function FeaturedChefs() {
   const chefs = [
@@ -52,35 +51,25 @@ export function FeaturedChefs() {
   ];
 
   return (
-    <motion.section
-      className="py-20 bg-gray-50"
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.6 }}
-    >
+    <section className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-12">
+        <div className="flex justify-between items-end mb-12">
           <div>
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Featured Home Chefs</h2>
             <p className="text-xl text-gray-600">
               Discover talented chefs in your neighborhood
             </p>
           </div>
-          <Button variant="outline" className="w-full sm:w-auto">
+          <Button variant="outline" className="hidden sm:block">
             View All Chefs
           </Button>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {chefs.map((chef, index) => (
-            <motion.div
+          {chefs.map((chef) => (
+            <div
               key={chef.id}
-              className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition-shadow cursor-pointer group"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.5, delay: 0.1 * index }}
+              className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
             >
               <div className="relative h-48 overflow-hidden">
                 <ImageWithFallback
@@ -94,7 +83,7 @@ export function FeaturedChefs() {
                   </div>
                 )}
               </div>
-              
+
               <div className="p-5 space-y-3">
                 <div>
                   <h3 className="text-lg font-bold text-gray-900">{chef.name}</h3>
@@ -118,7 +107,7 @@ export function FeaturedChefs() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
@@ -128,6 +117,6 @@ export function FeaturedChefs() {
           </Button>
         </div>
       </div>
-    </motion.section>
+    </section>
   );
 }

@@ -1,7 +1,6 @@
 import { Heart, Plus } from "lucide-react";
-import { Button } from "./ui/button";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 
 export function PopularDishes() {
   const dishes = [
@@ -68,35 +67,25 @@ export function PopularDishes() {
   ];
 
   return (
-    <motion.section
-      className="py-20 bg-white"
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.6 }}
-    >
+    <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-12">
+        <div className="flex justify-between items-end mb-12">
           <div>
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Popular Dishes Today</h2>
             <p className="text-xl text-gray-600">
               Freshly prepared meals you'll love
             </p>
           </div>
-          <Button variant="outline" className="w-full sm:w-auto">
+          <Button variant="outline" className="hidden sm:block">
             Explore All Dishes
           </Button>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {dishes.map((dish, index) => (
-            <motion.div
+          {dishes.map((dish) => (
+            <div
               key={dish.id}
-              className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-2xl transition-all cursor-pointer group"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.5, delay: 0.1 * index }}
+              className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
             >
               <div className="relative h-56 overflow-hidden">
                 <ImageWithFallback
@@ -113,7 +102,7 @@ export function PopularDishes() {
                   </div>
                 )}
               </div>
-              
+
               <div className="p-5 space-y-3">
                 <div>
                   <div className="flex items-center justify-between mb-2">
@@ -136,7 +125,7 @@ export function PopularDishes() {
                   </Button>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
@@ -146,6 +135,6 @@ export function PopularDishes() {
           </Button>
         </div>
       </div>
-    </motion.section>
+    </section>
   );
 }

@@ -1,6 +1,5 @@
 import { ShoppingCart, User, ChefHat, Search, LogOut } from "lucide-react";
-import { Button } from "./ui/button";
-import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -18,21 +17,18 @@ export function Navbar() {
   }, []);
 
   return (
-    <motion.nav
-      initial={{ y: -40, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className={`fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300 ${
-        isScrolled ? "bg-white/90 backdrop-blur-xl border-white/40 shadow-lg" : "bg-white/70 backdrop-blur-md border-transparent"
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 transition-all duration-300 ${
+        isScrolled ? "shadow-md" : ""
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <ChefHat className="w-8 h-8 text-orange-500" />
             <span className="text-2xl font-bold text-gray-900">HomePlate</span>
-          </div>
+          </Link>
 
           {/* Search Bar - Desktop */}
           <div className="hidden md:flex flex-1 max-w-md mx-8">
@@ -133,6 +129,6 @@ export function Navbar() {
           </div>
         </div>
       </div>
-    </motion.nav>
+    </nav>
   );
 }
