@@ -1,6 +1,12 @@
 {
   "version": 2,
+  "builds": [
+    {
+      "src": "hosting/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "installCommand": "cd hosting && npm install",
   "buildCommand": "cd hosting && npm run build",
-  "outputDirectory": "hosting/dist",
-  "installCommand": "cd hosting && npm install"
+  "outputDirectory": "hosting/dist"
 }
