@@ -1,6 +1,22 @@
 {
-  "buildCommand": "cd hosting && npm run build",
-  "outputDirectory": "hosting/dist",
-  "installCommand": "cd hosting && npm install",
-  "framework": null
+  "version": 2,
+  "builds": [
+    {
+      "src": "hosting/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/assets/(.*)",
+      "dest": "/hosting/dist/assets/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/hosting/dist/index.html"
+    }
+  ]
 }
