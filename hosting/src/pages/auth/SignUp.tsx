@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { ChefHat, Loader2, MapPin, Camera, ShieldCheck, Video as VideoIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
-import { roleOptions, type Role } from "@/context/RoleContext";
+import { publicRoleOptions, type Role } from "@/context/RoleContext";
 import { useToast } from "@/context/ToastContext";
 import { compressImageFile } from "@/utils/fileHelpers";
 
@@ -54,7 +54,7 @@ function validateVendorRequirements(details: VendorRequirementFields) {
 export function SignUpPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const initialRole = (params.get("role") as Role | null) ?? roleOptions[0].value;
+  const initialRole = (params.get("role") as Role | null) ?? publicRoleOptions[0].value;
   const { signUp, user } = useAuth();
   const { showToast } = useToast();
   const [form, setForm] = useState({ name: "", email: "", password: "", role: initialRole });
@@ -204,7 +204,7 @@ export function SignUpPage() {
               <ul className="space-y-2 text-white/90">
                 <li>• Buyer concierge for bespoke orders</li>
                 <li>• Vendor bidding and command hub</li>
-                <li>• Admin-grade analytics coming soon</li>
+                <li>• Real-time order tracking & analytics</li>
               </ul>
             </div>
           </div>
@@ -269,7 +269,7 @@ export function SignUpPage() {
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">Choose your role</label>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {roleOptions.map((option) => {
+                  {publicRoleOptions.map((option) => {
                     const isActive = form.role === option.value;
                     return (
                       <button
@@ -284,9 +284,7 @@ export function SignUpPage() {
                         <p className="text-xs text-gray-500">
                           {option.value === "vendor"
                             ? "Bid on custom requests with verified kitchen"
-                            : option.value === "buyer"
-                            ? "Post bespoke meal briefs"
-                            : "Monitor marketplace health"}
+                            : "Post bespoke meal briefs"}
                         </p>
                       </button>
                     );

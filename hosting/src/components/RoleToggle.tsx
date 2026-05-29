@@ -1,4 +1,4 @@
-import { roleOptions, useRole } from "@/context/RoleContext";
+import { publicRoleOptions, useRole } from "@/context/RoleContext";
 import type { Role } from "@/context/RoleContext";
 
 interface RoleToggleProps {
@@ -28,7 +28,7 @@ export function RoleToggle({ tone = "light", className = "", onRoleChange }: Rol
     <div
       className={`flex rounded-full border p-1 text-sm shadow-sm transition ${palette.wrapper} ${className}`.trim()}
     >
-      {roleOptions.map((option) => {
+      {publicRoleOptions.map((option) => {
         const isActive = role === option.value;
         return (
           <button

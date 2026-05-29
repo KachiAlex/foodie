@@ -10,6 +10,11 @@ export const roleOptions: { value: Role; label: string }[] = [
   { value: "admin", label: "Admin" },
 ];
 
+export const publicRoleOptions: { value: Exclude<Role, "admin">; label: string }[] = [
+  { value: "buyer", label: "Buyer" },
+  { value: "vendor", label: "Vendor" },
+];
+
 interface RoleContextValue {
   role: Role;
   setRole: (role: Role) => void;

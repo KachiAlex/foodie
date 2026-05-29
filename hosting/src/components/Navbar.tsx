@@ -1,4 +1,4 @@
-import { ShoppingCart, User, ChefHat, Search, LogOut } from "lucide-react";
+import { ShoppingCart, ChefHat, Search, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -107,11 +107,6 @@ export function Navbar() {
                 <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   3
                 </span>
-              </Link>
-            </Button>
-            <Button variant="ghost" size="icon" asChild>
-              <Link to="/dashboard/admin" aria-label="Admin console">
-                <User className="w-5 h-5" />
               </Link>
             </Button>
           </div>
