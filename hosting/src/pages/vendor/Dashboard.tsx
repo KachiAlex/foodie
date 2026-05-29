@@ -14,16 +14,12 @@ import {
 import { useMemo, useState } from "react";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import {
-  menuItems,
-  vendorMetrics,
-  vendorOpenRequests,
-  vendorOrders,
-} from "@/data/mock";
+import { useApp } from "@/context/AppContext";
 
 const statusColumns = ["New", "Cooking", "Ready", "Delivered"] as const;
 
 export function VendorDashboard() {
+  const { vendorOpenRequests, vendorOrders, menuItems, vendorMetrics, addBid } = useApp();
   const [checklistItems, setChecklistItems] = useState([
     { label: "Upload new kitchen shots", detail: "Highlight clean surfaces + plating station", complete: true },
     { label: "Verify cold-chain logs", detail: "Attach latest HACCP sheet", complete: false },
@@ -69,9 +65,22 @@ export function VendorDashboard() {
   const handleSubmitBid = async () => {
     if (!activeRequest || isSubmittingBid || bidSent) return;
     setIsSubmittingBid(true);
-    await new Promise((resolve) => setTimeout(resolve, 900));
-    setIsSubmittingBid(false);
-    setBidSent(true);
+    try {
+      // Parse budget to get a numeric value for the bid
+      const budgetNum = parseInt(activeRequest.budget.replace(/[^0-9]/g, ""), 10) || 200;
+      await addBid({
+        requestId: activeRequest.id,
+        chef: "Chef You",
+        price: Math.round(budgetNum * 0.95),
+        eta: "Ready in 2 hours",
+        confidence: 90,
+      });
+      setBidSent(true);
+    } catch {
+      // error handled by context
+    } finally {
+      setIsSubmittingBid(false);
+    }
   };
 
   return (
@@ -350,13 +359,13 @@ export function VendorDashboard() {
   );
 }
 
-type BidRequestModalProps = {
-  request: (typeof vendorOpenRequests)[number];
+interface BidRequestModalProps {
+  request: { id: string; title: string; location: string; servings: string; budget: string; deadline: string; tags: string[] };
   onClose: () => void;
   isSubmitting: boolean;
   onSubmit: () => void;
   bidSent: boolean;
-};
+}
 
 function BidRequestModal({ request, onClose, isSubmitting, onSubmit, bidSent }: BidRequestModalProps) {
   const wizardSteps = ["Proposal", "Attachments", "Review"] as const;

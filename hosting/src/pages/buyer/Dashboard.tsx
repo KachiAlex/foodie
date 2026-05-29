@@ -17,12 +17,10 @@ import {
 } from "lucide-react";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import {
-  buyerOrders,
-  buyerRequests,
-  featuredVendors,
-  vendorBids,
-} from "@/data/mock";
+import { useApp } from "@/context/AppContext";
+import { NewRequestModal } from "@/components/NewRequestModal";
+import { featuredVendors } from "@/data/mock";
+import type { VendorBid } from "@/data/mock";
 
 const savedBriefs = [
   {
@@ -42,11 +40,13 @@ const savedBriefs = [
 ];
 
 export function BuyerDashboard() {
+  const { requests, orders, bids } = useApp();
+  const [showNewRequest, setShowNewRequest] = useState(false);
   const [bidFilter, setBidFilter] = useState<"all" | "collecting_bids" | "in_progress" | "fulfilled">("all");
   const [timelineRequestId, setTimelineRequestId] = useState<string | null>(null);
   const [activeBriefId, setActiveBriefId] = useState<string | null>(null);
-  const activeRequests = buyerRequests.filter((request) => request.status !== "fulfilled").length;
-  const onDeckOrders = buyerOrders.filter((order) => order.status !== "Delivered");
+  const activeRequests = requests.filter((request) => request.status !== "fulfilled").length;
+  const onDeckOrders = orders.filter((order) => order.status !== "Delivered");
   const todayDeliveries = onDeckOrders.filter((order) => order.eta.includes("Today")).length;
   const favoriteVendors = featuredVendors.slice(0, 3);
 
@@ -76,7 +76,7 @@ export function BuyerDashboard() {
 
   const nextDelivery = onDeckOrders[0];
 
-  const bidsByRequest = vendorBids.reduce<Record<string, typeof vendorBids>>((acc, bid) => {
+  const bidsByRequest = bids.reduce<Record<string, typeof bids>>((acc, bid) => {
     acc[bid.requestId] = acc[bid.requestId] ? [...acc[bid.requestId], bid] : [bid];
     return acc;
   }, {});
@@ -147,10 +147,10 @@ export function BuyerDashboard() {
 
   const filteredBidRequests = useMemo(
     () =>
-      buyerRequests.filter((request) =>
+      requests.filter((request) =>
         bidFilter === "all" ? true : request.status === bidFilter,
       ),
-    [bidFilter],
+    [bidFilter, requests],
   );
 
   const getTimelineForRequest = (requestId: string) =>
@@ -179,7 +179,7 @@ export function BuyerDashboard() {
           <Button variant="outline" className="gap-2">
             <Search className="h-4 w-4" /> Find Vendors
           </Button>
-          <Button className="gap-2 bg-orange-500 text-white">
+          <Button className="gap-2 bg-orange-500 text-white" onClick={() => setShowNewRequest(true)}>
             <Plus className="h-4 w-4" /> New Request
           </Button>
         </div>
@@ -358,7 +358,7 @@ export function BuyerDashboard() {
                 </Button>
               </div>
               <div className="mt-6 space-y-4">
-                {buyerRequests.map((request) => (
+                {requests.map((request) => (
                   <motion.div
                     key={request.id}
                     className="rounded-2xl border border-gray-200 p-4 lg:p-5"
@@ -395,7 +395,7 @@ export function BuyerDashboard() {
                 </div>
               </div>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                {buyerOrders.map((order) => (
+                {orders.map((order) => (
                   <motion.div
                     key={order.id}
                     className="rounded-2xl border border-gray-200 p-5"
@@ -600,6 +600,8 @@ export function BuyerDashboard() {
         brief={activeBriefId ? savedBriefs.find((brief) => brief.id === activeBriefId) ?? null : null}
         onClose={() => setActiveBriefId(null)}
       />
+
+      {showNewRequest && <NewRequestModal onClose={() => setShowNewRequest(false)} />}
     </DashboardLayout>
   );
 }
@@ -607,7 +609,7 @@ export function BuyerDashboard() {
 interface BidTimelineModalProps {
   requestId: string | null;
   timeline?: Array<{ step: string; time: string; detail: string }>;
-  bids: typeof vendorBids;
+  bids: VendorBid[];
   onClose: () => void;
 }
 

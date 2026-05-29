@@ -6,15 +6,18 @@ import "./index.css";
 import { RoleProvider } from "./context/RoleContext";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
+import { AppProvider } from "./context/AppContext";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <StrictMode>
     <ToastProvider>
       <RoleProvider>
         <AuthProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
+          <AppProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </AppProvider>
         </AuthProvider>
       </RoleProvider>
     </ToastProvider>
