@@ -16,7 +16,7 @@ export function NewRequestModal({ onClose }: NewRequestModalProps) {
     title: "",
     cuisine: "Nigerian",
     portionType: "Pot",
-    uom: "pcs",
+    uom: "Plate",
     servings: 10,
     budget: 200,
     deliveryWindow: "Today, 6:00 PM",
@@ -154,30 +154,24 @@ export function NewRequestModal({ onClose }: NewRequestModalProps) {
                 onChange={(e) => update("uom", e.target.value)}
                 className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
-                <option value="pcs">Pieces (pcs)</option>
-                <option value="pot">Pot</option>
-                <option value="bucket">Bucket</option>
-                <option value="gallon">Gallon</option>
-                <option value="litre">Litre</option>
-                <option value="kg">Kilogram (kg)</option>
-                <option value="grams">Grams (g)</option>
-                <option value="plate">Plate</option>
-                <option value="bowl">Bowl</option>
-                <option value="tray">Tray</option>
-                <option value="pack">Pack</option>
-                <option value="sachet">Sachet</option>
-                <option value="carton">Carton</option>
-                <option value="dozen">Dozen</option>
-                <option value="bundle">Bundle</option>
-                <option value="wrap">Wrap</option>
-                <option value="portion">Portion</option>
-                <option value="serving">Serving</option>
-                <option value="loaf">Loaf</option>
-                <option value="bottle">Bottle</option>
-                <option value="tin">Tin</option>
-                <option value="jar">Jar</option>
-                <option value="cup">Cup</option>
-                <option value="spoon">Spoon</option>
+                <optgroup label="Single Orders">
+                  <option value="Plate">Plate</option>
+                  <option value="Pack">Pack</option>
+                  <option value="Bowl">Bowl</option>
+                  <option value="Portion">Portion</option>
+                </optgroup>
+                <optgroup label="Bulk Orders">
+                  <option value="Half Pot">Half Pot</option>
+                  <option value="Full Pot">Full Pot</option>
+                  <option value="Bucket">Bucket</option>
+                  <option value="Cooler">Cooler</option>
+                  <option value="Tray">Tray</option>
+                </optgroup>
+                <optgroup label="Quantitative">
+                  <option value="Piece">Piece</option>
+                  <option value="Dozen">Dozen</option>
+                  <option value="Litre">Litre</option>
+                </optgroup>
               </select>
             </label>
             <label className="block text-sm font-semibold text-gray-700">
