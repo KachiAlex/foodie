@@ -114,9 +114,9 @@ export function PopularDishes() {
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl font-bold text-gray-900">${dish.price}</span>
+                    <span className="text-2xl font-bold text-gray-900">₦{dish.price}</span>
                     {dish.originalPrice && (
-                      <span className="text-sm text-gray-400 line-through">${dish.originalPrice}</span>
+                      <span className="text-sm text-gray-400 line-through">₦{dish.originalPrice}</span>
                     )}
                   </div>
                   <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-4">

@@ -186,7 +186,7 @@ export function NewRequestModal({ onClose }: NewRequestModalProps) {
               />
             </label>
             <label className="block text-sm font-semibold text-gray-700">
-              Budget (USD)
+              Budget (NGN)
               <input
                 type="number"
                 min={10}
@@ -207,7 +207,7 @@ export function NewRequestModal({ onClose }: NewRequestModalProps) {
               <p><span className="font-medium text-gray-900">Portion:</span> {form.portionType}</p>
               <p><span className="font-medium text-gray-900">UoM:</span> {form.uom}</p>
               <p><span className="font-medium text-gray-900">Servings:</span> {form.servings}</p>
-              <p><span className="font-medium text-gray-900">Budget:</span> ${form.budget}</p>
+              <p><span className="font-medium text-gray-900">Budget:</span> ₦{form.budget}</p>
               <p><span className="font-medium text-gray-900">Delivery:</span> {form.deliveryWindow}</p>
             </div>
           </div>

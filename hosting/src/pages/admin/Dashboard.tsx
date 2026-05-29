@@ -51,13 +51,13 @@ export function AdminDashboard() {
   const opsAlerts = [
     { label: "SLA risk", value: "3 routes", detail: "+1 vs avg", severity: "High" },
     { label: "Disputes awaiting vendor", value: "4 cases", detail: "avg age 42m", severity: "Medium" },
-    { label: "Payout backlog", value: "$18k", detail: "2 vendors flagged", severity: "High" },
+    { label: "Payout backlog", value: "₦18k", detail: "2 vendors flagged", severity: "High" },
   ];
 
   const [payoutQueue, setPayoutQueue] = useState([
-    { id: "PAY-713", vendor: "Chef Derin", amount: "$540", status: "Ready", age: "10m" },
-    { id: "PAY-708", vendor: "Chef Ireti", amount: "$1,120", status: "Requires review", age: "38m" },
-    { id: "PAY-701", vendor: "Chef Muna", amount: "$325", status: "Docs missing", age: "1h" },
+    { id: "PAY-713", vendor: "Chef Derin", amount: "₦540", status: "Ready", age: "10m" },
+    { id: "PAY-708", vendor: "Chef Ireti", amount: "₦1,120", status: "Requires review", age: "38m" },
+    { id: "PAY-701", vendor: "Chef Muna", amount: "₦325", status: "Docs missing", age: "1h" },
   ]);
 
   const trustTasks = [
