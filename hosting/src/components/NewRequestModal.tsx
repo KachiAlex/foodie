@@ -16,6 +16,7 @@ export function NewRequestModal({ onClose }: NewRequestModalProps) {
     title: "",
     cuisine: "Nigerian",
     portionType: "Pot",
+    uom: "pcs",
     servings: 10,
     budget: 200,
     deliveryWindow: "Today, 6:00 PM",
@@ -147,6 +148,39 @@ export function NewRequestModal({ onClose }: NewRequestModalProps) {
               </div>
             </label>
             <label className="block text-sm font-semibold text-gray-700">
+              Unit of measurement (UoM)
+              <select
+                value={form.uom}
+                onChange={(e) => update("uom", e.target.value)}
+                className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="pcs">Pieces (pcs)</option>
+                <option value="pot">Pot</option>
+                <option value="bucket">Bucket</option>
+                <option value="gallon">Gallon</option>
+                <option value="litre">Litre</option>
+                <option value="kg">Kilogram (kg)</option>
+                <option value="grams">Grams (g)</option>
+                <option value="plate">Plate</option>
+                <option value="bowl">Bowl</option>
+                <option value="tray">Tray</option>
+                <option value="pack">Pack</option>
+                <option value="sachet">Sachet</option>
+                <option value="carton">Carton</option>
+                <option value="dozen">Dozen</option>
+                <option value="bundle">Bundle</option>
+                <option value="wrap">Wrap</option>
+                <option value="portion">Portion</option>
+                <option value="serving">Serving</option>
+                <option value="loaf">Loaf</option>
+                <option value="bottle">Bottle</option>
+                <option value="tin">Tin</option>
+                <option value="jar">Jar</option>
+                <option value="cup">Cup</option>
+                <option value="spoon">Spoon</option>
+              </select>
+            </label>
+            <label className="block text-sm font-semibold text-gray-700">
               Servings
               <input
                 type="number"
@@ -177,6 +211,7 @@ export function NewRequestModal({ onClose }: NewRequestModalProps) {
               <p><span className="font-medium text-gray-900">Title:</span> {form.title || "—"}</p>
               <p><span className="font-medium text-gray-900">Cuisine:</span> {form.cuisine}</p>
               <p><span className="font-medium text-gray-900">Portion:</span> {form.portionType}</p>
+              <p><span className="font-medium text-gray-900">UoM:</span> {form.uom}</p>
               <p><span className="font-medium text-gray-900">Servings:</span> {form.servings}</p>
               <p><span className="font-medium text-gray-900">Budget:</span> ${form.budget}</p>
               <p><span className="font-medium text-gray-900">Delivery:</span> {form.deliveryWindow}</p>

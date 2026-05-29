@@ -36,6 +36,7 @@ export interface CreateRequestPayload {
   title: string;
   cuisine: string;
   portionType: "Pot" | "Portion" | "Tray";
+  uom: string;
   servings: number;
   budget: number;
   deliveryWindow: string;
