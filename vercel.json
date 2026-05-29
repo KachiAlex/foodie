@@ -1,8 +1,12 @@
 {
   "buildCommand": "cd hosting && npm run build",
   "outputDirectory": "hosting/dist",
-  "installCommand": "cd hosting && npm install",
+  "installCommand": "npm install && cd hosting && npm install",
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
