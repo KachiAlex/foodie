@@ -30,9 +30,11 @@ export function authenticate(req: Request, _res: Response, next: NextFunction) {
     return next();
   }
 
-  // Stub: parse mock token payload
+  // Decode fm.<base64>.sig token
   try {
-    const payload = JSON.parse(Buffer.from(token, "base64").toString()) as AuthUser;
+    const parts = token.split(".");
+    const encoded = parts.length === 3 ? parts[1] : token;
+    const payload = JSON.parse(Buffer.from(encoded, "base64").toString()) as AuthUser;
     (req as Request & { user?: AuthUser }).user = payload;
     next();
   } catch {

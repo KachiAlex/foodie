@@ -1,0 +1,264 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ===================== USER & AUTH =====================
+
+model User {
+  id                 String             @id @default(cuid())
+  email              String             @unique
+  name               String
+  passwordHash       String
+  role               Role
+  verificationStatus VerificationStatus @default(pending)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  buyerRequests  FoodRequest[]
+  ordersAsBuyer  Order[]        @relation("BuyerOrders")
+  bids           Bid[]
+  vendorProfile  VendorProfile?
+  escrowWallet   EscrowWallet?
+  transactions   EscrowTransaction[]
+  disputesOpened Dispute[]      @relation("DisputeOpener")
+
+  @@map("users")
+}
+
+enum Role {
+  buyer
+  vendor
+  admin
+}
+
+enum VerificationStatus {
+  pending
+  verified
+  rejected
+}
+
+// ===================== VENDOR PROFILE =====================
+
+model VendorProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  kitchenName String
+  address     String
+  landmark    String
+  specialties String[]
+  rating      Float    @default(0)
+  totalOrders Int      @default(0)
+  isOnline    Boolean  @default(false)
+  verified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  menuItems MenuItem[]
+
+  @@map("vendor_profiles")
+}
+
+model MenuItem {
+  id          String        @id @default(cuid())
+  vendorId    String
+  vendor      VendorProfile @relation(fields: [vendorId], references: [id])
+  name        String
+  description String?
+  price       Decimal       @db.Decimal(10, 2)
+  category    String
+  imageUrl    String?
+  isAvailable Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("menu_items")
+}
+
+// ===================== FOOD REQUESTS =====================
+
+model FoodRequest {
+  id                String        @id @default(cuid())
+  buyerId           String
+  buyer             User          @relation(fields: [buyerId], references: [id])
+  foodName          String
+  category          String
+  quantity          Int
+  unit              String
+  budgetMin         Decimal       @db.Decimal(10, 2)
+  budgetMax         Decimal       @db.Decimal(10, 2)
+  deliveryAddress   String
+  deliveryLat       Float?
+  deliveryLong      Float?
+  deliveryDateTime  DateTime
+  instructions      String?
+  imageUrl          String?
+  status            RequestStatus @default(open)
+  selectedBidId     String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  bids    Bid[]
+  order   Order?
+
+  @@map("food_requests")
+}
+
+enum RequestStatus {
+  open
+  bidding
+  bid_selected
+  paid
+  cooking
+  picked_up
+  delivered
+  completed
+  cancelled
+}
+
+// ===================== BIDS =====================
+
+model Bid {
+  id                    String    @id @default(cuid())
+  requestId             String
+  request               FoodRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  vendorId              String
+  vendor                User      @relation(fields: [vendorId], references: [id])
+  bidAmount             Decimal   @db.Decimal(10, 2)
+  prepTimeMinutes       Int
+  estimatedDeliveryTime String
+  message               String?
+  imageUrl              String?
+  status                BidStatus @default(active)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("bids")
+}
+
+enum BidStatus {
+  active
+  selected
+  rejected
+  expired
+}
+
+// ===================== ORDERS =====================
+
+model Order {
+  id            String      @id @default(cuid())
+  requestId     String      @unique
+  request       FoodRequest @relation(fields: [requestId], references: [id])
+  buyerId       String
+  buyer         User        @relation("BuyerOrders", fields: [buyerId], references: [id])
+  vendorId      String
+  bidId         String
+  foodCost      Decimal     @db.Decimal(10, 2)
+  deliveryFee   Decimal     @db.Decimal(10, 2)
+  platformFee   Decimal     @db.Decimal(10, 2)
+  escrowFee     Decimal     @db.Decimal(10, 2)
+  totalAmount   Decimal     @db.Decimal(10, 2)
+  status        OrderStatus @default(paid)
+  riderId       String?
+  deliveredAt   DateTime?
+  dispute       Dispute?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@map("orders")
+}
+
+enum OrderStatus {
+  paid
+  accepted
+  cooking
+  ready_for_pickup
+  picked_up
+  delivered
+  completed
+  disputed
+  cancelled
+}
+
+// ===================== ESCROW =====================
+
+model EscrowWallet {
+  id          String  @id @default(cuid())
+  vendorId    String  @unique
+  vendor      User    @relation(fields: [vendorId], references: [id])
+  available   Decimal @db.Decimal(10, 2)
+  pending     Decimal @db.Decimal(10, 2)
+  totalEarned Decimal @db.Decimal(10, 2)
+  currency    String  @default("NGN")
+  updatedAt   DateTime @updatedAt
+
+  @@map("escrow_wallets")
+}
+
+model EscrowTransaction {
+  id        String            @id @default(cuid())
+  orderId   String?
+  vendorId  String
+  vendor    User              @relation(fields: [vendorId], references: [id])
+  amount    Decimal           @db.Decimal(10, 2)
+  type      TransactionType
+  status    TransactionStatus @default(pending)
+  createdAt DateTime          @default(now())
+
+  @@map("escrow_transactions")
+}
+
+enum TransactionType {
+  deposit
+  release
+  refund
+  withdrawal
+}
+
+enum TransactionStatus {
+  pending
+  completed
+  failed
+}
+
+// ===================== DISPUTES =====================
+
+model Dispute {
+  id          String   @id @default(cuid())
+  orderId     String   @unique
+  order       Order    @relation(fields: [orderId], references: [id])
+  openedById  String
+  openedBy    User     @relation("DisputeOpener", fields: [openedById], references: [id])
+  reason      String
+  resolution  String?
+  status      DisputeStatus @default(open)
+  openedAt    DateTime @default(now())
+  resolvedAt  DateTime?
+
+  @@map("disputes")
+}
+
+enum DisputeStatus {
+  open
+  under_review
+  resolved
+  closed
+}
+
+// ===================== AUDIT LOG =====================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actor     String
+  action    String
+  target    String
+  metadata  String?
+  timestamp DateTime @default(now())
+
+  @@map("audit_logs")
+}

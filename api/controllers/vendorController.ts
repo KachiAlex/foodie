@@ -1,47 +1,114 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
+import { prisma } from "../lib/prisma";
 
-export const getProfile = asyncHandler(async (_req: Request, res: Response) => {
-  res.json({
-    success: true,
-    data: {
-      id: "ven-001",
-      name: "Chef Nneka",
-      rating: 4.8,
-      specialty: "Nigerian",
-      verified: true,
+export const getProfile = asyncHandler(async (req: Request, res: Response) => {
+  const vendorId = req.params.id as string | undefined;
+  const profile = await prisma.vendorProfile.findUnique({
+    where: { userId: vendorId },
+    include: {
+      user: { select: { id: true, name: true, email: true } },
+      menuItems: true,
     },
   });
+  if (!profile) {
+    res.status(404).json({ success: false, error: { message: "Vendor not found" } });
+    return;
+  }
+  res.json({ success: true, data: profile });
 });
 
 export const updateProfile = asyncHandler(async (req: Request, res: Response) => {
-  res.json({ success: true, data: req.body });
-});
-
-export const getWallet = asyncHandler(async (_req: Request, res: Response) => {
-  res.json({
-    success: true,
+  const vendorId = req.params.id;
+  const { kitchenName, address, landmark, specialties, isOnline } = req.body;
+  const profile = await prisma.vendorProfile.update({
+    where: { userId: vendorId },
     data: {
-      available: 45200,
-      pending: 23800,
-      totalEarned: 125600,
-      currency: "NGN",
+      kitchenName,
+      address,
+      landmark,
+      specialties,
+      isOnline,
+    },
+    include: {
+      user: { select: { id: true, name: true, email: true } },
+      menuItems: true,
     },
   });
+  res.json({ success: true, data: profile });
 });
 
-export const getVendorOrders = asyncHandler(async (_req: Request, res: Response) => {
-  res.json({ success: true, data: [] });
+export const getWallet = asyncHandler(async (req: Request, res: Response) => {
+  const vendorId = req.params.id as string | undefined;
+  const wallet = await prisma.escrowWallet.findUnique({
+    where: { vendorId },
+  });
+  if (!wallet) {
+    res.status(404).json({ success: false, error: { message: "Wallet not found" } });
+    return;
+  }
+  res.json({ success: true, data: wallet });
 });
 
-export const getMenu = asyncHandler(async (_req: Request, res: Response) => {
-  res.json({ success: true, data: [] });
+export const getVendorOrders = asyncHandler(async (req: Request, res: Response) => {
+  const vendorId = req.params.id;
+  const data = await prisma.order.findMany({
+    where: { vendorId },
+    orderBy: { createdAt: "desc" },
+    include: {
+      buyer: { select: { id: true, name: true } },
+      request: true,
+    },
+  });
+  res.json({ success: true, data });
+});
+
+export const getMenu = asyncHandler(async (req: Request, res: Response) => {
+  const vendorId = req.params.id;
+  const profile = await prisma.vendorProfile.findUnique({
+    where: { userId: vendorId },
+    include: { menuItems: true },
+  });
+  if (!profile) {
+    res.status(404).json({ success: false, error: { message: "Vendor not found" } });
+    return;
+  }
+  res.json({ success: true, data: profile.menuItems });
 });
 
 export const addMenuItem = asyncHandler(async (req: Request, res: Response) => {
-  res.status(201).json({ success: true, data: req.body });
+  const vendorId = req.params.id;
+  const { name, description, price, category, imageUrl } = req.body;
+
+  const profile = await prisma.vendorProfile.findUnique({
+    where: { userId: vendorId },
+  });
+  if (!profile) {
+    res.status(404).json({ success: false, error: { message: "Vendor not found" } });
+    return;
+  }
+
+  const item = await prisma.menuItem.create({
+    data: {
+      vendorId: profile.id,
+      name,
+      description,
+      price: Number(price) || 0,
+      category,
+      imageUrl,
+    },
+  });
+  res.status(201).json({ success: true, data: item });
 });
 
 export const getOpenRequests = asyncHandler(async (_req: Request, res: Response) => {
-  res.json({ success: true, data: [] });
+  const data = await prisma.foodRequest.findMany({
+    where: { status: "open" },
+    orderBy: { createdAt: "desc" },
+    include: {
+      buyer: { select: { id: true, name: true } },
+      bids: true,
+    },
+  });
+  res.json({ success: true, data });
 });

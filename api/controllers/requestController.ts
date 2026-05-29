@@ -1,27 +1,72 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
-import { generateId } from "../utils/generateId";
+import { prisma } from "../lib/prisma";
 
-const inMemoryRequests: any[] = [];
-
-export const listRequests = asyncHandler(async (_req: Request, res: Response) => {
-  res.json({ success: true, data: inMemoryRequests });
+export const listRequests = asyncHandler(async (req: Request, res: Response) => {
+  const buyerId = req.query.buyerId as string | undefined;
+  const data = await prisma.foodRequest.findMany({
+    where: buyerId ? { buyerId } : undefined,
+    orderBy: { createdAt: "desc" },
+    include: {
+      buyer: { select: { id: true, name: true, email: true } },
+      bids: { include: { vendor: { select: { id: true, name: true } } } },
+      order: true,
+    },
+  });
+  res.json({ success: true, data });
 });
 
 export const createRequest = asyncHandler(async (req: Request, res: Response) => {
-  const request = {
-    id: generateId("REQ"),
-    ...req.body,
-    status: "open",
-    bids: 0,
-    createdAt: new Date().toISOString(),
-  };
-  inMemoryRequests.unshift(request);
+  const {
+    buyerId,
+    foodName,
+    category,
+    quantity,
+    unit,
+    budgetMin,
+    budgetMax,
+    deliveryAddress,
+    deliveryDateTime,
+    instructions,
+    imageUrl,
+  } = req.body;
+
+  const request = await prisma.foodRequest.create({
+    data: {
+      buyerId,
+      foodName,
+      category,
+      quantity: Number(quantity) || 1,
+      unit,
+      budgetMin: Number(budgetMin) || 0,
+      budgetMax: Number(budgetMax) || 0,
+      deliveryAddress,
+      deliveryDateTime: new Date(deliveryDateTime),
+      instructions,
+      imageUrl,
+      status: "open",
+    },
+    include: {
+      buyer: { select: { id: true, name: true, email: true } },
+    },
+  });
+
   res.status(201).json({ success: true, data: request });
 });
 
 export const getRequest = asyncHandler(async (req: Request, res: Response) => {
-  const request = inMemoryRequests.find((r) => r.id === req.params.id);
+  const request = await prisma.foodRequest.findUnique({
+    where: { id: req.params.id },
+    include: {
+      buyer: { select: { id: true, name: true, email: true } },
+      bids: {
+        where: { status: "active" },
+        include: { vendor: { select: { id: true, name: true } } },
+        orderBy: { bidAmount: "asc" },
+      },
+      order: true,
+    },
+  });
   if (!request) {
     res.status(404).json({ success: false, error: { message: "Request not found" } });
     return;
@@ -30,20 +75,27 @@ export const getRequest = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const updateStatus = asyncHandler(async (req: Request, res: Response) => {
-  const request = inMemoryRequests.find((r) => r.id === req.params.id);
-  if (!request) {
-    res.status(404).json({ success: false, error: { message: "Request not found" } });
-    return;
-  }
-  request.status = req.body.status;
+  const { status } = req.body;
+  const request = await prisma.foodRequest.update({
+    where: { id: req.params.id },
+    data: { status },
+  });
   res.json({ success: true, data: request });
 });
 
 export const getRequestBids = asyncHandler(async (req: Request, res: Response) => {
-  const request = inMemoryRequests.find((r) => r.id === req.params.id);
+  const request = await prisma.foodRequest.findUnique({
+    where: { id: req.params.id },
+    include: {
+      bids: {
+        include: { vendor: { select: { id: true, name: true } } },
+        orderBy: { bidAmount: "asc" },
+      },
+    },
+  });
   if (!request) {
     res.status(404).json({ success: false, error: { message: "Request not found" } });
     return;
   }
-  res.json({ success: true, data: request.bids || [] });
+  res.json({ success: true, data: request.bids });
 });

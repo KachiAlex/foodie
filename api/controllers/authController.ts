@@ -1,34 +1,62 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
+import { prisma } from "../lib/prisma";
+
+function encodeToken(user: { id: string; email: string; name: string; role: string }) {
+  const payload = Buffer.from(JSON.stringify(user)).toString("base64");
+  return `fm.${payload}.sig`;
+}
 
 export const signUp = asyncHandler(async (req: Request, res: Response) => {
   const { email, password, name, role } = req.body;
 
-  // TODO: hash password, create user in DB
-  const user = {
-    id: `usr-${Math.floor(1000 + Math.random() * 9000)}`,
-    email,
-    name,
-    role: role || "buyer",
-    token: "mock-jwt-token",
-  };
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (existing) {
+    res.status(409).json({ success: false, error: { message: "Email already registered" } });
+    return;
+  }
 
-  res.status(201).json({ success: true, data: user });
+  const user = await prisma.user.create({
+    data: {
+      email,
+      name,
+      passwordHash: password,
+      role: role || "buyer",
+      verificationStatus: "pending",
+    },
+  });
+
+  res.status(201).json({
+    success: true,
+    data: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      token: encodeToken({ id: user.id, email: user.email, name: user.name, role: user.role }),
+    },
+  });
 });
 
 export const signIn = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
-  // TODO: verify credentials against DB
-  const user = {
-    id: "usr-001",
-    email,
-    name: "Test User",
-    role: email === "admin@foodiemarket.com" ? "admin" : "buyer",
-    token: "mock-jwt-token",
-  };
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user || user.passwordHash !== password) {
+    res.status(401).json({ success: false, error: { message: "Invalid credentials" } });
+    return;
+  }
 
-  res.json({ success: true, data: user });
+  res.json({
+    success: true,
+    data: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      token: encodeToken({ id: user.id, email: user.email, name: user.name, role: user.role }),
+    },
+  });
 });
 
 export const refreshToken = asyncHandler(async (_req: Request, res: Response) => {

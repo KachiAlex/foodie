@@ -1,26 +1,74 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
-import { generateId } from "../utils/generateId";
+import { prisma } from "../lib/prisma";
 
-const inMemoryOrders: any[] = [];
-
-export const listOrders = asyncHandler(async (_req: Request, res: Response) => {
-  res.json({ success: true, data: inMemoryOrders });
+export const listOrders = asyncHandler(async (req: Request, res: Response) => {
+  const { buyerId, vendorId } = req.query as Record<string, string | undefined>;
+  const data = await prisma.order.findMany({
+    where: {
+      ...(buyerId ? { buyerId } : {}),
+      ...(vendorId ? { vendorId } : {}),
+    },
+    orderBy: { createdAt: "desc" },
+    include: {
+      buyer: { select: { id: true, name: true, email: true } },
+      request: true,
+      dispute: true,
+    },
+  });
+  res.json({ success: true, data });
 });
 
 export const createOrder = asyncHandler(async (req: Request, res: Response) => {
-  const order = {
-    id: generateId("ORD"),
-    ...req.body,
-    status: "paid",
-    createdAt: new Date().toISOString(),
-  };
-  inMemoryOrders.unshift(order);
+  const {
+    requestId,
+    buyerId,
+    vendorId,
+    bidId,
+    foodCost,
+    deliveryFee,
+    platformFee,
+    escrowFee,
+    totalAmount,
+  } = req.body;
+
+  const order = await prisma.order.create({
+    data: {
+      requestId,
+      buyerId,
+      vendorId,
+      bidId,
+      foodCost: Number(foodCost) || 0,
+      deliveryFee: Number(deliveryFee) || 0,
+      platformFee: Number(platformFee) || 0,
+      escrowFee: Number(escrowFee) || 0,
+      totalAmount: Number(totalAmount) || 0,
+      status: "paid",
+    },
+    include: {
+      buyer: { select: { id: true, name: true } },
+      request: true,
+    },
+  });
+
+  // Update request status to paid
+  await prisma.foodRequest.update({
+    where: { id: requestId },
+    data: { status: "paid" },
+  });
+
   res.status(201).json({ success: true, data: order });
 });
 
 export const getOrder = asyncHandler(async (req: Request, res: Response) => {
-  const order = inMemoryOrders.find((o) => o.id === req.params.id);
+  const order = await prisma.order.findUnique({
+    where: { id: req.params.id },
+    include: {
+      buyer: { select: { id: true, name: true } },
+      request: true,
+      dispute: true,
+    },
+  });
   if (!order) {
     res.status(404).json({ success: false, error: { message: "Order not found" } });
     return;
@@ -29,36 +77,46 @@ export const getOrder = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const updateStatus = asyncHandler(async (req: Request, res: Response) => {
-  const order = inMemoryOrders.find((o) => o.id === req.params.id);
-  if (!order) {
-    res.status(404).json({ success: false, error: { message: "Order not found" } });
-    return;
-  }
-  order.status = req.body.status;
+  const { status } = req.body;
+  const order = await prisma.order.update({
+    where: { id: req.params.id },
+    data: { status },
+  });
   res.json({ success: true, data: order });
 });
 
 export const confirmDelivery = asyncHandler(async (req: Request, res: Response) => {
-  const order = inMemoryOrders.find((o) => o.id === req.params.id);
-  if (!order) {
-    res.status(404).json({ success: false, error: { message: "Order not found" } });
-    return;
-  }
-  order.status = "completed";
-  order.deliveredAt = new Date().toISOString();
+  const order = await prisma.order.update({
+    where: { id: req.params.id },
+    data: { status: "completed", deliveredAt: new Date() },
+    include: {
+      buyer: { select: { id: true, name: true } },
+      request: true,
+    },
+  });
   res.json({ success: true, data: order });
 });
 
 export const openDispute = asyncHandler(async (req: Request, res: Response) => {
-  const order = inMemoryOrders.find((o) => o.id === req.params.id);
-  if (!order) {
-    res.status(404).json({ success: false, error: { message: "Order not found" } });
-    return;
-  }
-  order.status = "disputed";
-  order.dispute = {
-    reason: req.body.reason,
-    openedAt: new Date().toISOString(),
-  };
-  res.json({ success: true, data: order });
+  const { reason, openedById } = req.body;
+
+  const order = await prisma.order.update({
+    where: { id: req.params.id },
+    data: { status: "disputed" },
+  });
+
+  const dispute = await prisma.dispute.create({
+    data: {
+      orderId: req.params.id,
+      openedById,
+      reason,
+      status: "open",
+    },
+    include: {
+      order: true,
+      openedBy: { select: { id: true, name: true } },
+    },
+  });
+
+  res.json({ success: true, data: { order, dispute } });
 });
