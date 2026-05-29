@@ -16,6 +16,7 @@ import {
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/context/ToastContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import {
   adminMetrics,
   adminOrders,
@@ -25,6 +26,7 @@ import {
 import { approvePayoutRequest, createOrderEscalation, triggerVendorAudit } from "@/services/adminApi";
 
 export function AdminDashboard() {
+  const { symbol } = useCurrency();
   const ESCALATION_CAP = 5;
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
   const [activeVendorId, setActiveVendorId] = useState<string | null>(null);
@@ -51,13 +53,13 @@ export function AdminDashboard() {
   const opsAlerts = [
     { label: "SLA risk", value: "3 routes", detail: "+1 vs avg", severity: "High" },
     { label: "Disputes awaiting vendor", value: "4 cases", detail: "avg age 42m", severity: "Medium" },
-    { label: "Payout backlog", value: "₦18k", detail: "2 vendors flagged", severity: "High" },
+    { label: "Payout backlog", value: `${symbol}18k`, detail: "2 vendors flagged", severity: "High" },
   ];
 
   const [payoutQueue, setPayoutQueue] = useState([
-    { id: "PAY-713", vendor: "Chef Derin", amount: "₦540", status: "Ready", age: "10m" },
-    { id: "PAY-708", vendor: "Chef Ireti", amount: "₦1,120", status: "Requires review", age: "38m" },
-    { id: "PAY-701", vendor: "Chef Muna", amount: "₦325", status: "Docs missing", age: "1h" },
+    { id: "PAY-713", vendor: "Chef Derin", amount: `${symbol}540`, status: "Ready", age: "10m" },
+    { id: "PAY-708", vendor: "Chef Ireti", amount: `${symbol}1,120`, status: "Requires review", age: "38m" },
+    { id: "PAY-701", vendor: "Chef Muna", amount: `${symbol}325`, status: "Docs missing", age: "1h" },
   ]);
 
   const trustTasks = [
@@ -227,7 +229,7 @@ export function AdminDashboard() {
             >
               <p className="text-sm text-gray-500">{metric.label}</p>
               <div className="mt-3 flex items-end justify-between">
-                <h3 className="text-3xl font-semibold text-gray-900">{metric.value}</h3>
+                <h3 className="text-3xl font-semibold text-gray-900">{symbol}{metric.value}</h3>
                 <span className={`text-sm font-semibold ${metric.trend === "up" ? "text-green-600" : "text-red-500"}`}>
                   {metric.delta}
                 </span>
@@ -271,7 +273,7 @@ export function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Payout queue</p>
-                <h3 className="text-2xl font-semibold text-gray-900">${payoutTotal.toLocaleString()}</h3>
+                <h3 className="text-2xl font-semibold text-gray-900">{symbol}{payoutTotal.toLocaleString()}</h3>
                 <p className="text-xs text-gray-500">Awaiting approval</p>
               </div>
               <DollarSign className="h-5 w-5 text-emerald-500" />
@@ -341,7 +343,7 @@ export function AdminDashboard() {
                       <td className="py-3 font-semibold text-gray-900">{order.id}</td>
                       <td className="py-3">{order.buyer}</td>
                       <td className="py-3">{order.vendor}</td>
-                      <td className="py-3 font-semibold">{order.amount}</td>
+                      <td className="py-3 font-semibold">{symbol}{order.amount}</td>
                       <td className="py-3">
                         <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
                           {order.status}
@@ -583,6 +585,7 @@ interface AdminOrderDetailModalProps {
 }
 
 function AdminOrderDetailModal({ order, profile, isEscalating, onCreateEscalation, onClose }: AdminOrderDetailModalProps) {
+  const { symbol } = useCurrency();
   if (!order || !profile) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
@@ -591,7 +594,7 @@ function AdminOrderDetailModal({ order, profile, isEscalating, onCreateEscalatio
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{order.id}</p>
             <h3 className="text-2xl font-semibold text-gray-900">Order dossier</h3>
-            <p className="text-sm text-gray-500">{order.amount} · {order.status}</p>
+            <p className="text-sm text-gray-500">{symbol}{order.amount} · {order.status}</p>
           </div>
           <Button variant="ghost" onClick={onClose}>
             Close

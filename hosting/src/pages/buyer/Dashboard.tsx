@@ -18,6 +18,7 @@ import {
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/context/AppContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { NewRequestModal } from "@/components/NewRequestModal";
 import { featuredVendors } from "@/data/mock";
 import type { VendorBid } from "@/data/mock";
@@ -41,6 +42,7 @@ const savedBriefs = [
 
 export function BuyerDashboard() {
   const { requests, orders, bids } = useApp();
+  const { symbol } = useCurrency();
   const [showNewRequest, setShowNewRequest] = useState(false);
   const [bidFilter, setBidFilter] = useState<"all" | "collecting_bids" | "in_progress" | "fulfilled">("all");
   const [timelineRequestId, setTimelineRequestId] = useState<string | null>(null);
@@ -135,7 +137,7 @@ export function BuyerDashboard() {
     "REQ-2012": [
       { step: "Brief logged", time: "09:10", detail: "Buyer shared portion sizes & venue details" },
       { step: "Chefs invited", time: "09:22", detail: "6 chefs notified" },
-      { step: "First bid", time: "09:41", detail: "Chef Amaka submitted ₦305" },
+      { step: "First bid", time: "09:41", detail: `Chef Amaka submitted ${symbol}305` },
       { step: "Revision requested", time: "10:05", detail: "Buyer asked for suya add-on" },
     ],
     "REQ-0894": [
@@ -208,8 +210,8 @@ export function BuyerDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Spend velocity</p>
-                <h3 className="text-2xl font-semibold text-gray-900">₦{totalSpend}</h3>
-                <p className="text-xs text-gray-500">Average ticket ₦{averageTicket}</p>
+                <h3 className="text-2xl font-semibold text-gray-900">{symbol}{totalSpend}</h3>
+                <p className="text-xs text-gray-500">Average ticket {symbol}{averageTicket}</p>
               </div>
               <div className="flex gap-2">
                 {["7d", "30d"].map((range) => (
@@ -374,7 +376,7 @@ export function BuyerDashboard() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-500">Budget</p>
-                        <p className="text-2xl font-bold text-gray-900">₦{request.budget}</p>
+                        <p className="text-2xl font-bold text-gray-900">{symbol}{request.budget}</p>
                       </div>
                     </div>
                     <div className="mt-4 flex flex-wrap gap-4 text-sm text-gray-600">
@@ -463,7 +465,7 @@ export function BuyerDashboard() {
                         <div>
                           <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{request.id}</p>
                           <h4 className="text-lg font-semibold text-gray-900">{request.title}</h4>
-                          <p className="text-sm text-gray-500">{request.bids} bids • budget ₦{request.budget}</p>
+                          <p className="text-sm text-gray-500">{request.bids} bids • budget {symbol}{request.budget}</p>
                         </div>
                         <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600">
                           {request.status.replace("_", " ")}

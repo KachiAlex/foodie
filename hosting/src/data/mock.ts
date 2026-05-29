@@ -210,8 +210,8 @@ export const featuredVendors = [
 ];
 
 export const vendorMetrics: VendorMetric[] = [
-  { label: "Today", value: "₦420", change: "+18% vs avg", trend: "up" },
-  { label: "This Week", value: "₦2,840", change: "+6% vs last", trend: "up" },
+  { label: "Today", value: "420", change: "+18% vs avg", trend: "up" },
+  { label: "This Week", value: "2,840", change: "+6% vs last", trend: "up" },
   { label: "Acceptance", value: "92%", change: "-2%", trend: "down" },
 ];
 
@@ -221,7 +221,7 @@ export const vendorOpenRequests: VendorOpenRequest[] = [
     title: "Family Egusi Pack",
     location: "Lekki Phase 1",
     servings: "12 portions",
-    budget: "₦180",
+    budget: "180",
     deadline: "Today 4PM",
     tags: ["Egusi", "Swallow"],
   },
@@ -230,7 +230,7 @@ export const vendorOpenRequests: VendorOpenRequest[] = [
     title: "Corporate Lunch Bowls",
     location: "Ikoyi",
     servings: "30 bowls",
-    budget: "₦420",
+    budget: "420",
     deadline: "Tomorrow 1PM",
     tags: ["Healthy", "Bulk"],
   },
@@ -239,7 +239,7 @@ export const vendorOpenRequests: VendorOpenRequest[] = [
     title: "Large Pot Jollof",
     location: "Yaba",
     servings: "60 plates",
-    budget: "₦650",
+    budget: "650",
     deadline: "Saturday",
     tags: ["Party", "Outdoor"],
   },
@@ -273,21 +273,21 @@ export const vendorOrders: VendorOrderStage[] = [
 ];
 
 export const menuItems: MenuItem[] = [
-  { id: "M-01", name: "Smoky Party Jollof", price: "₦95 / pot", availability: "Daily", tags: ["Top seller"] },
-  { id: "M-02", name: "Fisherman Soup", price: "₦18 / bowl", availability: "Weekends", tags: ["New"] },
-  { id: "M-03", name: "Vegan Afang Bowl", price: "₦12 / bowl", availability: "Daily", tags: ["Vegan"] },
+  { id: "M-01", name: "Smoky Party Jollof", price: "95 / pot", availability: "Daily", tags: ["Top seller"] },
+  { id: "M-02", name: "Fisherman Soup", price: "18 / bowl", availability: "Weekends", tags: ["New"] },
+  { id: "M-03", name: "Vegan Afang Bowl", price: "12 / bowl", availability: "Daily", tags: ["Vegan"] },
 ];
 
 export const adminMetrics: AdminMetric[] = [
-  { label: "Gross Marketplace Volume", value: "₦128k", delta: "+12%", trend: "up" },
+  { label: "Gross Marketplace Volume", value: "128k", delta: "+12%", trend: "up" },
   { label: "Active Requests", value: "312", delta: "+4%", trend: "up" },
   { label: "Disputes", value: "7", delta: "-2", trend: "down" },
 ];
 
 export const adminOrders: AdminOrder[] = [
-  { id: "ORD-9031", buyer: "Oluwatobi F.", vendor: "Chef Nkem", amount: "₦210", status: "In progress" },
-  { id: "ORD-9027", buyer: "Dara Foods", vendor: "Chef Pilar", amount: "₦540", status: "Delivered" },
-  { id: "ORD-9018", buyer: "Ifeanyi & Co.", vendor: "Chef Tobi", amount: "₦320", status: "Dispute" },
+  { id: "ORD-9031", buyer: "Oluwatobi F.", vendor: "Chef Nkem", amount: "210", status: "In progress" },
+  { id: "ORD-9027", buyer: "Dara Foods", vendor: "Chef Pilar", amount: "540", status: "Delivered" },
+  { id: "ORD-9018", buyer: "Ifeanyi & Co.", vendor: "Chef Tobi", amount: "320", status: "Dispute" },
 ];
 
 export const adminVendors: AdminVendorRecord[] = [

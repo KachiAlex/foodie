@@ -2,6 +2,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/context/AppContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import type { CreateRequestPayload } from "@/services/requestApi";
 
 interface NewRequestModalProps {
@@ -10,6 +11,7 @@ interface NewRequestModalProps {
 
 export function NewRequestModal({ onClose }: NewRequestModalProps) {
   const { addRequest } = useApp();
+  const { symbol } = useCurrency();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<CreateRequestPayload>({
@@ -186,7 +188,7 @@ export function NewRequestModal({ onClose }: NewRequestModalProps) {
               />
             </label>
             <label className="block text-sm font-semibold text-gray-700">
-              Budget (NGN)
+              Budget ({symbol})
               <input
                 type="number"
                 min={10}
@@ -207,7 +209,7 @@ export function NewRequestModal({ onClose }: NewRequestModalProps) {
               <p><span className="font-medium text-gray-900">Portion:</span> {form.portionType}</p>
               <p><span className="font-medium text-gray-900">UoM:</span> {form.uom}</p>
               <p><span className="font-medium text-gray-900">Servings:</span> {form.servings}</p>
-              <p><span className="font-medium text-gray-900">Budget:</span> ₦{form.budget}</p>
+              <p><span className="font-medium text-gray-900">Budget:</span> {symbol}{form.budget}</p>
               <p><span className="font-medium text-gray-900">Delivery:</span> {form.deliveryWindow}</p>
             </div>
           </div>

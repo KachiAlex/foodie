@@ -15,11 +15,13 @@ import { useMemo, useState } from "react";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/context/AppContext";
+import { useCurrency } from "@/context/CurrencyContext";
 
 const statusColumns = ["New", "Cooking", "Ready", "Delivered"] as const;
 
 export function VendorDashboard() {
   const { vendorOpenRequests, vendorOrders, menuItems, vendorMetrics, addBid } = useApp();
+  const { symbol } = useCurrency();
   const [checklistItems, setChecklistItems] = useState([
     { label: "Upload new kitchen shots", detail: "Highlight clean surfaces + plating station", complete: true },
     { label: "Verify cold-chain logs", detail: "Attach latest HACCP sheet", complete: false },
@@ -113,7 +115,7 @@ export function VendorDashboard() {
               animate={{ opacity: 1, y: 0 }}
             >
               <p className="text-sm text-gray-500">{metric.label}</p>
-              <h3 className="text-3xl font-semibold text-gray-900">{metric.value}</h3>
+              <h3 className="text-3xl font-semibold text-gray-900">{symbol}{metric.value}</h3>
               <p className={`text-sm font-semibold ${metric.trend === "up" ? "text-green-600" : "text-red-500"}`}>{metric.change}</p>
             </motion.div>
           ))}
@@ -175,7 +177,7 @@ export function VendorDashboard() {
                 icon: Activity,
               }, {
                 label: "Avg tip",
-                value: "₦4.8k",
+                value: `${symbol}4.8k`,
                 icon: CheckCircle2,
               }, {
                 label: "Chef score",
@@ -260,7 +262,7 @@ export function VendorDashboard() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-gray-500">Budget</p>
-                      <p className="text-xl font-bold text-gray-900">{request.budget}</p>
+                      <p className="text-xl font-bold text-gray-900">{symbol}{request.budget}</p>
                     </div>
                   </div>
                   <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-gray-600">
@@ -300,7 +302,7 @@ export function VendorDashboard() {
                       <h4 className="text-lg font-semibold text-gray-900">{item.name}</h4>
                       <p className="text-sm text-gray-500">{item.availability}</p>
                     </div>
-                    <span className="text-xl font-semibold text-gray-900">{item.price}</span>
+                    <span className="text-xl font-semibold text-gray-900">{symbol}{item.price}</span>
                   </div>
                   <div className="mt-3 flex items-center gap-2 text-xs text-gray-500">
                     {item.tags.map((tag) => (

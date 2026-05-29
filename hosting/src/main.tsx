@@ -7,17 +7,20 @@ import { RoleProvider } from "./context/RoleContext";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
 import { AppProvider } from "./context/AppContext";
+import { CurrencyProvider } from "./context/CurrencyContext";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <StrictMode>
     <ToastProvider>
       <RoleProvider>
         <AuthProvider>
-          <AppProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
-          </AppProvider>
+          <CurrencyProvider>
+            <AppProvider>
+              <BrowserRouter>
+                <App />
+              </BrowserRouter>
+            </AppProvider>
+          </CurrencyProvider>
         </AuthProvider>
       </RoleProvider>
     </ToastProvider>
