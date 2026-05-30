@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Activity,
@@ -20,10 +20,9 @@ import { useCurrency } from "@/context/CurrencyContext";
 import {
   adminMetrics,
   adminOrders,
-  adminVendors,
   auditLog,
 } from "@/data/mock";
-import { approvePayoutRequest, createOrderEscalation, triggerVendorAudit } from "@/services/adminApi";
+import { approvePayoutRequest, createOrderEscalation, triggerVendorAudit, getPendingVendors, verifyVendor } from "@/services/adminApi";
 
 export function AdminDashboard() {
   const { symbol } = useCurrency();
@@ -36,7 +35,28 @@ export function AdminDashboard() {
   const [orderSearch, setOrderSearch] = useState("");
   const [vendorSearch, setVendorSearch] = useState("");
   const [recentAudits, setRecentAudits] = useState<Record<string, string>>({});
+  const [adminVendors, setAdminVendors] = useState<any[]>([]);
   const { showToast } = useToast();
+
+  useEffect(() => {
+    getPendingVendors()
+      .then((vendors) => {
+        setAdminVendors(
+          vendors.map((v) => ({
+            id: v.user.id,
+            name: v.user.name,
+            email: v.user.email,
+            kycStatus: v.verified ? "Approved" : "Pending",
+            kitchenName: v.kitchenName,
+            address: v.address,
+            landmark: v.landmark,
+            rating: 0,
+            totalOrders: 0,
+          }))
+        );
+      })
+      .catch((err) => console.error("Failed to load pending vendors", err));
+  }, []);
 
   const [escalationQueue, setEscalationQueue] = useState([
     { id: "ESC-491", title: "Buyer flagged late delivery", owner: "Joy", severity: "High", eta: "Respond in 30m" },
@@ -158,6 +178,18 @@ export function AdminDashboard() {
       showToast("Error scheduling audit");
     } finally {
       setIsSchedulingAudit(null);
+    }
+  };
+
+  const handleVerifyVendor = async (vendorId: string) => {
+    try {
+      const response = await verifyVendor(vendorId);
+      showToast(`Vendor ${response.user.name} verified successfully`);
+      setAdminVendors((prev) =>
+        prev.map((v) => (v.id === vendorId ? { ...v, kycStatus: "Approved" } : v))
+      );
+    } catch {
+      showToast("Error verifying vendor");
     }
   };
 
@@ -423,7 +455,7 @@ export function AdminDashboard() {
                       {isSchedulingAudit === vendor.id ? "Scheduling..." : recentAudits[vendor.id] ? "Audit scheduled" : "Trigger audit"}
                     </Button>
                     {vendor.kycStatus !== "Approved" && (
-                      <Button size="sm" className="bg-green-600 text-white">
+                      <Button size="sm" className="bg-green-600 text-white" onClick={() => handleVerifyVendor(vendor.id)}>
                         Approve KYC
                       </Button>
                     )}
@@ -654,7 +686,7 @@ function AdminOrderDetailModal({ order, profile, isEscalating, onCreateEscalatio
 }
 
 interface VendorDossierModalProps {
-  vendor: (typeof adminVendors)[number] | null;
+  vendor: { id: string; name: string; email: string; kycStatus: string; kitchenName: string; address: string; landmark: string; rating: number; totalOrders: number } | null;
   dossier: { documents: Array<{ type: string; status: string }>; notes: string } | null;
   onClose: () => void;
 }

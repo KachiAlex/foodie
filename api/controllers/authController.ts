@@ -14,7 +14,7 @@ function signToken(user: { id: string; email: string; name: string; role: string
 }
 
 export const signUp = asyncHandler(async (req: Request, res: Response) => {
-  const { email, password, name, role } = req.body;
+  const { email, password, name, role, vendorVerification } = req.body;
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
@@ -30,7 +30,22 @@ export const signUp = asyncHandler(async (req: Request, res: Response) => {
       name,
       passwordHash,
       role: role || "buyer",
-      verificationStatus: "pending",
+      verificationStatus: role === "vendor" ? "pending" : "verified",
+      vendorProfile:
+        role === "vendor" && vendorVerification
+          ? {
+              create: {
+                kitchenName: name,
+                address: vendorVerification.address || "",
+                landmark: vendorVerification.landmark || "",
+                specialties: ["Nigerian"],
+                rating: 0,
+                totalOrders: 0,
+                isOnline: false,
+                verified: false,
+              },
+            }
+          : undefined,
     },
   });
 
@@ -41,6 +56,7 @@ export const signUp = asyncHandler(async (req: Request, res: Response) => {
       email: user.email,
       name: user.name,
       role: user.role,
+      verificationStatus: user.verificationStatus,
       token: signToken({ id: user.id, email: user.email, name: user.name, role: user.role }),
     },
   });
@@ -68,6 +84,7 @@ export const signIn = asyncHandler(async (req: Request, res: Response) => {
       email: user.email,
       name: user.name,
       role: user.role,
+      verificationStatus: user.verificationStatus,
       token: signToken({ id: user.id, email: user.email, name: user.name, role: user.role }),
     },
   });

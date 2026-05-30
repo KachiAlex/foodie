@@ -9,31 +9,33 @@ interface AuthResponse {
   token: string;
 }
 
-function toAuthUser(data: AuthResponse): AuthUser {
+function toAuthUser(data: AuthResponse, status?: "pending" | "verified"): AuthUser {
   return {
     id: data.id,
     name: data.name,
     email: data.email,
     role: data.role,
+    verificationStatus: status,
   };
 }
 
 export async function signUpRequest(payload: SignUpPayload): Promise<AuthUser> {
-  const data = await api.post<AuthResponse>("/auth/sign-up", {
+  const data = await api.post<AuthResponse & { verificationStatus?: "pending" | "verified" }>("/auth/sign-up", {
     email: payload.email,
     password: payload.password,
     name: payload.name,
     role: payload.role,
+    vendorVerification: payload.vendorVerification,
   });
   setToken(data.token);
-  return toAuthUser(data);
+  return toAuthUser(data, data.verificationStatus);
 }
 
 export async function signInRequest(payload: SignInPayload): Promise<AuthUser> {
-  const data = await api.post<AuthResponse>("/auth/sign-in", {
+  const data = await api.post<AuthResponse & { verificationStatus?: "pending" | "verified" }>("/auth/sign-in", {
     email: payload.email,
     password: payload.password,
   });
   setToken(data.token);
-  return toAuthUser(data);
+  return toAuthUser(data, data.verificationStatus);
 }
