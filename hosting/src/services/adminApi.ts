@@ -7,6 +7,7 @@ type ActionResponse = {
 
 interface PendingVendor {
   id: string;
+  userId: string;
   user: { id: string; name: string; email: string };
   kitchenName: string;
   address: string;
