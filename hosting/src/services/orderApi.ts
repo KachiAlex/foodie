@@ -111,7 +111,7 @@ export async function updateVendorOrderStatus(
   return mapVendorOrder(data);
 }
 
-export async function createVendorOrder(order: Omit<VendorOrderStage, "id">): Promise<VendorOrderStage> {
+export async function createVendorOrder(_order: Omit<VendorOrderStage, "id">): Promise<VendorOrderStage> {
   const data = await api.post<BackendOrder>("/orders", {
     requestId: "",
     foodCost: 0,
