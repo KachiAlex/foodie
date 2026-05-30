@@ -1,6 +1,7 @@
 import type { Role } from "@/context/RoleContext";
 
 export interface AuthUser {
+  id: string;
   name: string;
   email: string;
   role: Role;

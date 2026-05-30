@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { prisma } from "../lib/prisma";
 
 export const getProfile = asyncHandler(async (req: Request, res: Response) => {
-  const vendorId = req.params.id as string | undefined;
+  const vendorId = (req.params.id || (req as Request & { user?: { id: string } }).user?.id) as string;
   const profile = await prisma.vendorProfile.findUnique({
     where: { userId: vendorId },
     include: {
@@ -39,7 +39,7 @@ export const updateProfile = asyncHandler(async (req: Request, res: Response) =>
 });
 
 export const getWallet = asyncHandler(async (req: Request, res: Response) => {
-  const vendorId = req.params.id as string | undefined;
+  const vendorId = (req.params.id || (req as Request & { user?: { id: string } }).user?.id) as string;
   const wallet = await prisma.escrowWallet.findUnique({
     where: { vendorId },
   });
@@ -51,7 +51,7 @@ export const getWallet = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getVendorOrders = asyncHandler(async (req: Request, res: Response) => {
-  const vendorId = req.params.id;
+  const vendorId = (req.params.id || (req as Request & { user?: { id: string } }).user?.id) as string;
   const data = await prisma.order.findMany({
     where: { vendorId },
     orderBy: { createdAt: "desc" },
@@ -64,7 +64,7 @@ export const getVendorOrders = asyncHandler(async (req: Request, res: Response) 
 });
 
 export const getMenu = asyncHandler(async (req: Request, res: Response) => {
-  const vendorId = req.params.id;
+  const vendorId = (req.params.id || (req as Request & { user?: { id: string } }).user?.id) as string;
   const profile = await prisma.vendorProfile.findUnique({
     where: { userId: vendorId },
     include: { menuItems: true },
@@ -77,7 +77,7 @@ export const getMenu = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const addMenuItem = asyncHandler(async (req: Request, res: Response) => {
-  const vendorId = req.params.id;
+  const vendorId = (req.params.id || (req as Request & { user?: { id: string } }).user?.id) as string;
   const { name, description, price, category, imageUrl } = req.body;
 
   const profile = await prisma.vendorProfile.findUnique({

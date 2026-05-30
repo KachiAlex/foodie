@@ -1,50 +1,53 @@
 import type { VendorMetric, MenuItem, VendorOpenRequest } from "@/data/mock";
-import {
-  vendorMetrics as initialMetrics,
-  menuItems as initialMenuItems,
-  vendorOpenRequests as initialOpenRequests,
-} from "@/data/mock";
+import { api } from "./apiClient";
 
-const METRICS_KEY = "foodiemarket_vendor_metrics";
-const MENU_KEY = "foodiemarket_vendor_menu";
-const OPEN_REQUESTS_KEY = "foodiemarket_vendor_open_requests";
-
-function getStoredMetrics(): VendorMetric[] {
-  try {
-    const raw = localStorage.getItem(METRICS_KEY);
-    if (raw) return JSON.parse(raw) as VendorMetric[];
-  } catch {
-    // ignore
-  }
-  return initialMetrics;
+/* Backend shape mapping */
+interface BackendWallet {
+  balance: number;
+  totalEarned: number;
+  totalWithdrawn: number;
 }
 
-function getStoredMenu(): MenuItem[] {
-  try {
-    const raw = localStorage.getItem(MENU_KEY);
-    if (raw) return JSON.parse(raw) as MenuItem[];
-  } catch {
-    // ignore
-  }
-  return initialMenuItems;
+interface BackendMenuItem {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+  description?: string | null;
+  imageUrl?: string | null;
 }
 
-function getStoredOpenRequests(): VendorOpenRequest[] {
-  try {
-    const raw = localStorage.getItem(OPEN_REQUESTS_KEY);
-    if (raw) return JSON.parse(raw) as VendorOpenRequest[];
-  } catch {
-    // ignore
-  }
-  return initialOpenRequests;
+interface BackendOpenRequest {
+  id: string;
+  foodName: string;
+  deliveryAddress: string;
+  quantity: number;
+  budgetMin: number;
+  budgetMax: number;
+  deliveryDateTime: string;
+  category: string;
 }
 
-function saveMenu(menu: MenuItem[]) {
-  localStorage.setItem(MENU_KEY, JSON.stringify(menu));
+function mapMenuItem(item: BackendMenuItem): MenuItem {
+  return {
+    id: item.id,
+    name: item.name,
+    price: `₦${item.price.toLocaleString()}`,
+    availability: item.category || "Available",
+    tags: item.description ? [item.description] : [],
+  };
 }
 
-function saveOpenRequests(requests: VendorOpenRequest[]) {
-  localStorage.setItem(OPEN_REQUESTS_KEY, JSON.stringify(requests));
+function mapOpenRequest(r: BackendOpenRequest): VendorOpenRequest {
+  return {
+    id: r.id,
+    title: r.foodName,
+    location: r.deliveryAddress || "Lagos",
+    servings: `${r.quantity} ${r.category}`,
+    budget: `₦${(r.budgetMin || 0).toLocaleString()} - ₦${(r.budgetMax || 0).toLocaleString()}`,
+    deadline: new Date(r.deliveryDateTime).toLocaleString(),
+    tags: [r.category],
+  };
 }
 
 export interface AddMenuItemPayload {
@@ -55,45 +58,50 @@ export interface AddMenuItemPayload {
 }
 
 export async function fetchVendorMetrics(): Promise<VendorMetric[]> {
-  await new Promise((resolve) => setTimeout(resolve, 200));
-  return getStoredMetrics();
+  const data = await api.get<BackendWallet>("/vendors/wallet");
+  return [
+    { label: "Wallet Balance", value: `₦${(data.balance || 0).toLocaleString()}`, change: "0%", trend: "up" },
+    { label: "Total Earned", value: `₦${(data.totalEarned || 0).toLocaleString()}`, change: "0%", trend: "up" },
+    { label: "Total Withdrawn", value: `₦${(data.totalWithdrawn || 0).toLocaleString()}`, change: "0%", trend: "down" },
+  ];
 }
 
 export async function fetchMenuItems(): Promise<MenuItem[]> {
-  await new Promise((resolve) => setTimeout(resolve, 200));
-  return getStoredMenu();
+  const data = await api.get<BackendMenuItem[]>("/vendors/menu");
+  return data.map(mapMenuItem);
 }
 
 export async function addMenuItem(payload: AddMenuItemPayload): Promise<MenuItem> {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  const menu = getStoredMenu();
-  const newItem: MenuItem = {
-    id: `M-${String(menu.length + 1).padStart(2, "0")}`,
+  const numericPrice = Number(payload.price.replace(/[^0-9]/g, "")) || 0;
+  const data = await api.post<BackendMenuItem>("/vendors/menu", {
     name: payload.name,
-    price: payload.price,
-    availability: payload.availability,
-    tags: payload.tags,
-  };
-  menu.push(newItem);
-  saveMenu(menu);
-  return newItem;
+    price: numericPrice,
+    category: payload.availability,
+    description: payload.tags.join(", "),
+    imageUrl: "",
+  });
+  return mapMenuItem(data);
 }
 
 export async function fetchVendorOpenRequests(): Promise<VendorOpenRequest[]> {
-  await new Promise((resolve) => setTimeout(resolve, 300));
-  return getStoredOpenRequests();
+  const data = await api.get<BackendOpenRequest[]>("/vendors/open-requests");
+  return data.map(mapOpenRequest);
 }
 
 export async function createVendorOpenRequest(
   payload: Omit<VendorOpenRequest, "id">
 ): Promise<VendorOpenRequest> {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  const requests = getStoredOpenRequests();
-  const newRequest: VendorOpenRequest = {
-    id: `REQ-${Math.floor(1000 + Math.random() * 9000)}`,
-    ...payload,
-  };
-  requests.push(newRequest);
-  saveOpenRequests(requests);
-  return newRequest;
+  const data = await api.post<BackendOpenRequest>("/requests", {
+    foodName: payload.title,
+    category: payload.tags[0] || "General",
+    quantity: Number(payload.servings.replace(/[^0-9]/g, "")) || 1,
+    unit: "Portion",
+    budgetMin: 0,
+    budgetMax: Number(payload.budget.replace(/[^0-9]/g, "")) || 0,
+    deliveryAddress: payload.location,
+    deliveryDateTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    instructions: "",
+    imageUrl: "",
+  });
+  return mapOpenRequest(data);
 }

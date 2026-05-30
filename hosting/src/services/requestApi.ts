@@ -1,35 +1,72 @@
 import type { BuyerRequest, RequestStatus, VendorBid } from "@/data/mock";
-import { buyerRequests as initialRequests, vendorBids as initialBids } from "@/data/mock";
+import { api } from "./apiClient";
 
-const REQUESTS_KEY = "foodiemarket_requests";
-const BIDS_KEY = "foodiemarket_bids";
+/* Backend shape mapping */
+interface BackendRequest {
+  id: string;
+  foodName: string;
+  category: string;
+  quantity: number;
+  unit: string;
+  budgetMin: number;
+  budgetMax: number;
+  deliveryAddress: string;
+  deliveryDateTime: string;
+  instructions?: string | null;
+  imageUrl?: string | null;
+  status: string;
+  bids: BackendBid[];
+}
 
-function getStoredRequests(): BuyerRequest[] {
-  try {
-    const raw = localStorage.getItem(REQUESTS_KEY);
-    if (raw) return JSON.parse(raw) as BuyerRequest[];
-  } catch {
-    // ignore parse errors
+interface BackendBid {
+  id: string;
+  requestId: string;
+  vendor?: { name: string };
+  bidAmount: number;
+  estimatedDeliveryTime?: string;
+  message?: string;
+}
+
+function mapStatus(status: string): RequestStatus {
+  switch (status) {
+    case "open":
+    case "collecting_bids":
+      return "collecting_bids";
+    case "bid_selected":
+    case "in_progress":
+      return "in_progress";
+    case "paid":
+    case "completed":
+    case "fulfilled":
+      return "fulfilled";
+    default:
+      return "draft";
   }
-  return initialRequests;
 }
 
-function getStoredBids(): VendorBid[] {
-  try {
-    const raw = localStorage.getItem(BIDS_KEY);
-    if (raw) return JSON.parse(raw) as VendorBid[];
-  } catch {
-    // ignore
-  }
-  return initialBids;
+function mapRequest(r: BackendRequest): BuyerRequest {
+  return {
+    id: r.id,
+    title: r.foodName,
+    cuisine: r.category,
+    portionType: (r.unit as "Pot" | "Portion" | "Tray") || "Portion",
+    servings: r.quantity,
+    budget: r.budgetMax || r.budgetMin || 0,
+    status: mapStatus(r.status),
+    deliveryWindow: r.deliveryAddress || new Date(r.deliveryDateTime).toLocaleString(),
+    bids: Array.isArray(r.bids) ? r.bids.length : 0,
+  };
 }
 
-function saveRequests(requests: BuyerRequest[]) {
-  localStorage.setItem(REQUESTS_KEY, JSON.stringify(requests));
-}
-
-function saveBids(bids: VendorBid[]) {
-  localStorage.setItem(BIDS_KEY, JSON.stringify(bids));
+function mapBid(b: BackendBid): VendorBid {
+  return {
+    id: b.id,
+    requestId: b.requestId,
+    chef: b.vendor?.name || "Unknown",
+    price: b.bidAmount,
+    eta: b.estimatedDeliveryTime || "TBD",
+    confidence: 0.8,
+  };
 }
 
 export interface CreateRequestPayload {
@@ -51,75 +88,51 @@ export interface CreateBidPayload {
 }
 
 export async function fetchRequests(): Promise<BuyerRequest[]> {
-  await new Promise((resolve) => setTimeout(resolve, 300));
-  return getStoredRequests();
+  const data = await api.get<BackendRequest[]>("/requests");
+  return data.map(mapRequest);
 }
 
 export async function createRequest(payload: CreateRequestPayload): Promise<BuyerRequest> {
-  await new Promise((resolve) => setTimeout(resolve, 600));
-  const requests = getStoredRequests();
-  const newRequest: BuyerRequest = {
-    id: `REQ-${Math.floor(1000 + Math.random() * 9000)}`,
-    title: payload.title,
-    cuisine: payload.cuisine,
-    portionType: payload.portionType,
-    servings: payload.servings,
-    budget: payload.budget,
-    status: "collecting_bids",
-    deliveryWindow: payload.deliveryWindow,
-    bids: 0,
-  };
-  requests.unshift(newRequest);
-  saveRequests(requests);
-  return newRequest;
+  const data = await api.post<BackendRequest>("/requests", {
+    foodName: payload.title,
+    category: payload.cuisine,
+    quantity: payload.servings,
+    unit: payload.portionType,
+    budgetMin: payload.budget * 0.8,
+    budgetMax: payload.budget,
+    deliveryAddress: payload.deliveryWindow,
+    deliveryDateTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    instructions: "",
+    imageUrl: "",
+  });
+  return mapRequest(data);
 }
 
 export async function updateRequestStatus(
   requestId: string,
   status: RequestStatus
 ): Promise<BuyerRequest> {
-  await new Promise((resolve) => setTimeout(resolve, 400));
-  const requests = getStoredRequests();
-  const idx = requests.findIndex((r) => r.id === requestId);
-  if (idx === -1) throw new Error("Request not found");
-  requests[idx] = { ...requests[idx], status };
-  saveRequests(requests);
-  return requests[idx];
+  const backendStatus = status === "fulfilled" ? "completed" : status;
+  const data = await api.patch<BackendRequest>(`/requests/${requestId}/status`, { status: backendStatus });
+  return mapRequest(data);
 }
 
 export async function fetchBids(): Promise<VendorBid[]> {
-  await new Promise((resolve) => setTimeout(resolve, 300));
-  return getStoredBids();
+  const data = await api.get<BackendBid[]>("/bids");
+  return data.map(mapBid);
 }
 
 export async function createBid(payload: CreateBidPayload): Promise<VendorBid> {
-  await new Promise((resolve) => setTimeout(resolve, 700));
-  const bids = getStoredBids();
-  const newBid: VendorBid = {
-    id: `BID-${Math.floor(1000 + Math.random() * 9000)}`,
+  const data = await api.post<BackendBid>("/bids", {
     requestId: payload.requestId,
-    chef: payload.chef,
-    price: payload.price,
-    eta: payload.eta,
-    confidence: payload.confidence,
-  };
-  bids.push(newBid);
-  saveBids(bids);
-
-  // Increment request bid count
-  const requests = getStoredRequests();
-  const reqIdx = requests.findIndex((r) => r.id === payload.requestId);
-  if (reqIdx !== -1) {
-    requests[reqIdx] = { ...requests[reqIdx], bids: requests[reqIdx].bids + 1 };
-    saveRequests(requests);
-  }
-
-  return newBid;
+    bidAmount: payload.price,
+    estimatedDeliveryTime: payload.eta,
+    message: `Bid from ${payload.chef}`,
+  });
+  return mapBid(data);
 }
 
 // Admin actions
 export async function deleteRequest(requestId: string): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, 400));
-  const requests = getStoredRequests().filter((r) => r.id !== requestId);
-  saveRequests(requests);
+  await api.del(`/requests/${requestId}`);
 }

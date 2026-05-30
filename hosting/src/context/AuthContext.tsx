@@ -2,7 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { ReactNode } from "react";
 import { useRole } from "@/context/RoleContext";
 import type { AuthUser, SignInPayload, SignUpPayload } from "@/types/auth";
-import { mockSignInRequest, mockSignUpRequest } from "@/services/authApi";
+import { signUpRequest, signInRequest } from "@/services/authApi";
+import { setToken } from "@/services/apiClient";
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -41,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = useCallback(
     async (payload: SignUpPayload) => {
-      const nextUser = await mockSignUpRequest(payload);
+      const nextUser = await signUpRequest(payload);
       persistUser(nextUser);
       return nextUser;
     },
@@ -50,15 +51,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback(
     async (payload: SignInPayload) => {
-      const nextUser = await mockSignInRequest(payload, user);
+      const nextUser = await signInRequest(payload);
       persistUser(nextUser);
       return nextUser;
     },
-    [persistUser, user],
+    [persistUser],
   );
 
   const signOut = useCallback(() => {
     setUser(null);
+    setToken(null);
   }, []);
 
   const value = useMemo(

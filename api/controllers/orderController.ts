@@ -32,11 +32,15 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     totalAmount,
   } = req.body;
 
+  const userId = (req as Request & { user?: { id: string } }).user?.id;
+  const resolvedBuyerId = buyerId || userId;
+  const resolvedVendorId = vendorId || userId;
+
   const order = await prisma.order.create({
     data: {
       requestId,
-      buyerId,
-      vendorId,
+      buyerId: resolvedBuyerId,
+      vendorId: resolvedVendorId,
       bidId,
       foodCost: Number(foodCost) || 0,
       deliveryFee: Number(deliveryFee) || 0,

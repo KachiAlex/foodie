@@ -31,9 +31,11 @@ export const createRequest = asyncHandler(async (req: Request, res: Response) =>
     imageUrl,
   } = req.body;
 
+  const resolvedBuyerId = buyerId || (req as Request & { user?: { id: string } }).user?.id;
+
   const request = await prisma.foodRequest.create({
     data: {
-      buyerId,
+      buyerId: resolvedBuyerId,
       foodName,
       category,
       quantity: Number(quantity) || 1,

@@ -1,35 +1,67 @@
 import type { BuyerOrder, VendorOrderStage } from "@/data/mock";
-import { buyerOrders as initialOrders, vendorOrders as initialVendorOrders } from "@/data/mock";
+import { api } from "./apiClient";
 
-const ORDERS_KEY = "foodiemarket_orders";
-const VENDOR_ORDERS_KEY = "foodiemarket_vendor_orders";
+/* Backend shape mapping */
+interface BackendOrder {
+  id: string;
+  buyer?: { name: string };
+  request?: { foodName: string };
+  foodCost: number;
+  deliveryFee: number;
+  totalAmount: number;
+  status: string;
+  createdAt: string;
+  deliveredAt?: string | null;
+}
 
-function getStoredOrders(): BuyerOrder[] {
-  try {
-    const raw = localStorage.getItem(ORDERS_KEY);
-    if (raw) return JSON.parse(raw) as BuyerOrder[];
-  } catch {
-    // ignore
+function mapOrderStatus(status: string): BuyerOrder["status"] {
+  switch (status) {
+    case "paid":
+    case "preparing":
+      return "Cooking";
+    case "ready":
+    case "out_for_delivery":
+      return "Out for delivery";
+    case "completed":
+      return "Delivered";
+    default:
+      return "Cooking";
   }
-  return initialOrders;
 }
 
-function getStoredVendorOrders(): VendorOrderStage[] {
-  try {
-    const raw = localStorage.getItem(VENDOR_ORDERS_KEY);
-    if (raw) return JSON.parse(raw) as VendorOrderStage[];
-  } catch {
-    // ignore
+function mapVendorOrderStatus(status: string): VendorOrderStage["status"] {
+  switch (status) {
+    case "paid":
+      return "New";
+    case "preparing":
+      return "Cooking";
+    case "ready":
+      return "Ready";
+    case "completed":
+      return "Delivered";
+    default:
+      return "New";
   }
-  return initialVendorOrders;
 }
 
-function saveOrders(orders: BuyerOrder[]) {
-  localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+function mapBuyerOrder(o: BackendOrder): BuyerOrder {
+  return {
+    id: o.id,
+    chef: o.request?.foodName || "Unknown",
+    dishes: o.request?.foodName || "Unknown",
+    amount: o.totalAmount || o.foodCost + o.deliveryFee || 0,
+    eta: o.deliveredAt ? new Date(o.deliveredAt).toLocaleString() : "Pending",
+    status: mapOrderStatus(o.status),
+  };
 }
 
-function saveVendorOrders(orders: VendorOrderStage[]) {
-  localStorage.setItem(VENDOR_ORDERS_KEY, JSON.stringify(orders));
+function mapVendorOrder(o: BackendOrder): VendorOrderStage {
+  return {
+    id: o.id,
+    customer: o.buyer?.name || "Unknown",
+    items: o.request?.foodName || "Unknown",
+    status: mapVendorOrderStatus(o.status),
+  };
 }
 
 export interface CreateOrderPayload {
@@ -45,64 +77,46 @@ export interface UpdateOrderStatusPayload {
 }
 
 export async function fetchOrders(): Promise<BuyerOrder[]> {
-  await new Promise((resolve) => setTimeout(resolve, 300));
-  return getStoredOrders();
+  const data = await api.get<BackendOrder[]>("/orders");
+  return data.map(mapBuyerOrder);
 }
 
 export async function createOrder(payload: CreateOrderPayload): Promise<BuyerOrder> {
-  await new Promise((resolve) => setTimeout(resolve, 600));
-  const orders = getStoredOrders();
-  const newOrder: BuyerOrder = {
-    id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
-    chef: payload.chef,
-    dishes: payload.dishes,
-    amount: payload.amount,
-    eta: payload.eta,
-    status: "Cooking",
-  };
-  orders.unshift(newOrder);
-  saveOrders(orders);
-  return newOrder;
+  const data = await api.post<BackendOrder>("/orders", {
+    requestId: "", // Placeholder; backend needs requestId. Frontend doesn't currently pass it.
+    foodCost: payload.amount * 0.85,
+    deliveryFee: payload.amount * 0.15,
+    totalAmount: payload.amount,
+  });
+  return mapBuyerOrder(data);
 }
 
 export async function updateOrderStatus({ orderId, status }: UpdateOrderStatusPayload): Promise<BuyerOrder> {
-  await new Promise((resolve) => setTimeout(resolve, 400));
-  const orders = getStoredOrders();
-  const idx = orders.findIndex((o) => o.id === orderId);
-  if (idx === -1) throw new Error("Order not found");
-  orders[idx] = { ...orders[idx], status };
-  saveOrders(orders);
-  return orders[idx];
+  const backendStatus = status === "Delivered" ? "completed" : status === "Out for delivery" ? "out_for_delivery" : "preparing";
+  const data = await api.patch<BackendOrder>(`/orders/${orderId}/status`, { status: backendStatus });
+  return mapBuyerOrder(data);
 }
 
 export async function fetchVendorOrders(): Promise<VendorOrderStage[]> {
-  await new Promise((resolve) => setTimeout(resolve, 300));
-  return getStoredVendorOrders();
+  const data = await api.get<BackendOrder[]>("/vendors/orders");
+  return data.map(mapVendorOrder);
 }
 
 export async function updateVendorOrderStatus(
   orderId: string,
   status: VendorOrderStage["status"]
 ): Promise<VendorOrderStage> {
-  await new Promise((resolve) => setTimeout(resolve, 400));
-  const orders = getStoredVendorOrders();
-  const idx = orders.findIndex((o) => o.id === orderId);
-  if (idx === -1) throw new Error("Order not found");
-  orders[idx] = { ...orders[idx], status };
-  saveVendorOrders(orders);
-  return orders[idx];
+  const backendStatus = status === "Delivered" ? "completed" : status === "Ready" ? "ready" : status === "Cooking" ? "preparing" : "paid";
+  const data = await api.patch<BackendOrder>(`/orders/${orderId}/status`, { status: backendStatus });
+  return mapVendorOrder(data);
 }
 
 export async function createVendorOrder(order: Omit<VendorOrderStage, "id">): Promise<VendorOrderStage> {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  const orders = getStoredVendorOrders();
-  const newOrder: VendorOrderStage = {
-    id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
-    customer: order.customer,
-    items: order.items,
-    status: order.status,
-  };
-  orders.push(newOrder);
-  saveVendorOrders(orders);
-  return newOrder;
+  const data = await api.post<BackendOrder>("/orders", {
+    requestId: "",
+    foodCost: 0,
+    deliveryFee: 0,
+    totalAmount: 0,
+  });
+  return mapVendorOrder(data);
 }

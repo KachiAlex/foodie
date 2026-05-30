@@ -1,52 +1,39 @@
 import type { SignInPayload, SignUpPayload, AuthUser } from "@/types/auth";
+import { api, setToken } from "./apiClient";
 
-const STATIC_USERS: Record<string, { profile: AuthUser; password: string }> = {
-  "admin@foodiemarket.com": {
-    profile: {
-      name: "Marketplace Admin",
-      email: "admin@foodiemarket.com",
-      role: "admin",
-      verificationStatus: "verified",
-    },
-    password: "admin123",
-  },
-};
+interface AuthResponse {
+  id: string;
+  email: string;
+  name: string;
+  role: AuthUser["role"];
+  token: string;
+}
 
-export async function mockSignUpRequest(payload: SignUpPayload): Promise<AuthUser> {
-  if (payload.email in STATIC_USERS) {
-    throw new Error("This email is reserved by Foodie Market.");
-  }
-  if (payload.role === "vendor" && payload.vendorVerification) {
-    console.info("[AuthAPI] Received vendor verification", payload.vendorVerification);
-  }
-  await new Promise((resolve) => setTimeout(resolve, 600));
+function toAuthUser(data: AuthResponse): AuthUser {
   return {
-    name: payload.name,
-    email: payload.email,
-    role: payload.role,
-    verificationStatus: payload.role === "vendor" ? "pending" : "verified",
-    vendorVerificationId: payload.role === "vendor" ? crypto.randomUUID() : undefined,
+    id: data.id,
+    name: data.name,
+    email: data.email,
+    role: data.role,
   };
 }
 
-export async function mockSignInRequest(payload: SignInPayload, existingUser?: AuthUser | null): Promise<AuthUser> {
-  await new Promise((resolve) => setTimeout(resolve, 400));
-
-  const staticRecord = STATIC_USERS[payload.email];
-  if (staticRecord) {
-    if (payload.password !== staticRecord.password) {
-      throw new Error("Invalid credentials");
-    }
-    return staticRecord.profile;
-  }
-
-  const resolvedRole = payload.role ?? existingUser?.role ?? "buyer";
-  const resolvedName = existingUser?.name ?? "Foodie";
-  return {
-    name: resolvedName,
+export async function signUpRequest(payload: SignUpPayload): Promise<AuthUser> {
+  const data = await api.post<AuthResponse>("/auth/sign-up", {
     email: payload.email,
-    role: resolvedRole,
-    verificationStatus: payload.role === "vendor" ? existingUser?.verificationStatus ?? "pending" : "verified",
-    vendorVerificationId: existingUser?.vendorVerificationId,
-  };
+    password: payload.password,
+    name: payload.name,
+    role: payload.role,
+  });
+  setToken(data.token);
+  return toAuthUser(data);
+}
+
+export async function signInRequest(payload: SignInPayload): Promise<AuthUser> {
+  const data = await api.post<AuthResponse>("/auth/sign-in", {
+    email: payload.email,
+    password: payload.password,
+  });
+  setToken(data.token);
+  return toAuthUser(data);
 }
