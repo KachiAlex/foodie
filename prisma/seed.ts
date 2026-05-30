@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+import bcrypt from "bcryptjs";
 import { PrismaClient } from "../api/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
@@ -25,12 +26,16 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log("Seeding database...");
 
+  const adminPass = await bcrypt.hash("admin123", 10);
+  const buyerPass = await bcrypt.hash("buyer123", 10);
+  const vendorPass = await bcrypt.hash("vendor123", 10);
+
   // Admin user
   const admin = await prisma.user.create({
     data: {
       email: "admin@foodiemarket.com",
       name: "Marketplace Admin",
-      passwordHash: "admin123",
+      passwordHash: adminPass,
       role: "admin",
       verificationStatus: "verified",
     },
@@ -42,7 +47,7 @@ async function main() {
     data: {
       email: "buyer@foodiemarket.com",
       name: "Chinedu Okonkwo",
-      passwordHash: "buyer123",
+      passwordHash: buyerPass,
       role: "buyer",
       verificationStatus: "verified",
     },
@@ -54,7 +59,7 @@ async function main() {
     data: {
       email: "chef.nneka@foodiemarket.com",
       name: "Chef Nneka",
-      passwordHash: "vendor123",
+      passwordHash: vendorPass,
       role: "vendor",
       verificationStatus: "verified",
       vendorProfile: {
@@ -77,7 +82,7 @@ async function main() {
     data: {
       email: "chef.tunde@foodiemarket.com",
       name: "Chef Tunde",
-      passwordHash: "vendor123",
+      passwordHash: vendorPass,
       role: "vendor",
       verificationStatus: "verified",
       vendorProfile: {

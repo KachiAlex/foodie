@@ -1,10 +1,16 @@
 import { Request, Response } from "express";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { asyncHandler } from "../utils/asyncHandler";
 import { prisma } from "../lib/prisma";
 
-function encodeToken(user: { id: string; email: string; name: string; role: string }) {
-  const payload = Buffer.from(JSON.stringify(user)).toString("base64");
-  return `fm.${payload}.sig`;
+const JWT_SECRET = process.env.JWT_SECRET || "foodie-market-dev-secret-change-in-production";
+const JWT_EXPIRES_IN = "7d";
+
+function signToken(user: { id: string; email: string; name: string; role: string }) {
+  return jwt.sign({ id: user.id, email: user.email, name: user.name, role: user.role }, JWT_SECRET, {
+    expiresIn: JWT_EXPIRES_IN,
+  });
 }
 
 export const signUp = asyncHandler(async (req: Request, res: Response) => {
@@ -16,11 +22,13 @@ export const signUp = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
+  const passwordHash = await bcrypt.hash(password, 10);
+
   const user = await prisma.user.create({
     data: {
       email,
       name,
-      passwordHash: password,
+      passwordHash,
       role: role || "buyer",
       verificationStatus: "pending",
     },
@@ -33,7 +41,7 @@ export const signUp = asyncHandler(async (req: Request, res: Response) => {
       email: user.email,
       name: user.name,
       role: user.role,
-      token: encodeToken({ id: user.id, email: user.email, name: user.name, role: user.role }),
+      token: signToken({ id: user.id, email: user.email, name: user.name, role: user.role }),
     },
   });
 });
@@ -42,7 +50,13 @@ export const signIn = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user || user.passwordHash !== password) {
+  if (!user) {
+    res.status(401).json({ success: false, error: { message: "Invalid credentials" } });
+    return;
+  }
+
+  const valid = await bcrypt.compare(password, user.passwordHash);
+  if (!valid) {
     res.status(401).json({ success: false, error: { message: "Invalid credentials" } });
     return;
   }
@@ -54,7 +68,7 @@ export const signIn = asyncHandler(async (req: Request, res: Response) => {
       email: user.email,
       name: user.name,
       role: user.role,
-      token: encodeToken({ id: user.id, email: user.email, name: user.name, role: user.role }),
+      token: signToken({ id: user.id, email: user.email, name: user.name, role: user.role }),
     },
   });
 });

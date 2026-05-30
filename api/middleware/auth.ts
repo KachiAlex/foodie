@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
 export interface AuthUser {
   id: string;
@@ -6,6 +7,8 @@ export interface AuthUser {
   role: "buyer" | "vendor" | "admin";
   name: string;
 }
+
+const JWT_SECRET = process.env.JWT_SECRET || "foodie-market-dev-secret-change-in-production";
 
 export function authenticate(req: Request, _res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
@@ -18,23 +21,8 @@ export function authenticate(req: Request, _res: Response, next: NextFunction) {
 
   const token = authHeader.slice(7);
 
-  // TODO: verify JWT with real secret
-  // For now, allow a test token pattern
-  if (token === "test-token") {
-    (req as Request & { user?: AuthUser }).user = {
-      id: "usr-001",
-      email: "test@foodiemarket.com",
-      role: "buyer",
-      name: "Test User",
-    };
-    return next();
-  }
-
-  // Decode fm.<base64>.sig token
   try {
-    const parts = token.split(".");
-    const encoded = parts.length === 3 ? parts[1] : token;
-    const payload = JSON.parse(Buffer.from(encoded, "base64").toString()) as AuthUser;
+    const payload = jwt.verify(token, JWT_SECRET) as AuthUser;
     (req as Request & { user?: AuthUser }).user = payload;
     next();
   } catch {
