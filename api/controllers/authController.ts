@@ -90,6 +90,45 @@ export const signIn = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
+export const requestPasswordReset = asyncHandler(async (req: Request, res: Response) => {
+  const { email } = req.body;
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    res.status(404).json({ success: false, error: { message: "No account found with that email" } });
+    return;
+  }
+
+  const resetToken = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: "1h" });
+  // In production, send email with reset link containing resetToken
+  // For now, return token directly for testing
+  res.json({
+    success: true,
+    data: {
+      message: "Password reset link sent to your email",
+      resetToken,
+    },
+  });
+});
+
+export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
+  const { token, password } = req.body;
+  let payload;
+  try {
+    payload = jwt.verify(token, JWT_SECRET) as { id: string; email: string };
+  } catch {
+    res.status(400).json({ success: false, error: { message: "Invalid or expired reset token" } });
+    return;
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+  await prisma.user.update({
+    where: { id: payload.id },
+    data: { passwordHash },
+  });
+
+  res.json({ success: true, data: { message: "Password reset successfully" } });
+});
+
 export const refreshToken = asyncHandler(async (_req: Request, res: Response) => {
   res.json({ success: true, data: { token: "mock-jwt-token" } });
 });

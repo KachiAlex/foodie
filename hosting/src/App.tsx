@@ -5,6 +5,7 @@ import { DashboardGuard } from "@/pages/DashboardGuard";
 import { ToastViewport } from "@/components/ToastViewport";
 import { SignUpPage } from "@/pages/auth/SignUp";
 import { SignInPage } from "@/pages/auth/SignIn";
+import { ForgotPasswordPage } from "@/pages/auth/ForgotPassword";
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/auth/sign-up" element={<SignUpPage />} />
         <Route path="/auth/sign-in" element={<SignInPage />} />
+        <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/dashboard" element={<DashboardLanding />} />
         <Route path="/dashboard/:roleSlug" element={<DashboardGuard />} />
       </Routes>

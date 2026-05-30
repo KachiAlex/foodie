@@ -121,6 +121,12 @@ export function SignInPage() {
               </Button>
             </form>
 
+            <div className="mt-4 flex items-center justify-between text-sm">
+              <Link to="/auth/forgot-password" className="text-orange-500 hover:underline">
+                Forgot password?
+              </Link>
+            </div>
+
             <p className="mt-6 text-sm text-gray-500">
               Need an account?{" "}
               <Link to="/auth/sign-up" className="text-orange-500">

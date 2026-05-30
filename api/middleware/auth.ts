@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { prisma } from "../lib/prisma";
 
 export interface AuthUser {
   id: string;
@@ -42,4 +43,23 @@ export function requireRole(...roles: AuthUser["role"][]) {
     }
     next();
   };
+}
+
+export async function requireVerifiedVendor(req: Request, _res: Response, next: NextFunction) {
+  const user = (req as Request & { user?: AuthUser }).user;
+  if (!user || user.role !== "vendor") {
+    const error = new Error("Forbidden: vendor access only");
+    (error as Error & { statusCode?: number }).statusCode = 403;
+    return next(error);
+  }
+  const profile = await prisma.vendorProfile.findUnique({
+    where: { userId: user.id },
+    select: { verified: true },
+  });
+  if (!profile?.verified) {
+    const error = new Error("Forbidden: vendor not verified");
+    (error as Error & { statusCode?: number }).statusCode = 403;
+    return next(error);
+  }
+  next();
 }

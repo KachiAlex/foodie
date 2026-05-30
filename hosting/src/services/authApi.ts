@@ -39,3 +39,13 @@ export async function signInRequest(payload: SignInPayload): Promise<AuthUser> {
   setToken(data.token);
   return toAuthUser(data, data.verificationStatus);
 }
+
+export async function requestPasswordReset(email: string): Promise<{ message: string; resetToken?: string }> {
+  const data = await api.post<{ message: string; resetToken?: string }>("/auth/request-password-reset", { email });
+  return data;
+}
+
+export async function resetPassword(token: string, password: string): Promise<{ message: string }> {
+  const data = await api.post<{ message: string }>("/auth/reset-password", { token, password });
+  return data;
+}
