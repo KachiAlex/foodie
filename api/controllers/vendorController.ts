@@ -2,6 +2,19 @@ import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
 import { prisma } from "../lib/prisma";
 
+export const listVendors = asyncHandler(async (_req: Request, res: Response) => {
+  const vendors = await prisma.vendorProfile.findMany({
+    where: { verified: true },
+    include: {
+      user: { select: { id: true, name: true } },
+      menuItems: { take: 3, select: { name: true, price: true } },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+  });
+  res.json({ success: true, data: vendors });
+});
+
 export const getProfile = asyncHandler(async (req: Request, res: Response) => {
   const vendorId = (req.params.id || (req as Request & { user?: { id: string } }).user?.id) as string;
   const profile = await prisma.vendorProfile.findUnique({

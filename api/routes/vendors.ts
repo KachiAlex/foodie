@@ -4,6 +4,7 @@ import * as vendorController from "../controllers/vendorController";
 
 const router = Router();
 
+router.get("/", vendorController.listVendors);
 router.get("/profile", authenticate, vendorController.getProfile);
 router.patch("/profile", authenticate, requireVerifiedVendor, vendorController.updateProfile);
 router.get("/wallet", authenticate, vendorController.getWallet);

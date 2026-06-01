@@ -17,12 +17,8 @@ import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/context/ToastContext";
 import { useCurrency } from "@/context/CurrencyContext";
-import {
-  adminMetrics,
-  adminOrders,
-  auditLog,
-} from "@/data/mock";
-import { approvePayoutRequest, createOrderEscalation, triggerVendorAudit, getPendingVendors, verifyVendor } from "@/services/adminApi";
+import { approvePayoutRequest, createOrderEscalation, triggerVendorAudit, getPendingVendors, verifyVendor, getDashboardMetrics, getAdminOrders, getEscrowTransactions, getAdminDisputes } from "@/services/adminApi";
+import type { DashboardMetrics, AdminOrder, EscrowTransaction, AdminDispute } from "@/services/adminApi";
 
 export function AdminDashboard() {
   const { symbol } = useCurrency();
@@ -36,6 +32,10 @@ export function AdminDashboard() {
   const [vendorSearch, setVendorSearch] = useState("");
   const [recentAudits, setRecentAudits] = useState<Record<string, string>>({});
   const [adminVendors, setAdminVendors] = useState<any[]>([]);
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+  const [adminOrders, setAdminOrders] = useState<AdminOrder[]>([]);
+  const [escrowTxns, setEscrowTxns] = useState<EscrowTransaction[]>([]);
+  const [adminDisputes, setAdminDisputes] = useState<AdminDispute[]>([]);
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -56,6 +56,22 @@ export function AdminDashboard() {
         );
       })
       .catch((err) => console.error("Failed to load pending vendors", err));
+
+    getDashboardMetrics()
+      .then(setMetrics)
+      .catch((err) => console.error("Failed to load metrics", err));
+
+    getAdminOrders()
+      .then(setAdminOrders)
+      .catch((err) => console.error("Failed to load admin orders", err));
+
+    getEscrowTransactions()
+      .then(setEscrowTxns)
+      .catch((err) => console.error("Failed to load escrow transactions", err));
+
+    getAdminDisputes()
+      .then(setAdminDisputes)
+      .catch((err) => console.error("Failed to load disputes", err));
   }, []);
 
   const [escalationQueue, setEscalationQueue] = useState([
@@ -76,11 +92,19 @@ export function AdminDashboard() {
     { label: "Payout backlog", value: `${symbol}18k`, detail: "2 vendors flagged", severity: "High" },
   ];
 
-  const [payoutQueue, setPayoutQueue] = useState([
-    { id: "PAY-713", vendor: "Chef Derin", amount: `${symbol}540`, status: "Ready", age: "10m" },
-    { id: "PAY-708", vendor: "Chef Ireti", amount: `${symbol}1,120`, status: "Requires review", age: "38m" },
-    { id: "PAY-701", vendor: "Chef Muna", amount: `${symbol}325`, status: "Docs missing", age: "1h" },
-  ]);
+  const payoutQueue = useMemo(
+    () =>
+      escrowTxns
+        .filter((t) => t.status !== "completed")
+        .map((t) => ({
+          id: t.id,
+          vendor: t.vendor?.name ?? "Unknown",
+          amount: `${symbol}${Number(t.amount).toLocaleString()}`,
+          status: t.status === "pending" ? "Ready" : t.status,
+          age: new Date(t.createdAt).toLocaleDateString(),
+        })),
+    [escrowTxns, symbol]
+  );
 
   const trustTasks = [
     { id: "TS-11", title: "Re-review flagged media", owner: "Ada", due: "Today", status: "In progress" },
@@ -93,13 +117,13 @@ export function AdminDashboard() {
       adminOrders.reduce<Record<string, { buyer: string; vendor: string; contact: string; timeline: Array<{ step: string; time: string }> }>>(
         (acc, order) => {
           acc[order.id] = {
-            buyer: order.buyer,
-            vendor: order.vendor,
+            buyer: order.buyer?.name ?? "Unknown",
+            vendor: order.request?.foodName ?? "Unknown",
             contact: "ops@foodiemarket.com",
             timeline: [
-              { step: "Order submitted", time: "08:14" },
-              { step: "Vendor accepted", time: "08:26" },
-              { step: "Kitchen prep", time: "09:10" },
+              { step: "Order submitted", time: new Date(order.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) },
+              { step: "Vendor accepted", time: "—" },
+              { step: "Kitchen prep", time: "—" },
               { step: order.status, time: "Now" },
             ],
           };
@@ -107,7 +131,7 @@ export function AdminDashboard() {
         },
         {},
       ),
-    [],
+    [adminOrders],
   );
 
   const vendorProfiles = useMemo(
@@ -137,7 +161,7 @@ export function AdminDashboard() {
   const filteredOrders = useMemo(
     () =>
       adminOrders.filter((order) =>
-        [order.id, order.buyer, order.vendor, order.status]
+        [order.id, order.buyer?.name ?? "", order.request?.foodName ?? "", order.status]
           .map((value) => value.toLowerCase())
           .some((value) => value.includes(orderSearch.toLowerCase())),
       ),
@@ -146,7 +170,7 @@ export function AdminDashboard() {
 
   const payoutTotal = useMemo(
     () =>
-      payoutQueue.reduce<number>((sum, item) => sum + Number(item.amount.replace(/[^0-9.]/g, "")), 0),
+      payoutQueue.reduce<number>((sum, item) => sum + Number(String(item.amount).replace(/[^0-9.]/g, "")), 0),
     [payoutQueue],
   );
 
@@ -154,8 +178,9 @@ export function AdminDashboard() {
     if (isApprovingPayout || payoutQueue.length === 0) return;
     setIsApprovingPayout(true);
     try {
-      const response = await approvePayoutRequest(payoutQueue[0].id);
-      setPayoutQueue((prev) => prev.slice(1));
+      const firstId = payoutQueue[0].id;
+      const response = await approvePayoutRequest(firstId);
+      setEscrowTxns((prev) => prev.map((t) => t.id === firstId ? { ...t, status: "completed" } : t));
       showToast(response.message);
     } catch {
       showToast("Error approving payout");
@@ -252,19 +277,22 @@ export function AdminDashboard() {
       }
     >
       <section className="space-y-8">
-        <div className="grid gap-4 sm:grid-cols-3">
-          {adminMetrics.map((metric) => (
+        <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          {[
+            { label: "Total Requests", value: metrics?.totalRequests ?? "—", prefix: "" },
+            { label: "Active Bids", value: metrics?.activeBids ?? "—", prefix: "" },
+            { label: "Escrow Held", value: metrics ? Number(metrics.escrowHeld).toLocaleString() : "—", prefix: symbol },
+            { label: "Open Disputes", value: metrics?.pendingDisputes ?? "—", prefix: "" },
+            { label: "Pending Vendors", value: metrics?.newVendors ?? "—", prefix: "" },
+          ].map((metric) => (
             <motion.div
               key={metric.label}
               className="rounded-3xl bg-white p-6 shadow-sm"
               whileHover={{ y: -4 }}
             >
               <p className="text-sm text-gray-500">{metric.label}</p>
-              <div className="mt-3 flex items-end justify-between">
-                <h3 className="text-3xl font-semibold text-gray-900">{symbol}{metric.value}</h3>
-                <span className={`text-sm font-semibold ${metric.trend === "up" ? "text-green-600" : "text-red-500"}`}>
-                  {metric.delta}
-                </span>
+              <div className="mt-3">
+                <h3 className="text-3xl font-semibold text-gray-900">{metric.prefix}{metric.value}</h3>
               </div>
             </motion.div>
           ))}
@@ -372,10 +400,10 @@ export function AdminDashboard() {
                 <tbody className="divide-y divide-gray-100">
                   {filteredOrders.map((order) => (
                     <tr key={order.id} className="text-gray-700">
-                      <td className="py-3 font-semibold text-gray-900">{order.id}</td>
-                      <td className="py-3">{order.buyer}</td>
-                      <td className="py-3">{order.vendor}</td>
-                      <td className="py-3 font-semibold">{symbol}{order.amount}</td>
+                      <td className="py-3 font-semibold text-gray-900">{order.id.slice(-8).toUpperCase()}</td>
+                      <td className="py-3">{order.buyer?.name ?? "—"}</td>
+                      <td className="py-3">{order.request?.foodName ?? "—"}</td>
+                      <td className="py-3 font-semibold">{symbol}{Number(order.totalAmount).toLocaleString()}</td>
                       <td className="py-3">
                         <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
                           {order.status}
@@ -478,14 +506,19 @@ export function AdminDashboard() {
               <Button variant="ghost" size="sm">Export</Button>
             </div>
             <div className="mt-4 space-y-4">
-              {auditLog.map((entry) => (
-                <div key={entry.id} className="flex items-center justify-between rounded-2xl border border-gray-100 p-4">
+              {adminDisputes.length === 0 && (
+                <p className="text-sm text-gray-400">No disputes found.</p>
+              )}
+              {adminDisputes.map((dispute) => (
+                <div key={dispute.id} className="flex items-center justify-between rounded-2xl border border-gray-100 p-4">
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">{entry.actor}</p>
-                    <p className="text-sm text-gray-500">{entry.action}</p>
-                    <p className="text-xs text-gray-400">{entry.target}</p>
+                    <p className="text-sm font-semibold text-gray-900">{dispute.openedBy?.name ?? "Unknown"}</p>
+                    <p className="text-sm text-gray-500">{dispute.reason}</p>
+                    <p className="text-xs text-gray-400">Order: {dispute.order?.id?.slice(-8).toUpperCase()}</p>
                   </div>
-                  <span className="text-xs text-gray-400">{entry.timestamp}</span>
+                  <span className={`text-xs font-semibold ${dispute.status === "open" ? "text-amber-600" : "text-green-600"}`}>
+                    {dispute.status}
+                  </span>
                 </div>
               ))}
             </div>
@@ -609,7 +642,7 @@ export function AdminDashboard() {
 }
 
 interface AdminOrderDetailModalProps {
-  order: (typeof adminOrders)[number] | null;
+  order: import("@/services/adminApi").AdminOrder | null;
   profile: { buyer: string; vendor: string; contact: string; timeline: Array<{ step: string; time: string }> } | null;
   isEscalating: boolean;
   onCreateEscalation: (orderId: string) => void;
@@ -626,7 +659,7 @@ function AdminOrderDetailModal({ order, profile, isEscalating, onCreateEscalatio
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{order.id}</p>
             <h3 className="text-2xl font-semibold text-gray-900">Order dossier</h3>
-            <p className="text-sm text-gray-500">{symbol}{order.amount} · {order.status}</p>
+            <p className="text-sm text-gray-500">{symbol}{Number(order.totalAmount).toLocaleString()} · {order.status}</p>
           </div>
           <Button variant="ghost" onClick={onClose}>
             Close

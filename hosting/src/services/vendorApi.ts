@@ -83,6 +83,37 @@ export async function addMenuItem(payload: AddMenuItemPayload): Promise<MenuItem
   return mapMenuItem(data);
 }
 
+export interface FeaturedVendor {
+  id: string;
+  name: string;
+  kitchenName: string;
+  address: string;
+  specialties: string[];
+  menuItems: { name: string; price: number }[];
+}
+
+interface BackendVendorProfile {
+  id: string;
+  userId: string;
+  kitchenName: string;
+  address: string;
+  specialties: string[];
+  user: { id: string; name: string };
+  menuItems: { name: string; price: number }[];
+}
+
+export async function listVendors(): Promise<FeaturedVendor[]> {
+  const data = await api.get<BackendVendorProfile[]>("/vendors");
+  return data.map((v) => ({
+    id: v.userId,
+    name: v.user?.name ?? "Unknown Chef",
+    kitchenName: v.kitchenName ?? "",
+    address: v.address ?? "",
+    specialties: v.specialties ?? [],
+    menuItems: v.menuItems ?? [],
+  }));
+}
+
 export async function fetchVendorOpenRequests(): Promise<VendorOpenRequest[]> {
   const data = await api.get<BackendOpenRequest[]>("/vendors/open-requests");
   return data.map(mapOpenRequest);

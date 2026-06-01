@@ -1,4 +1,4 @@
-import { useMemo, useState, type KeyboardEvent } from "react";
+import { useMemo, useState, useEffect, type KeyboardEvent } from "react";
 import { motion } from "framer-motion";
 import {
   BadgeCheck,
@@ -13,15 +13,15 @@ import {
   Plus,
   Quote,
   Search,
-  Star,
 } from "lucide-react";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/context/AppContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { NewRequestModal } from "@/components/NewRequestModal";
-import { featuredVendors } from "@/data/mock";
 import type { VendorBid } from "@/data/mock";
+import { listVendors } from "@/services/vendorApi";
+import type { FeaturedVendor } from "@/services/vendorApi";
 
 const savedBriefs = [
   {
@@ -48,6 +48,11 @@ export function BuyerDashboard() {
   const [timelineRequestId, setTimelineRequestId] = useState<string | null>(null);
   const [activeBriefId, setActiveBriefId] = useState<string | null>(null);
   const [acceptingBidId, setAcceptingBidId] = useState<string | null>(null);
+  const [vendors, setVendors] = useState<FeaturedVendor[]>([]);
+
+  useEffect(() => {
+    listVendors().then(setVendors).catch(() => {});
+  }, []);
 
   const handleAcceptBid = async (bidId: string, requestId: string) => {
     if (acceptingBidId) return;
@@ -63,7 +68,7 @@ export function BuyerDashboard() {
   const activeRequests = requests.filter((request) => request.status !== "fulfilled").length;
   const onDeckOrders = orders.filter((order) => order.status !== "Delivered");
   const todayDeliveries = onDeckOrders.filter((order) => order.eta.includes("Today")).length;
-  const favoriteVendors = featuredVendors.slice(0, 3);
+  const favoriteVendors = vendors.slice(0, 3);
 
   const insightCards = [
     {
@@ -343,16 +348,14 @@ export function BuyerDashboard() {
             <div className="rounded-3xl bg-white p-6 shadow-sm">
               <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Favorite chefs</p>
               <div className="mt-4 space-y-3">
+                {favoriteVendors.length === 0 && <p className="text-sm text-gray-400">No verified vendors yet.</p>}
                 {favoriteVendors.map((vendor) => (
                   <div key={vendor.id} className="flex items-center justify-between rounded-2xl border border-gray-100 p-3">
                     <div>
-                      <p className="text-sm text-gray-500">{vendor.specialty}</p>
+                      <p className="text-sm text-gray-500">{vendor.kitchenName || vendor.address}</p>
                       <p className="text-base font-semibold text-gray-900">{vendor.name}</p>
                     </div>
-                    <div className="flex items-center gap-1 text-orange-500">
-                      <Star className="h-4 w-4 fill-orange-500" />
-                      <span className="font-semibold text-gray-900">{vendor.rating}</span>
-                    </div>
+                    <BadgeCheck className="h-5 w-5 text-orange-500" />
                   </div>
                 ))}
               </div>
@@ -536,19 +539,17 @@ export function BuyerDashboard() {
                 </Button>
               </div>
               <div className="mt-4 space-y-4">
-                {featuredVendors.map((vendor) => (
+                {vendors.length === 0 && <p className="text-sm text-gray-400">No verified chefs yet.</p>}
+                {vendors.map((vendor) => (
                   <div key={vendor.id} className="flex items-center justify-between rounded-2xl border border-gray-100 p-4">
                     <div>
-                      <p className="text-sm text-gray-500">{vendor.specialty}</p>
+                      <p className="text-sm text-gray-500">{vendor.kitchenName}</p>
                       <h4 className="text-lg font-semibold text-gray-900">{vendor.name}</h4>
                       <p className="text-sm text-gray-500 flex items-center gap-1">
-                        <MapPin className="h-4 w-4" /> {vendor.distance} away
+                        <MapPin className="h-4 w-4" /> {vendor.address || "Lagos"}
                       </p>
                     </div>
-                    <div className="flex items-center gap-1 text-orange-500">
-                      <Star className="h-4 w-4 fill-orange-500" />
-                      <span className="font-semibold text-gray-900">{vendor.rating}</span>
-                    </div>
+                    <BadgeCheck className="h-5 w-5 text-orange-500" />
                   </div>
                 ))}
               </div>

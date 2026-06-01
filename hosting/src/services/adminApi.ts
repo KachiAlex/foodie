@@ -5,6 +5,41 @@ type ActionResponse = {
   message: string;
 };
 
+export interface DashboardMetrics {
+  totalRequests: number;
+  activeBids: number;
+  escrowHeld: number;
+  pendingDisputes: number;
+  newVendors: number;
+}
+
+export interface AdminOrder {
+  id: string;
+  buyer: { id: string; name: string };
+  request: { id: string; foodName: string };
+  totalAmount: number;
+  status: string;
+  createdAt: string;
+}
+
+export interface EscrowTransaction {
+  id: string;
+  vendor: { id: string; name: string };
+  amount: number;
+  type: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface AdminDispute {
+  id: string;
+  order: { id: string };
+  openedBy: { id: string; name: string };
+  reason: string;
+  status: string;
+  openedAt: string;
+}
+
 interface PendingVendor {
   id: string;
   userId: string;
@@ -13,6 +48,22 @@ interface PendingVendor {
   address: string;
   landmark: string;
   verified: boolean;
+}
+
+export async function getDashboardMetrics(): Promise<DashboardMetrics> {
+  return api.get<DashboardMetrics>("/admin/dashboard");
+}
+
+export async function getAdminOrders(): Promise<AdminOrder[]> {
+  return api.get<AdminOrder[]>("/admin/orders");
+}
+
+export async function getEscrowTransactions(): Promise<EscrowTransaction[]> {
+  return api.get<EscrowTransaction[]>("/admin/escrow");
+}
+
+export async function getAdminDisputes(): Promise<AdminDispute[]> {
+  return api.get<AdminDispute[]>("/admin/disputes");
 }
 
 export async function approvePayoutRequest(payoutId: string): Promise<ActionResponse> {
