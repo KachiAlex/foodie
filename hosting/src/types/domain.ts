@@ -21,6 +21,7 @@ export interface BuyerOrder {
   amount: number;
   eta: string;
   status: "Cooking" | "Out for delivery" | "Delivered";
+  createdAt?: string;
 }
 
 export interface VendorBid {
@@ -54,6 +55,7 @@ export interface VendorOrderStage {
   customer: string;
   items: string;
   status: "New" | "Cooking" | "Ready" | "Delivered";
+  createdAt: string;
 }
 
 export interface MenuItem {

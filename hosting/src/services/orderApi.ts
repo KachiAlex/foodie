@@ -52,6 +52,7 @@ function mapBuyerOrder(o: BackendOrder): BuyerOrder {
     amount: o.totalAmount || o.foodCost + o.deliveryFee || 0,
     eta: o.deliveredAt ? new Date(o.deliveredAt).toLocaleString() : "Pending",
     status: mapOrderStatus(o.status),
+    createdAt: o.createdAt,
   };
 }
 
@@ -61,6 +62,7 @@ function mapVendorOrder(o: BackendOrder): VendorOrderStage {
     customer: o.buyer?.name || "Unknown",
     items: o.request?.foodName || "Unknown",
     status: mapVendorOrderStatus(o.status),
+    createdAt: o.createdAt,
   };
 }
 

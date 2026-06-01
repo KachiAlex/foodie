@@ -5,7 +5,9 @@ import {
   CheckCircle2,
   ClipboardList,
   Clock3,
+  Inbox,
   Leaf,
+  Plus,
   RefreshCcw,
   Settings,
   ShieldCheck,
@@ -13,31 +15,49 @@ import {
   X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useApp } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
 
 const statusColumns = ["New", "Cooking", "Ready", "Delivered"] as const;
+const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const NEXT_STATUS: Partial<Record<typeof statusColumns[number], typeof statusColumns[number]>> = {
+  New: "Cooking",
+  Cooking: "Ready",
+  Ready: "Delivered",
+};
 
 export function VendorDashboard() {
-  const { vendorOpenRequests, vendorOrders, menuItems, vendorMetrics, addBid } = useApp();
+  const { vendorOpenRequests, vendorOrders, menuItems, vendorMetrics, addBid, changeVendorOrderStatus, isLoading } = useApp();
   const { user } = useAuth();
   const { symbol } = useCurrency();
+  const [searchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") ?? "overview";
   const isPendingVerification = user?.verificationStatus === "pending";
   const [activeRequest, setActiveRequest] = useState<(typeof vendorOpenRequests)[number] | null>(null);
   const [isSubmittingBid, setIsSubmittingBid] = useState(false);
   const [bidSent, setBidSent] = useState(false);
+  const [promotingOrders, setPromotingOrders] = useState<Set<string>>(new Set());
 
-  const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const promoteOrder = async (orderId: string, nextStatus: typeof statusColumns[number]) => {
+    setPromotingOrders((prev) => new Set(prev).add(orderId));
+    try {
+      await changeVendorOrderStatus(orderId, nextStatus);
+    } finally {
+      setPromotingOrders((prev) => { const s = new Set(prev); s.delete(orderId); return s; });
+    }
+  };
+
   const bidTrend = useMemo(() => {
     const counts: Record<string, number> = {};
     DAY_LABELS.forEach((d) => { counts[d] = 0; });
-    const todayLabel = DAY_LABELS[new Date().getDay()];
-    vendorOrders.forEach(() => {
-      counts[todayLabel] = (counts[todayLabel] ?? 0) + 1;
+    vendorOrders.forEach((order) => {
+      const day = order.createdAt ? DAY_LABELS[new Date(order.createdAt).getDay()] : DAY_LABELS[new Date().getDay()];
+      counts[day] = (counts[day] ?? 0) + 1;
     });
     const today = new Date().getDay();
     return Array.from({ length: 7 }, (_, i) => {
@@ -76,17 +96,17 @@ export function VendorDashboard() {
     setIsSubmittingBid(false);
   };
 
-  const handleSubmitBid = async () => {
+  const handleSubmitBid = async (values: { bidAmount: string; notes: string }) => {
     if (!activeRequest || isSubmittingBid || bidSent) return;
     setIsSubmittingBid(true);
     try {
-      // Parse budget to get a numeric value for the bid
-      const budgetNum = parseInt(activeRequest.budget.replace(/[^0-9]/g, ""), 10) || 200;
+      const price = parseInt(values.bidAmount.replace(/[^0-9]/g, ""), 10) || 0;
+      const eta = values.notes.trim() || "Ready in 2 hours";
       await addBid({
         requestId: activeRequest.id,
-        chef: "Chef You",
-        price: Math.round(budgetNum * 0.95),
-        eta: "Ready in 2 hours",
+        chef: user?.name ?? "Chef",
+        price,
+        eta,
         confidence: 90,
       });
       setBidSent(true);
@@ -96,6 +116,41 @@ export function VendorDashboard() {
       setIsSubmittingBid(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <DashboardLayout
+        sidebar={{
+          title: "Vendor",
+          nav: [
+            { label: "Overview", to: "/dashboard/vendor", icon: <Sparkles className="h-4 w-4" /> },
+            { label: "Requests", to: "/dashboard/vendor?tab=requests", icon: <ClipboardList className="h-4 w-4" /> },
+            { label: "Menu", to: "/dashboard/vendor?tab=menu", icon: <Leaf className="h-4 w-4" /> },
+            { label: "Settings", to: "/dashboard/vendor?tab=settings", icon: <Settings className="h-4 w-4" /> },
+          ],
+        }}
+        title="Chef Command Hub"
+        description="Bid on custom requests, manage orders, and showcase your menu."
+      >
+        <section className="space-y-8">
+          <div className="grid gap-4 sm:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-24 w-full rounded-3xl" />
+            ))}
+          </div>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Skeleton className="h-64 w-full rounded-3xl" />
+            <Skeleton className="h-64 w-full rounded-3xl" />
+          </div>
+          <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+            <Skeleton className="h-72 w-full rounded-3xl" />
+            <Skeleton className="h-72 w-full rounded-3xl" />
+          </div>
+          <Skeleton className="h-56 w-full rounded-3xl" />
+        </section>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout
@@ -132,13 +187,120 @@ export function VendorDashboard() {
               </p>
             </div>
             <Link
-              to="/auth/sign-in"
+              to="/dashboard/vendor?tab=settings"
               className="shrink-0 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-600"
             >
               Learn more
             </Link>
           </motion.div>
         )}
+        {activeTab === "requests" && (
+          <div className="rounded-3xl bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Open Requests</p>
+                <h2 className="text-2xl font-semibold text-gray-900">Bid marketplace</h2>
+              </div>
+              <Button variant="ghost" size="sm" className="text-orange-600">View filters</Button>
+            </div>
+            <div className="mt-6 space-y-4">
+              {vendorOpenRequests.length === 0 && (
+                <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-gray-200 py-12 text-center">
+                  <Inbox className="h-8 w-8 text-gray-300" />
+                  <p className="text-sm font-semibold text-gray-500">No open requests right now</p>
+                  <p className="text-xs text-gray-400">New buyer briefs will appear here as soon as they're posted.</p>
+                </div>
+              )}
+              {vendorOpenRequests.map((request) => (
+                <div key={request.id} className="rounded-2xl border border-gray-200 p-4 lg:p-5">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm text-gray-500">{request.id}</p>
+                      <h3 className="text-xl font-semibold text-gray-900">{request.title}</h3>
+                      <p className="text-sm text-gray-500">{request.location} • {request.servings}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-500">Budget</p>
+                      <p className="text-xl font-bold text-gray-900">{symbol}{request.budget}</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                    <span className="rounded-full bg-orange-50 px-3 py-1 text-orange-600">{request.deadline}</span>
+                    {request.tags.map((tag) => (
+                      <span key={tag} className="rounded-full bg-gray-100 px-3 py-1">{tag}</span>
+                    ))}
+                    <div className="ml-auto flex gap-2">
+                      <Button variant="outline" size="sm" className="border-gray-200 text-gray-700" onClick={() => openRequestModal(request)}>View brief</Button>
+                      <Button size="sm" className="bg-orange-500 text-white" onClick={() => openRequestModal(request)}>Submit bid</Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === "menu" && (
+          <div className="rounded-3xl bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Menu</h3>
+              <Button size="sm" className="bg-orange-500 text-white">Add menu item</Button>
+            </div>
+            <div className="mt-4 space-y-4">
+              {menuItems.length === 0 && (
+                <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-gray-200 py-10 text-center">
+                  <Plus className="h-7 w-7 text-gray-300" />
+                  <p className="text-sm font-semibold text-gray-500">Your menu is empty</p>
+                  <p className="text-xs text-gray-400">Add your first dish to start receiving bids.</p>
+                  <Button size="sm" className="mt-1 bg-orange-500 text-white">Add menu item</Button>
+                </div>
+              )}
+              {menuItems.map((item) => (
+                <div key={item.id} className="rounded-2xl border border-gray-100 p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-900">{item.name}</h4>
+                      <p className="text-sm text-gray-500">{item.availability}</p>
+                    </div>
+                    <span className="text-xl font-semibold text-gray-900">{symbol}{item.price}</span>
+                  </div>
+                  <div className="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                    {item.tags.map((tag) => (
+                      <span key={tag} className="rounded-full bg-gray-100 px-2 py-1">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === "settings" && (
+          <div className="rounded-3xl bg-white p-6 shadow-sm">
+            <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Settings</p>
+            <h2 className="mt-1 text-2xl font-semibold text-gray-900">Account & Kitchen</h2>
+            <div className="mt-6 space-y-4">
+              <div className="rounded-2xl border border-gray-100 p-5">
+                <p className="text-sm font-semibold text-gray-700">Display name</p>
+                <p className="mt-1 text-base text-gray-900">{user?.name ?? "—"}</p>
+              </div>
+              <div className="rounded-2xl border border-gray-100 p-5">
+                <p className="text-sm font-semibold text-gray-700">Email</p>
+                <p className="mt-1 text-base text-gray-900">{user?.email ?? "—"}</p>
+              </div>
+              <div className="rounded-2xl border border-gray-100 p-5">
+                <p className="text-sm font-semibold text-gray-700">Verification status</p>
+                <p className={`mt-1 text-sm font-semibold ${
+                  user?.verificationStatus === "verified" ? "text-emerald-600" : "text-amber-600"
+                }`}>
+                  {user?.verificationStatus === "verified" ? "Verified" : "Pending review"}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "overview" && <>
         <div className="grid gap-4 sm:grid-cols-3">
           {vendorMetrics.map((metric) => (
             <motion.div
@@ -269,6 +431,13 @@ export function VendorDashboard() {
               </Button>
             </div>
             <div className="mt-6 space-y-4">
+              {vendorOpenRequests.length === 0 && (
+                <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-gray-200 py-12 text-center">
+                  <Inbox className="h-8 w-8 text-gray-300" />
+                  <p className="text-sm font-semibold text-gray-500">No open requests right now</p>
+                  <p className="text-xs text-gray-400">New buyer briefs will appear here as soon as they're posted.</p>
+                </div>
+              )}
               {vendorOpenRequests.map((request) => (
                 <div key={request.id} className="rounded-2xl border border-gray-200 p-4 lg:p-5">
                   <div className="flex flex-wrap items-center justify-between gap-3">
@@ -312,6 +481,14 @@ export function VendorDashboard() {
               <Button variant="ghost" size="sm">Manage</Button>
             </div>
             <div className="mt-4 space-y-4">
+              {menuItems.length === 0 && (
+                <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-gray-200 py-10 text-center">
+                  <Plus className="h-7 w-7 text-gray-300" />
+                  <p className="text-sm font-semibold text-gray-500">Your menu is empty</p>
+                  <p className="text-xs text-gray-400">Add your first dish to start receiving bids.</p>
+                  <Button size="sm" className="mt-1 bg-orange-500 text-white">Add menu item</Button>
+                </div>
+              )}
               {menuItems.map((item) => (
                 <div key={item.id} className="rounded-2xl border border-gray-100 p-4">
                   <div className="flex items-center justify-between">
@@ -350,20 +527,40 @@ export function VendorDashboard() {
                   } orders</span>
                 </div>
                 <div className="mt-4 space-y-3">
+                  {vendorOrders.filter((order) => order.status === status).length === 0 && (
+                    <p className="rounded-xl border border-dashed border-gray-200 py-6 text-center text-xs text-gray-400">
+                      No orders
+                    </p>
+                  )}
                   {vendorOrders
                     .filter((order) => order.status === status)
-                    .map((order) => (
-                      <div key={order.id} className="rounded-xl bg-white p-3 shadow-sm">
-                        <p className="text-xs text-gray-400">{order.id}</p>
-                        <h4 className="text-sm font-semibold text-gray-900">{order.customer}</h4>
-                        <p className="text-xs text-gray-500">{order.items}</p>
-                      </div>
-                    ))}
+                    .map((order) => {
+                      const nextStatus = NEXT_STATUS[status];
+                      const isPromoting = promotingOrders.has(order.id);
+                      return (
+                        <div key={order.id} className="rounded-xl bg-white p-3 shadow-sm">
+                          <p className="text-xs text-gray-400">{order.id}</p>
+                          <h4 className="text-sm font-semibold text-gray-900">{order.customer}</h4>
+                          <p className="text-xs text-gray-500">{order.items}</p>
+                          {nextStatus && (
+                            <button
+                              type="button"
+                              disabled={isPromoting}
+                              onClick={() => promoteOrder(order.id, nextStatus)}
+                              className="mt-2 w-full rounded-lg bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-600 hover:bg-orange-100 disabled:opacity-50"
+                            >
+                              {isPromoting ? "Moving…" : `→ ${nextStatus}`}
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
                 </div>
               </div>
             ))}
           </div>
         </div>
+        </>}
       </section>
       {activeRequest && (
         <BidRequestModal
@@ -382,14 +579,14 @@ interface BidRequestModalProps {
   request: { id: string; title: string; location: string; servings: string; budget: string; deadline: string; tags: string[] };
   onClose: () => void;
   isSubmitting: boolean;
-  onSubmit: () => void;
+  onSubmit: (values: { bidAmount: string; notes: string }) => void;
   bidSent: boolean;
 }
 
 function BidRequestModal({ request, onClose, isSubmitting, onSubmit, bidSent }: BidRequestModalProps) {
   const wizardSteps = ["Proposal", "Attachments", "Review"] as const;
   const [activeStep, setActiveStep] = useState(0);
-  const [bidAmount, setBidAmount] = useState(() => request.budget ?? "");
+  const [bidAmount, setBidAmount] = useState(() => request.budget.replace(/[^0-9]/g, "") ?? "");
   const [notes, setNotes] = useState("Ready to personalize spice & plating per guest.");
   const [selectedAssets, setSelectedAssets] = useState<string[]>(["Signature menu.pdf"]);
   const attachmentLibrary = [
@@ -410,7 +607,7 @@ function BidRequestModal({ request, onClose, isSubmitting, onSubmit, bidSent }: 
       setActiveStep((prev) => prev + 1);
       return;
     }
-    onSubmit();
+    onSubmit({ bidAmount, notes });
   };
 
   const handleBack = () => {

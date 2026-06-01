@@ -1,16 +1,19 @@
 import { useMemo, useState, useEffect, type KeyboardEvent } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   BadgeCheck,
   Bell,
   CalendarClock,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Filter,
   Flame,
-  Heart,
   MapPin,
   Plus,
   Quote,
   Search,
+  Zap,
 } from "lucide-react";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -30,6 +33,9 @@ export function BuyerDashboard() {
   const [activeBriefId, setActiveBriefId] = useState<string | null>(null);
   const [acceptingBidId, setAcceptingBidId] = useState<string | null>(null);
   const [vendors, setVendors] = useState<FeaturedVendor[]>([]);
+  const [expandedRequestIds, setExpandedRequestIds] = useState<Set<string>>(new Set());
+  const [spendRange, setSpendRange] = useState<"7d" | "30d">("7d");
+  const [hoveredSpend, setHoveredSpend] = useState<{ label: string; value: number } | null>(null);
 
   useEffect(() => {
     listVendors().then(setVendors).catch(() => {});
@@ -41,122 +47,110 @@ export function BuyerDashboard() {
     try {
       await acceptBid(bidId, requestId);
     } catch {
-      // error handled by context
+      // handled by context
     } finally {
       setAcceptingBidId(null);
     }
   };
-  const activeRequests = requests.filter((request) => request.status !== "fulfilled").length;
-  const onDeckOrders = orders.filter((order) => order.status !== "Delivered");
-  const todayDeliveries = onDeckOrders.filter((order) => order.eta.includes("Today")).length;
-  const favoriteVendors = vendors.slice(0, 3);
 
-  const insightCards = [
-    {
-      label: "Live briefs",
-      value: activeRequests,
-      meta: "open for bidding",
-      icon: Flame,
-      accent: "bg-orange-500/10 text-orange-600",
-    },
-    {
-      label: "Today's drops",
-      value: todayDeliveries,
-      meta: "on the way",
-      icon: CalendarClock,
-      accent: "bg-amber-500/10 text-amber-600",
-    },
-    {
-      label: "Favorite chefs",
-      value: favoriteVendors.length,
-      meta: "ready for repeat",
-      icon: Heart,
-      accent: "bg-rose-500/10 text-rose-600",
-    },
-  ];
+  const toggleExpand = (id: string) =>
+    setExpandedRequestIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
 
-  const nextDelivery = onDeckOrders[0];
+  // ── Derived data ──────────────────────────────────────────────────────────
+  const bidsByRequest = useMemo(
+    () =>
+      bids.reduce<Record<string, typeof bids>>((acc, bid) => {
+        acc[bid.requestId] = acc[bid.requestId] ? [...acc[bid.requestId], bid] : [bid];
+        return acc;
+      }, {}),
+    [bids],
+  );
 
-  const bidsByRequest = bids.reduce<Record<string, typeof bids>>((acc, bid) => {
-    acc[bid.requestId] = acc[bid.requestId] ? [...acc[bid.requestId], bid] : [bid];
-    return acc;
-  }, {});
+  const actionableRequests = useMemo(
+    () => requests.filter((r) => r.status === "collecting_bids" && (bidsByRequest[r.id]?.length ?? 0) > 0),
+    [requests, bidsByRequest],
+  );
 
-  const [spendRange, setSpendRange] = useState<"7d" | "30d">("7d");
-  const [hoveredSpend, setHoveredSpend] = useState<{ label: string; value: number } | null>(null);
+  const activeOrders = useMemo(() => orders.filter((o) => o.status !== "Delivered"), [orders]);
+  const nextDelivery = activeOrders[0] ?? null;
 
+  const activeRequestCount = requests.filter((r) => r.status !== "fulfilled").length;
+  const totalSpendAll = orders.reduce((sum, o) => sum + o.amount, 0);
+  const deliveredCount = orders.filter((o) => o.status === "Delivered").length;
+  const onTimeRate = orders.length > 0 ? Math.round((deliveredCount / orders.length) * 100) : 0;
+
+  const filteredRequests = useMemo(
+    () => requests.filter((r) => bidFilter === "all" || r.status === bidFilter),
+    [requests, bidFilter],
+  );
+
+  // ── Spend trend (real dates) ──────────────────────────────────────────────
   const spendTrend = useMemo(() => {
     const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const now = new Date();
     if (spendRange === "7d") {
-      const days: Record<string, number> = {};
+      const buckets: { label: string; date: Date; value: number }[] = [];
       for (let i = 6; i >= 0; i--) {
         const d = new Date(now);
         d.setDate(now.getDate() - i);
-        days[DAY_LABELS[d.getDay()]] = 0;
+        buckets.push({ label: DAY_LABELS[d.getDay()], date: d, value: 0 });
       }
       orders.forEach((o) => {
-        const d = new Date();
-        const dayLabel = DAY_LABELS[d.getDay()];
-        if (dayLabel in days) days[dayLabel] += o.amount;
+        const orderDate = o.createdAt ? new Date(o.createdAt) : now;
+        buckets.forEach((b) => {
+          if (orderDate.toDateString() === b.date.toDateString()) b.value += o.amount;
+        });
       });
-      return Object.entries(days).map(([label, value]) => ({ label, value }));
+      return buckets.map(({ label, value }) => ({ label, value }));
     } else {
+      const cutoff = new Date(now);
+      cutoff.setDate(now.getDate() - 28);
       const weeks = ["W1", "W2", "W3", "W4"];
       const totals: Record<string, number> = { W1: 0, W2: 0, W3: 0, W4: 0 };
-      orders.forEach((o) => { totals[weeks[Math.min(3, Math.floor(Math.random() * 4))]] += o.amount; });
+      orders.forEach((o) => {
+        const d = o.createdAt ? new Date(o.createdAt) : now;
+        if (d < cutoff) return;
+        const diffDays = Math.floor((now.getTime() - d.getTime()) / 86400000);
+        const weekIdx = Math.min(3, Math.floor(diffDays / 7));
+        totals[weeks[3 - weekIdx]] += o.amount;
+      });
       return weeks.map((w) => ({ label: w, value: totals[w] }));
     }
   }, [orders, spendRange]);
 
-  const activeSpendHistory = spendTrend;
-  const maxSpendValue = Math.max(...activeSpendHistory.map((day) => day.value), 1);
-  const totalSpend = activeSpendHistory.reduce((sum, day) => sum + day.value, 0);
-  const averageTicket = activeSpendHistory.length > 0 ? Math.round(totalSpend / activeSpendHistory.length) : 0;
+  const maxSpendValue = Math.max(...spendTrend.map((d) => d.value), 1);
+  const totalSpendPeriod = spendTrend.reduce((s, d) => s + d.value, 0);
+  const avgTicket = orders.length > 0 ? Math.round(totalSpendAll / orders.length) : 0;
+
+  // ── Fulfillment breakdown ─────────────────────────────────────────────────
+  const fulfillmentBreakdown = useMemo(() => {
+    const total = Math.max(orders.length, 1);
+    return [
+      { label: "Delivered", value: Math.round((orders.filter((o) => o.status === "Delivered").length / total) * 100), color: "bg-emerald-500" },
+      { label: "Cooking", value: Math.round((orders.filter((o) => o.status === "Cooking").length / total) * 100), color: "bg-orange-300" },
+      { label: "En route", value: Math.round((orders.filter((o) => o.status === "Out for delivery").length / total) * 100), color: "bg-rose-400" },
+    ];
+  }, [orders]);
 
   const handleSpendKeyNavigation = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
     event.preventDefault();
-    const target = event.currentTarget;
-    const nextElement = event.key === "ArrowRight" ? target.nextElementSibling : target.previousElementSibling;
-    if (nextElement instanceof HTMLButtonElement) {
-      nextElement.focus();
-    }
+    const sibling = event.key === "ArrowRight"
+      ? event.currentTarget.nextElementSibling
+      : event.currentTarget.previousElementSibling;
+    if (sibling instanceof HTMLButtonElement) sibling.focus();
   };
-
-  const fulfillmentBreakdown = useMemo(() => {
-    const delivered = orders.filter((o) => o.status === "Delivered").length;
-    const cooking = orders.filter((o) => o.status === "Cooking").length;
-    const outForDelivery = orders.filter((o) => o.status === "Out for delivery").length;
-    const total = Math.max(orders.length, 1);
-    return [
-      { label: "Delivered", value: Math.round((delivered / total) * 100), color: "bg-emerald-500" },
-      { label: "Cooking", value: Math.round((cooking / total) * 100), color: "bg-orange-300" },
-      { label: "En route", value: Math.round((outForDelivery / total) * 100), color: "bg-rose-400" },
-    ];
-  }, [orders]);
-  const fulfillmentTotal = orders.length;
-
-  const filteredBidRequests = useMemo(
-    () =>
-      requests.filter((request) =>
-        bidFilter === "all" ? true : request.status === bidFilter,
-      ),
-    [bidFilter, requests],
-  );
 
   const getTimelineForRequest = (requestId: string) => {
     const requestBids = bids.filter((b) => b.requestId === requestId);
-    if (requestBids.length === 0) {
-      return [{ step: "Brief posted", time: "Pending", detail: "Waiting for chefs to submit bids." }];
-    }
+    if (requestBids.length === 0) return [{ step: "Brief posted", time: "Pending", detail: "Waiting for chefs to submit bids." }];
     return [
       { step: "Brief posted", time: "—", detail: "Your food brief is live." },
-      ...requestBids.map((b) => ({
-        step: `Bid from ${b.chef}`,
-        time: `${symbol}${b.price.toLocaleString()}`,
-        detail: b.eta,
-      })),
+      ...requestBids.map((b) => ({ step: `Bid from ${b.chef}`, time: `${symbol}${b.price.toLocaleString()}`, detail: b.eta })),
     ];
   };
 
@@ -184,8 +178,58 @@ export function BuyerDashboard() {
       }
     >
       <div className="space-y-8">
-        <section className="grid gap-4 md:grid-cols-3">
-          {insightCards.map((card) => (
+
+        {/* ── 1. Needs Action strip ─────────────────────────────────────── */}
+        <AnimatePresence>
+          {actionableRequests.length > 0 && (
+            <motion.section
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="rounded-3xl border border-amber-200 bg-amber-50 p-5"
+            >
+              <div className="flex items-center gap-2 text-amber-700">
+                <Zap className="h-4 w-4 fill-amber-500 text-amber-500" />
+                <p className="text-sm font-semibold">
+                  {actionableRequests.length} {actionableRequests.length === 1 ? "request needs" : "requests need"} your decision
+                </p>
+              </div>
+              <div className="mt-4 space-y-3">
+                {actionableRequests.map((req) => {
+                  const reqBids = bidsByRequest[req.id] ?? [];
+                  const lowestBid = reqBids.reduce((min, b) => b.price < min.price ? b : min, reqBids[0]);
+                  return (
+                    <div key={req.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">{req.title}</p>
+                        <p className="text-xs text-gray-500">{reqBids.length} bids · lowest {symbol}{lowestBid.price.toLocaleString()} · budget {symbol}{req.budget.toLocaleString()}</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="bg-orange-500 text-white hover:bg-orange-600"
+                        onClick={() => {
+                          setExpandedRequestIds((prev) => { const n = new Set(prev); n.add(req.id); return n; });
+                          document.getElementById(`request-${req.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }}
+                      >
+                        Review bids
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
+
+        {/* ── 2. KPI strip ──────────────────────────────────────────────── */}
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: "Active briefs", value: activeRequestCount, meta: "open for bidding", icon: Flame, accent: "bg-orange-500/10 text-orange-600" },
+            { label: "Active orders", value: activeOrders.length, meta: "in progress", icon: CalendarClock, accent: "bg-amber-500/10 text-amber-600" },
+            { label: "Total spent", value: `${symbol}${totalSpendAll.toLocaleString()}`, meta: "all time", icon: CheckCircle2, accent: "bg-emerald-500/10 text-emerald-600" },
+            { label: "On-time rate", value: `${onTimeRate}%`, meta: `${orders.length} deliveries`, icon: BadgeCheck, accent: "bg-blue-500/10 text-blue-600" },
+          ].map((card) => (
             <div key={card.label} className="rounded-3xl bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
@@ -201,389 +245,276 @@ export function BuyerDashboard() {
           ))}
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-2">
+        {/* ── 3. Next delivery + spend chart ────────────────────────────── */}
+        <section className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
           <div className="rounded-3xl bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Spend velocity</p>
-                <h3 className="text-2xl font-semibold text-gray-900">{symbol}{totalSpend}</h3>
-                <p className="text-xs text-gray-500">Average ticket {symbol}{averageTicket}</p>
+                <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Spend</p>
+                <h3 className="text-2xl font-semibold text-gray-900">{symbol}{totalSpendPeriod.toLocaleString()}</h3>
+                <p className="text-xs text-gray-500">Avg ticket {symbol}{avgTicket.toLocaleString()}</p>
               </div>
               <div className="flex gap-2">
-                {["7d", "30d"].map((range) => (
-                  <button
-                    key={range}
-                    type="button"
-                    onClick={() => setSpendRange(range as typeof spendRange)}
-                    className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
-                      spendRange === range ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    }`}
-                  >
-                    {range}
+                {(["7d", "30d"] as const).map((r) => (
+                  <button key={r} type="button" onClick={() => setSpendRange(r)}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold transition ${spendRange === r ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+                    {r}
                   </button>
                 ))}
               </div>
             </div>
             <div className="mt-6 flex gap-2">
-              {activeSpendHistory.map((day) => (
-                <button
-                  key={day.label}
-                  type="button"
-                  onMouseEnter={() => setHoveredSpend(day)}
-                  onMouseLeave={() => setHoveredSpend(null)}
-                  onFocus={() => setHoveredSpend(day)}
-                  onBlur={() => setHoveredSpend(null)}
+              {spendTrend.map((day) => (
+                <button key={day.label} type="button"
+                  onMouseEnter={() => setHoveredSpend(day)} onMouseLeave={() => setHoveredSpend(null)}
+                  onFocus={() => setHoveredSpend(day)} onBlur={() => setHoveredSpend(null)}
                   onKeyDown={handleSpendKeyNavigation}
-                  className="flex-1"
-                  aria-label={`Spent $${day.value} on ${day.label}`}
-                >
-                  <div className="relative h-32 rounded-2xl bg-gray-50">
-                    <div
-                      className={`absolute bottom-2 left-2 right-2 rounded-2xl bg-gradient-to-t from-orange-500 to-amber-400 ${
-                        hoveredSpend?.label === day.label ? "shadow-lg" : ""
-                      }`}
-                      style={{ height: `${(day.value / maxSpendValue) * 100}%` }}
-                    />
+                  className="flex-1" aria-label={`${day.label}: ${symbol}${day.value}`}>
+                  <div className="relative h-28 rounded-2xl bg-gray-50">
+                    <div className={`absolute bottom-2 left-2 right-2 rounded-2xl bg-gradient-to-t from-orange-500 to-amber-400 transition-shadow ${hoveredSpend?.label === day.label ? "shadow-lg" : ""}`}
+                      style={{ height: `${(day.value / maxSpendValue) * 100}%` }} />
                   </div>
                   <p className="mt-2 text-center text-xs text-gray-500">{day.label}</p>
                 </button>
               ))}
             </div>
-            <div className="mt-4 rounded-2xl bg-gray-50 p-4 text-sm text-gray-600">
+            <div className="mt-4 rounded-2xl bg-gray-50 p-3 text-sm">
               {hoveredSpend ? (
                 <div className="flex items-center justify-between">
-                  <span>
-                    <span className="font-semibold text-gray-900">{hoveredSpend.label}</span>
-                    <span className="ml-2 text-gray-500">spend</span>
-                  </span>
-                  <span className="text-lg font-semibold text-gray-900">${hoveredSpend.value}</span>
+                  <span className="font-semibold text-gray-900">{hoveredSpend.label}</span>
+                  <span className="font-semibold text-gray-900">{symbol}{hoveredSpend.value.toLocaleString()}</span>
                 </div>
               ) : (
-                <div className="flex items-center justify-between">
-                  <span>Hover a bar to inspect spend</span>
-                  <span className="text-xs font-semibold text-emerald-600">+12% vs prior</span>
-                </div>
+                <p className="text-gray-500">Hover a bar to inspect spend</p>
               )}
             </div>
           </div>
 
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Fulfillment rate</p>
-                <h3 className="text-2xl font-semibold text-gray-900">94% on-time</h3>
-                <p className="text-xs text-gray-500">Across last {fulfillmentTotal} deliveries</p>
-              </div>
-              <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">SLA target 90%</span>
-            </div>
-            <div className="mt-6 space-y-4">
-              {fulfillmentBreakdown.map((entry) => (
-                <div key={entry.label} className="space-y-2 rounded-2xl bg-gray-50 p-3">
-                  <div className="flex items-center justify-between text-sm text-gray-600">
-                    <span className="flex items-center gap-2">
-                      <span className={`h-2.5 w-2.5 rounded-full ${entry.color}`} />
-                      {entry.label}
-                    </span>
-                    <span>
-                      {entry.value}% · {Math.round((entry.value / 100) * fulfillmentTotal)} drops
-                    </span>
-                  </div>
-                  <div className="h-2 rounded-full bg-white">
-                    <div className={`h-2 rounded-full ${entry.color}`} style={{ width: `${entry.value}%` }} />
-                  </div>
+          <div className="space-y-4">
+            {nextDelivery ? (
+              <div className="rounded-3xl bg-gray-900 p-6 text-white">
+                <p className="text-xs uppercase tracking-[0.3em] text-white/50">Next delivery</p>
+                <h3 className="mt-3 text-xl font-semibold">{nextDelivery.chef}</h3>
+                <p className="text-white/70 text-sm">{nextDelivery.dishes}</p>
+                <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                  <div><p className="text-white/50">Status</p><p className="font-semibold capitalize">{nextDelivery.status}</p></div>
+                  <div><p className="text-white/50">Amount</p><p className="font-semibold text-emerald-300">{symbol}{nextDelivery.amount.toLocaleString()}</p></div>
                 </div>
-              ))}
+                <span className="mt-4 inline-block rounded-2xl bg-white/10 px-3 py-1 text-xs font-semibold">ETA {nextDelivery.eta}</span>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-200 p-8 text-center">
+                <CalendarClock className="h-8 w-8 text-gray-300" />
+                <p className="mt-3 text-sm font-semibold text-gray-500">No active deliveries</p>
+                <Button size="sm" className="mt-4 bg-orange-500 text-white" onClick={() => setShowNewRequest(true)}>
+                  Place a request
+                </Button>
+              </div>
+            )}
+
+            <div className="rounded-3xl bg-white p-5 shadow-sm">
+              <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Fulfillment</p>
+              <p className="mt-1 text-2xl font-semibold text-gray-900">{onTimeRate}% delivered</p>
+              <div className="mt-4 space-y-3">
+                {fulfillmentBreakdown.map((e) => (
+                  <div key={e.label} className="space-y-1">
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span className="flex items-center gap-1.5"><span className={`h-2 w-2 rounded-full ${e.color}`} />{e.label}</span>
+                      <span>{e.value}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-gray-100">
+                      <div className={`h-1.5 rounded-full ${e.color}`} style={{ width: `${e.value}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
 
-        {nextDelivery && (
-          <section className="grid gap-4 lg:grid-cols-[1.8fr_1fr]">
-            <div className="rounded-3xl bg-gray-900 p-6 text-white">
-              <p className="text-xs uppercase tracking-[0.3em] text-white/50">Next delivery</p>
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-2xl font-semibold">{nextDelivery.chef}</h3>
-                  <p className="text-white/70">{nextDelivery.dishes}</p>
-                </div>
-                <span className="rounded-2xl bg-white/10 px-4 py-1 text-sm font-semibold">ETA {nextDelivery.eta}</span>
-              </div>
-              <div className="mt-6 grid gap-4 text-sm text-white/80 sm:grid-cols-3">
-                <div>
-                  <p className="text-white/50">Order ID</p>
-                  <p className="font-semibold">{nextDelivery.id}</p>
-                </div>
-                <div>
-                  <p className="text-white/50">Status</p>
-                  <p className="font-semibold capitalize">{nextDelivery.status}</p>
-                </div>
-                <div>
-                  <p className="text-white/50">Amount</p>
-                  <p className="font-semibold text-emerald-300">${nextDelivery.amount}</p>
-                </div>
-              </div>
-            </div>
-            <div className="rounded-3xl bg-white p-6 shadow-sm">
-              <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Favorite chefs</p>
-              <div className="mt-4 space-y-3">
-                {favoriteVendors.length === 0 && <p className="text-sm text-gray-400">No verified vendors yet.</p>}
-                {favoriteVendors.map((vendor) => (
-                  <div key={vendor.id} className="flex items-center justify-between rounded-2xl border border-gray-100 p-3">
-                    <div>
-                      <p className="text-sm text-gray-500">{vendor.kitchenName || vendor.address}</p>
-                      <p className="text-base font-semibold text-gray-900">{vendor.name}</p>
-                    </div>
-                    <BadgeCheck className="h-5 w-5 text-orange-500" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
+        {/* ── 4. Unified requests + bids + filter ───────────────────────── */}
         <section className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-          <div className="space-y-6">
-            <div className="rounded-3xl bg-white p-6 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Live Requests</p>
-                  <h2 className="text-2xl font-semibold text-gray-900">Your open bids</h2>
-                </div>
-                <Button variant="ghost" size="sm" className="text-orange-600">
-                  Manage
-                </Button>
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Your requests</h2>
+                <p className="text-sm text-gray-500">{requests.length} total · {activeRequestCount} active</p>
               </div>
-              <div className="mt-6 space-y-4">
-                {requests.map((request) => (
-                  <motion.div
-                    key={request.id}
-                    className="rounded-2xl border border-gray-200 p-4 lg:p-5"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="text-sm text-gray-500">{request.id}</p>
-                        <h3 className="text-xl font-semibold text-gray-900">{request.title}</h3>
-                        <p className="text-sm text-gray-500">{request.cuisine} • {request.portionType} • {request.servings} servings</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500">Budget</p>
-                        <p className="text-2xl font-bold text-gray-900">{symbol}{request.budget}</p>
-                      </div>
-                    </div>
-                    <div className="mt-4 flex flex-wrap gap-4 text-sm text-gray-600">
-                      <span className="rounded-full bg-orange-50 px-3 py-1 text-orange-600">{request.status.replace("_", " ")}</span>
-                      <span>{request.deliveryWindow}</span>
-                      <span>{request.bids} bids</span>
-                    </div>
-                  </motion.div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: "All", value: "all" },
+                  { label: "Collecting bids", value: "collecting_bids" },
+                  { label: "In progress", value: "in_progress" },
+                  { label: "Fulfilled", value: "fulfilled" },
+                ].map((opt) => (
+                  <button key={opt.value} type="button"
+                    onClick={() => setBidFilter(opt.value as typeof bidFilter)}
+                    className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${bidFilter === opt.value ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 text-gray-600 hover:border-gray-400"}`}>
+                    {opt.label}
+                  </button>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-3xl bg-white p-6 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Orders</p>
-                  <h2 className="text-2xl font-semibold text-gray-900">Current deliveries</h2>
-                </div>
+            {filteredRequests.length === 0 && (
+              <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-200 py-12 text-center">
+                <Filter className="h-8 w-8 text-gray-300" />
+                <p className="mt-3 text-sm font-semibold text-gray-500">No requests match this filter</p>
+                <Button size="sm" variant="ghost" className="mt-2 text-orange-600" onClick={() => setBidFilter("all")}>Clear filter</Button>
               </div>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                {orders.map((order) => (
-                  <motion.div
-                    key={order.id}
-                    className="rounded-2xl border border-gray-200 p-5"
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{order.id}</p>
-                        <h3 className="text-lg font-semibold text-gray-900">{order.chef}</h3>
-                        <p className="text-sm text-gray-500">{order.dishes}</p>
-                      </div>
-                      <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600">{order.status}</span>
-                    </div>
-                    <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
-                      <span>ETA: {order.eta}</span>
-                      <span className="text-lg font-bold text-gray-900">${order.amount}</span>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
+            )}
 
-            <div className="rounded-3xl bg-white p-6 shadow-sm">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">Bid insights</h3>
-                <Button variant="ghost" size="sm">
-                  View Bid Room
-                </Button>
-              </div>
-              <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-gray-500">
-                <span className="inline-flex items-center gap-1">
-                  <Filter className="h-4 w-4" /> Filter by status
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { label: "All", value: "all" },
-                    { label: "Collecting bids", value: "collecting_bids" },
-                    { label: "In progress", value: "in_progress" },
-                    { label: "Fulfilled", value: "fulfilled" },
-                  ].map((option) => {
-                    const isActive = bidFilter === option.value;
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => setBidFilter(option.value as typeof bidFilter)}
-                        className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
-                          isActive ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 text-gray-600 hover:border-gray-400"
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="mt-6 space-y-5">
-                {filteredBidRequests.slice(0, 2).map((request) => {
-                  const requestBids = bidsByRequest[request.id] ?? [];
-                  return (
-                    <div key={request.id} className="rounded-2xl border border-gray-100 p-4">
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                          <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{request.id}</p>
-                          <h4 className="text-lg font-semibold text-gray-900">{request.title}</h4>
-                          <p className="text-sm text-gray-500">{request.bids} bids • budget {symbol}{request.budget}</p>
-                        </div>
-                        <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600">
-                          {request.status.replace("_", " ")}
+            {filteredRequests.map((request) => {
+              const reqBids = bidsByRequest[request.id] ?? [];
+              const isExpanded = expandedRequestIds.has(request.id);
+              const hasActionable = request.status === "collecting_bids" && reqBids.length > 0;
+              return (
+                <motion.div
+                  key={request.id}
+                  id={`request-${request.id}`}
+                  className={`rounded-3xl border bg-white p-5 shadow-sm transition-colors ${hasActionable ? "border-amber-200" : "border-gray-100"}`}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                          request.status === "collecting_bids" ? "bg-amber-50 text-amber-700" :
+                          request.status === "in_progress" ? "bg-blue-50 text-blue-700" :
+                          request.status === "fulfilled" ? "bg-emerald-50 text-emerald-700" :
+                          "bg-gray-100 text-gray-600"
+                        }`}>
+                          {request.status.replace(/_/g, " ")}
                         </span>
+                        {hasActionable && <span className="flex items-center gap-1 rounded-full bg-orange-50 px-2 py-0.5 text-xs font-semibold text-orange-600"><Zap className="h-3 w-3" /> Action needed</span>}
                       </div>
-                      <div className="mt-4 grid gap-3 lg:grid-cols-2">
-                        {requestBids.length === 0 && <p className="text-sm text-gray-500">No bids yet</p>}
-                        {requestBids.map((bid) => (
-                          <div key={bid.id} className="rounded-2xl bg-gray-50 p-3">
-                            <div className="flex items-center justify-between text-sm">
-                              <p className="font-semibold text-gray-900">{bid.chef}</p>
-                              <span className="text-xs font-semibold text-emerald-600">{bid.confidence}% confidence</span>
-                            </div>
-                            <div className="mt-2 flex items-center justify-between text-sm text-gray-600">
-                              <span>{symbol}{bid.price}</span>
-                              <span>{bid.eta}</span>
-                            </div>
-                            {request.status === "collecting_bids" && (
-                              <Button
-                                size="sm"
-                                className="mt-2 w-full bg-orange-500 text-white text-xs"
-                                disabled={acceptingBidId === bid.id}
-                                onClick={() => handleAcceptBid(bid.id, request.id)}
-                              >
-                                {acceptingBidId === bid.id ? "Accepting..." : "Accept bid"}
-                              </Button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        <Button variant="outline" size="sm" className="border-gray-200 text-gray-700">
-                          Compare bids
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-orange-600">
-                          Message chefs
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-gray-600" onClick={() => setTimelineRequestId(request.id)}>
-                          View timeline
-                        </Button>
-                      </div>
+                      <h3 className="mt-2 text-lg font-semibold text-gray-900">{request.title}</h3>
+                      <p className="text-sm text-gray-500">{request.cuisine} · {request.portionType} · {request.servings} servings · {request.deliveryWindow}</p>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
+                    <div className="text-right">
+                      <p className="text-xs text-gray-400">Budget</p>
+                      <p className="text-2xl font-bold text-gray-900">{symbol}{request.budget.toLocaleString()}</p>
+                      <p className="text-xs text-gray-500">{reqBids.length} bid{reqBids.length !== 1 ? "s" : ""}</p>
+                    </div>
+                  </div>
+
+                  {reqBids.length > 0 && (
+                    <button
+                      type="button"
+                      className="mt-4 flex w-full items-center justify-between rounded-2xl bg-gray-50 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100"
+                      onClick={() => toggleExpand(request.id)}
+                    >
+                      <span>{isExpanded ? "Hide" : "Show"} {reqBids.length} bid{reqBids.length !== 1 ? "s" : ""}</span>
+                      {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </button>
+                  )}
+
+                  <AnimatePresence>
+                    {isExpanded && reqBids.length > 0 && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                          {reqBids.map((bid) => (
+                            <div key={bid.id} className="rounded-2xl border border-gray-100 p-4">
+                              <div className="flex items-center justify-between">
+                                <p className="font-semibold text-gray-900">{bid.chef}</p>
+                                <span className="text-xs text-emerald-600">{bid.confidence}% match</span>
+                              </div>
+                              <div className="mt-2 flex items-center justify-between text-sm text-gray-600">
+                                <span className="text-base font-bold text-gray-900">{symbol}{bid.price.toLocaleString()}</span>
+                                <span>{bid.eta}</span>
+                              </div>
+                              {request.status === "collecting_bids" && (
+                                <Button
+                                  size="sm"
+                                  className="mt-3 w-full bg-orange-500 text-white hover:bg-orange-600"
+                                  disabled={acceptingBidId === bid.id}
+                                  onClick={() => handleAcceptBid(bid.id, request.id)}
+                                >
+                                  {acceptingBidId === bid.id ? "Accepting..." : "Accept this bid"}
+                                </Button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button variant="ghost" size="sm" className="text-gray-500"
+                      onClick={() => setTimelineRequestId(request.id)}>
+                      View timeline
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-orange-600"
+                      onClick={() => setActiveBriefId(request.id)}>
+                      Details
+                    </Button>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
 
+          {/* ── Sidebar: vendors + active orders ────────────────────────── */}
           <div className="space-y-6">
             <div className="rounded-3xl bg-white p-6 shadow-sm">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">Featured Vendors</h3>
-                <Button variant="ghost" size="sm">
-                  View all
-                </Button>
+                <h3 className="text-base font-semibold text-gray-900">Active orders</h3>
+                <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-semibold text-orange-600">{activeOrders.length}</span>
               </div>
-              <div className="mt-4 space-y-4">
-                {vendors.length === 0 && <p className="text-sm text-gray-400">No verified chefs yet.</p>}
-                {vendors.map((vendor) => (
-                  <div key={vendor.id} className="flex items-center justify-between rounded-2xl border border-gray-100 p-4">
-                    <div>
-                      <p className="text-sm text-gray-500">{vendor.kitchenName}</p>
-                      <h4 className="text-lg font-semibold text-gray-900">{vendor.name}</h4>
-                      <p className="text-sm text-gray-500 flex items-center gap-1">
-                        <MapPin className="h-4 w-4" /> {vendor.address || "Lagos"}
-                      </p>
+              <div className="mt-4 space-y-3">
+                {activeOrders.length === 0 && <p className="text-sm text-gray-400">No active orders.</p>}
+                {activeOrders.map((order) => (
+                  <div key={order.id} className="rounded-2xl border border-gray-100 p-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold text-gray-900">{order.chef}</p>
+                      <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-semibold text-orange-600">{order.status}</span>
                     </div>
-                    <BadgeCheck className="h-5 w-5 text-orange-500" />
+                    <div className="mt-1 flex items-center justify-between text-xs text-gray-500">
+                      <span>ETA: {order.eta}</span>
+                      <span className="font-semibold text-gray-900">{symbol}{order.amount.toLocaleString()}</span>
+                    </div>
                   </div>
                 ))}
               </div>
-            </div>
-
-            <div className="rounded-3xl bg-gradient-to-br from-orange-500 to-amber-500 p-6 text-white">
-              <p className="text-sm uppercase tracking-[0.3em] text-white/70">Need something specific?</p>
-              <h3 className="mt-3 text-2xl font-semibold">Connect with a food concierge</h3>
-              <p className="mt-2 text-white/80">Share portion sizes, dietary needs, and delivery logistics—we will route to verified chefs.</p>
-              <div className="mt-4 flex flex-col gap-2 text-sm text-white/90">
-                <p className="flex items-center gap-2">
-                  <BadgeCheck className="h-4 w-4" /> Curated shortlist in 2 hours
-                </p>
-                <p className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" /> Local-only sourcing
-                </p>
-              </div>
-              <Button variant="outline" className="mt-4 border-white text-white hover:bg-white/10">
-                Talk to concierge
-              </Button>
             </div>
 
             <div className="rounded-3xl bg-white p-6 shadow-sm">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">Saved briefs</h3>
-                <Button variant="ghost" size="sm">
-                  Manage
-                </Button>
+                <h3 className="text-base font-semibold text-gray-900">Verified chefs</h3>
+                <Button variant="ghost" size="sm" className="text-xs text-orange-600">View all</Button>
               </div>
               <div className="mt-4 space-y-3">
-                {requests.length === 0 && (
-                  <p className="text-sm text-gray-400">No briefs yet. Create your first food request.</p>
-                )}
-                {requests.map((brief) => (
-                  <div key={brief.id} className="rounded-2xl border border-gray-100 p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{brief.id.slice(-8).toUpperCase()}</p>
-                        <h4 className="text-base font-semibold text-gray-900">{brief.title}</h4>
-                      </div>
-                      <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-semibold text-orange-600">{brief.status}</span>
+                {vendors.length === 0 && <p className="text-sm text-gray-400">No verified chefs yet.</p>}
+                {vendors.slice(0, 4).map((vendor) => (
+                  <div key={vendor.id} className="flex items-center justify-between rounded-2xl border border-gray-100 p-3">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{vendor.name}</p>
+                      <p className="text-xs text-gray-500 flex items-center gap-1">
+                        <MapPin className="h-3 w-3" /> {vendor.address || "Lagos"}
+                      </p>
                     </div>
-                    <div className="mt-2 flex flex-wrap gap-2 text-xs text-gray-600">
-                      <span className="rounded-full bg-gray-50 px-3 py-1">{brief.cuisine}</span>
-                      <span className="rounded-full bg-gray-50 px-3 py-1">{brief.servings} servings</span>
-                      <span className="rounded-full bg-gray-50 px-3 py-1">{brief.deliveryWindow}</span>
-                    </div>
-                    <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
-                      <Button variant="ghost" size="sm" className="text-orange-600" onClick={() => setActiveBriefId(brief.id)}>
-                        View details
-                      </Button>
-                    </div>
+                    <BadgeCheck className="h-4 w-4 text-orange-500" />
                   </div>
                 ))}
               </div>
             </div>
+
+            <button
+              type="button"
+              onClick={() => setShowNewRequest(true)}
+              className="w-full rounded-3xl bg-gradient-to-br from-orange-500 to-amber-500 p-6 text-left text-white hover:opacity-95 transition-opacity"
+            >
+              <Zap className="h-6 w-6 opacity-80" />
+              <h3 className="mt-3 text-lg font-semibold">Post a new request</h3>
+              <p className="mt-1 text-sm text-white/80">Describe your food brief and get bids from verified chefs.</p>
+            </button>
           </div>
         </section>
       </div>
