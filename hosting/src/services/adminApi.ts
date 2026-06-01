@@ -93,3 +93,8 @@ export async function verifyVendor(vendorId: string): Promise<PendingVendor> {
   const data = await api.patch<PendingVendor>(`/admin/vendors/${vendorId}/verify`, {});
   return data;
 }
+
+export async function resolveDispute(disputeId: string): Promise<ActionResponse> {
+  const data = await api.patch<ActionResponse>(`/admin/disputes/${disputeId}/resolve`, {});
+  return data;
+}

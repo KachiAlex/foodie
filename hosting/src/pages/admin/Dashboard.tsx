@@ -1,14 +1,11 @@
 import { useMemo, useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Activity,
   AlertTriangle,
   Briefcase,
   CheckCircle2,
-  ClipboardCheck,
   DollarSign,
-  Gavel,
-  Inbox,
   Search,
   Shield,
   Users,
@@ -17,17 +14,20 @@ import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/context/ToastContext";
 import { useCurrency } from "@/context/CurrencyContext";
-import { approvePayoutRequest, createOrderEscalation, triggerVendorAudit, getPendingVendors, verifyVendor, getDashboardMetrics, getAdminOrders, getEscrowTransactions, getAdminDisputes } from "@/services/adminApi";
+import { approvePayoutRequest, createOrderEscalation, triggerVendorAudit, getPendingVendors, verifyVendor, getDashboardMetrics, getAdminOrders, getEscrowTransactions, getAdminDisputes, resolveDispute } from "@/services/adminApi";
 import type { DashboardMetrics, AdminOrder, EscrowTransaction, AdminDispute } from "@/services/adminApi";
 
 export function AdminDashboard() {
   const { symbol } = useCurrency();
   const ESCALATION_CAP = 5;
+  const { showToast } = useToast();
+
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
   const [activeVendorId, setActiveVendorId] = useState<string | null>(null);
-  const [isApprovingPayout, setIsApprovingPayout] = useState(false);
+  const [approvingPayoutId, setApprovingPayoutId] = useState<string | null>(null);
   const [isEscalatingOrder, setIsEscalatingOrder] = useState(false);
   const [isSchedulingAudit, setIsSchedulingAudit] = useState<string | null>(null);
+  const [resolvingDisputeId, setResolvingDisputeId] = useState<string | null>(null);
   const [orderSearch, setOrderSearch] = useState("");
   const [vendorSearch, setVendorSearch] = useState("");
   const [recentAudits, setRecentAudits] = useState<Record<string, string>>({});
@@ -36,77 +36,31 @@ export function AdminDashboard() {
   const [adminOrders, setAdminOrders] = useState<AdminOrder[]>([]);
   const [escrowTxns, setEscrowTxns] = useState<EscrowTransaction[]>([]);
   const [adminDisputes, setAdminDisputes] = useState<AdminDispute[]>([]);
-  const { showToast } = useToast();
-
-  useEffect(() => {
-    getPendingVendors()
-      .then((vendors) => {
-        setAdminVendors(
-          vendors.map((v) => ({
-            id: v.user.id,
-            name: v.user.name,
-            email: v.user.email,
-            kycStatus: v.verified ? "Approved" : "Pending",
-            kitchenName: v.kitchenName,
-            address: v.address,
-            landmark: v.landmark,
-            rating: 0,
-            totalOrders: 0,
-          }))
-        );
-      })
-      .catch((err) => console.error("Failed to load pending vendors", err));
-
-    getDashboardMetrics()
-      .then(setMetrics)
-      .catch((err) => console.error("Failed to load metrics", err));
-
-    getAdminOrders()
-      .then(setAdminOrders)
-      .catch((err) => console.error("Failed to load admin orders", err));
-
-    getEscrowTransactions()
-      .then(setEscrowTxns)
-      .catch((err) => console.error("Failed to load escrow transactions", err));
-
-    getAdminDisputes()
-      .then(setAdminDisputes)
-      .catch((err) => console.error("Failed to load disputes", err));
-  }, []);
-
+  const [isLoading, setIsLoading] = useState(true);
   const [escalationQueue, setEscalationQueue] = useState<{ id: string; title: string; owner: string; severity: string; eta: string }[]>([]);
 
-  const moderationQueue = useMemo(
-    () =>
-      adminVendors
-        .filter((v) => v.kycStatus === "Pending")
-        .map((v) => ({ id: v.id, flag: "KYC pending review", vendor: v.kitchenName || v.name, status: "Pending" })),
-    [adminVendors]
-  );
-
-  const opsAlerts = useMemo(
-    () => [
-      {
-        label: "Open Disputes",
-        value: `${metrics?.pendingDisputes ?? 0} cases`,
-        detail: "requiring resolution",
-        severity: (metrics?.pendingDisputes ?? 0) > 3 ? "High" : "Medium",
-      },
-      {
-        label: "Pending Vendors",
-        value: `${metrics?.newVendors ?? 0} vendors`,
-        detail: "awaiting KYC",
-        severity: (metrics?.newVendors ?? 0) > 0 ? "Medium" : "Low",
-      },
-      {
-        label: "Payout Backlog",
-        value: `${symbol}${Number(metrics?.escrowHeld ?? 0).toLocaleString()}`,
-        detail: "in escrow",
-        severity: (metrics?.escrowHeld ?? 0) > 10000 ? "High" : "Medium",
-      },
-    ],
-    [metrics, symbol]
-  );
+  useEffect(() => {
+    setIsLoading(true);
+    Promise.allSettled([
+      getPendingVendors().then((vendors) =>
+        setAdminVendors(vendors.map((v) => ({
+          id: v.user.id,
+          name: v.user.name,
+          email: v.user.email,
+          kycStatus: v.verified ? "Approved" : "Pending",
+          kitchenName: v.kitchenName,
+          address: v.address,
+          landmark: v.landmark,
+          rating: 0,
+          totalOrders: 0,
+        })))
+      ),
+      getDashboardMetrics().then(setMetrics),
+      getAdminOrders().then(setAdminOrders),
+      getEscrowTransactions().then(setEscrowTxns),
+      getAdminDisputes().then(setAdminDisputes),
+    ]).finally(() => setIsLoading(false));
+  }, []);
 
   const payoutQueue = useMemo(
     () =>
@@ -115,26 +69,27 @@ export function AdminDashboard() {
         .map((t) => ({
           id: t.id,
           vendor: t.vendor?.name ?? "Unknown",
-          amount: `${symbol}${Number(t.amount).toLocaleString()}`,
+          amount: Number(t.amount),
           status: t.status === "pending" ? "Ready" : t.status,
           age: new Date(t.createdAt).toLocaleDateString(),
         })),
-    [escrowTxns, symbol]
+    [escrowTxns],
   );
 
-  const trustTasks = useMemo(
-    () =>
-      adminDisputes
-        .filter((d) => d.status === "open")
-        .map((d) => ({
-          id: d.id,
-          title: d.reason,
-          owner: d.openedBy?.name ?? "Unknown",
-          due: new Date(d.openedAt).toLocaleDateString(),
-          status: "Open",
-        })),
-    [adminDisputes]
-  );
+  const payoutTotal = useMemo(() => payoutQueue.reduce((s, p) => s + p.amount, 0), [payoutQueue]);
+  const openDisputes = useMemo(() => adminDisputes.filter((d) => d.status === "open"), [adminDisputes]);
+  const pendingVendors = useMemo(() => adminVendors.filter((v) => v.kycStatus === "Pending"), [adminVendors]);
+
+  const priorityAlerts = useMemo(() => {
+    const alerts: { id: string; label: string; detail: string; severity: "High" | "Medium" }[] = [];
+    if ((metrics?.pendingDisputes ?? 0) > 3)
+      alerts.push({ id: "disputes", label: `${metrics!.pendingDisputes} open disputes`, detail: "Require admin resolution", severity: "High" });
+    if ((metrics?.escrowHeld ?? 0) > 10000)
+      alerts.push({ id: "escrow", label: `${symbol}${Number(metrics!.escrowHeld).toLocaleString()} in escrow backlog`, detail: "Payout approval needed", severity: "High" });
+    if ((metrics?.newVendors ?? 0) > 0)
+      alerts.push({ id: "kyc", label: `${metrics!.newVendors} vendors awaiting KYC`, detail: "Review and approve", severity: "Medium" });
+    return alerts;
+  }, [metrics, symbol]);
 
   const orderProfiles = useMemo(
     () =>
@@ -192,24 +147,32 @@ export function AdminDashboard() {
     [adminOrders, orderSearch],
   );
 
-  const payoutTotal = useMemo(
-    () =>
-      payoutQueue.reduce<number>((sum, item) => sum + Number(String(item.amount).replace(/[^0-9.]/g, "")), 0),
-    [payoutQueue],
-  );
-
-  const handleApproveNextPayout = async () => {
-    if (isApprovingPayout || payoutQueue.length === 0) return;
-    setIsApprovingPayout(true);
+  const handleApprovePayout = async (payoutId: string) => {
+    if (approvingPayoutId) return;
+    setApprovingPayoutId(payoutId);
     try {
-      const firstId = payoutQueue[0].id;
-      const response = await approvePayoutRequest(firstId);
-      setEscrowTxns((prev) => prev.map((t) => t.id === firstId ? { ...t, status: "completed" } : t));
+      const response = await approvePayoutRequest(payoutId);
+      setEscrowTxns((prev) => prev.map((t) => t.id === payoutId ? { ...t, status: "completed" } : t));
       showToast(response.message);
     } catch {
       showToast("Error approving payout");
     } finally {
-      setIsApprovingPayout(false);
+      setApprovingPayoutId(null);
+    }
+  };
+
+  const handleResolveDispute = async (disputeId: string) => {
+    if (resolvingDisputeId) return;
+    setResolvingDisputeId(disputeId);
+    try {
+      await resolveDispute(disputeId);
+      setAdminDisputes((prev) => prev.map((d) => d.id === disputeId ? { ...d, status: "resolved" } : d));
+      showToast("Dispute resolved");
+    } catch {
+      showToast("Error resolving dispute — marking locally");
+      setAdminDisputes((prev) => prev.map((d) => d.id === disputeId ? { ...d, status: "resolved" } : d));
+    } finally {
+      setResolvingDisputeId(null);
     }
   };
 
@@ -280,131 +243,101 @@ export function AdminDashboard() {
     showToast(`Escalation ${ticketId} snoozed`);
   };
 
+  const SIDEBAR = {
+    title: "Admin",
+    nav: [
+      { label: "Command Center", to: "/dashboard/admin", icon: <Activity className="h-4 w-4" /> },
+      { label: "Orders", to: "/dashboard/admin?tab=orders", icon: <Briefcase className="h-4 w-4" /> },
+      { label: "Vendors", to: "/dashboard/admin?tab=vendors", icon: <Users className="h-4 w-4" /> },
+      { label: "Compliance", to: "/dashboard/admin?tab=compliance", icon: <Shield className="h-4 w-4" /> },
+    ],
+  };
+
+  if (isLoading) {
+    return (
+      <DashboardLayout sidebar={SIDEBAR} title="Marketplace Control" description="Monitor fulfillment health, vendor trust, and escalations.">
+        <div className="space-y-6 animate-pulse">
+          <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
+            {[1,2,3,4,5].map((i) => <div key={i} className="h-28 rounded-3xl bg-gray-100" />)}
+          </div>
+          <div className="grid gap-4 lg:grid-cols-[1.4fr_0.9fr]">
+            <div className="h-64 rounded-3xl bg-gray-100" />
+            <div className="h-64 rounded-3xl bg-gray-100" />
+          </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="h-72 rounded-3xl bg-gray-100" />
+            <div className="h-72 rounded-3xl bg-gray-100" />
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout
-      sidebar={{
-        title: "Admin",
-        nav: [
-          { label: "Command Center", to: "/dashboard/admin", icon: <Activity className="h-4 w-4" /> },
-          { label: "Orders", to: "/dashboard/admin?tab=orders", icon: <Briefcase className="h-4 w-4" /> },
-          { label: "Vendors", to: "/dashboard/admin?tab=vendors", icon: <Users className="h-4 w-4" /> },
-          { label: "Compliance", to: "/dashboard/admin?tab=compliance", icon: <Shield className="h-4 w-4" /> },
-        ],
-      }}
+      sidebar={SIDEBAR}
       title="Marketplace Control"
       description="Monitor fulfillment health, vendor trust, and escalations."
-      actions={
-        <div className="flex gap-2">
-          <Button variant="outline">Download report</Button>
-          <Button className="bg-orange-500 text-white">Trigger alert</Button>
-        </div>
-      }
     >
       <section className="space-y-8">
-        <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {[
-            { label: "Total Requests", value: metrics?.totalRequests ?? "—", prefix: "" },
-            { label: "Active Bids", value: metrics?.activeBids ?? "—", prefix: "" },
-            { label: "Escrow Held", value: metrics ? Number(metrics.escrowHeld).toLocaleString() : "—", prefix: symbol },
-            { label: "Open Disputes", value: metrics?.pendingDisputes ?? "—", prefix: "" },
-            { label: "Pending Vendors", value: metrics?.newVendors ?? "—", prefix: "" },
-          ].map((metric) => (
-            <motion.div
-              key={metric.label}
-              className="rounded-3xl bg-white p-6 shadow-sm"
-              whileHover={{ y: -4 }}
-            >
-              <p className="text-sm text-gray-500">{metric.label}</p>
-              <div className="mt-3">
-                <h3 className="text-3xl font-semibold text-gray-900">{metric.prefix}{metric.value}</h3>
-              </div>
-            </motion.div>
-          ))}
-        </div>
 
-        <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Ops signals</p>
-                <h3 className="text-2xl font-semibold text-gray-900">Control tower</h3>
-              </div>
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
-            </div>
-            <div className="mt-6 grid gap-4 sm:grid-cols-3">
-              {opsAlerts.map((alert) => (
-                <div key={alert.label} className="rounded-2xl border border-gray-100 p-4">
-                  <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{alert.label}</p>
-                  <p className="mt-2 text-xl font-semibold text-gray-900">{alert.value}</p>
-                  <p className="text-xs text-gray-500">{alert.detail}</p>
-                  <span
-                    className={`mt-3 inline-flex rounded-full px-3 py-1 text-[10px] font-semibold ${
-                      alert.severity === "High"
-                        ? "bg-red-50 text-red-600"
-                        : alert.severity === "Medium"
-                        ? "bg-amber-50 text-amber-600"
-                        : "bg-emerald-50 text-emerald-600"
-                    }`}
-                  >
+        {/* ── 1. Priority alert bar ──────────────────────────────────────── */}
+        <AnimatePresence>
+          {priorityAlerts.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="space-y-2"
+            >
+              {priorityAlerts.map((alert) => (
+                <div key={alert.id} className={`flex items-center justify-between rounded-2xl px-5 py-3 ${alert.severity === "High" ? "border border-red-200 bg-red-50" : "border border-amber-200 bg-amber-50"}`}>
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className={`h-4 w-4 shrink-0 ${alert.severity === "High" ? "text-red-500" : "text-amber-500"}`} />
+                    <div>
+                      <p className={`text-sm font-semibold ${alert.severity === "High" ? "text-red-800" : "text-amber-800"}`}>{alert.label}</p>
+                      <p className={`text-xs ${alert.severity === "High" ? "text-red-600" : "text-amber-600"}`}>{alert.detail}</p>
+                    </div>
+                  </div>
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${alert.severity === "High" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
                     {alert.severity}
                   </span>
                 </div>
               ))}
-            </div>
-          </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Payout queue</p>
-                <h3 className="text-2xl font-semibold text-gray-900">{symbol}{payoutTotal.toLocaleString()}</h3>
-                <p className="text-xs text-gray-500">Awaiting approval</p>
-              </div>
-              <DollarSign className="h-5 w-5 text-emerald-500" />
-            </div>
-            <div className="mt-4 space-y-3">
-              {payoutQueue.map((payout) => (
-                <div key={payout.id} className="rounded-2xl border border-gray-100 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{payout.id}</p>
-                      <p className="text-sm font-semibold text-gray-900">{payout.vendor}</p>
-                      <p className="text-xs text-gray-500">Age {payout.age}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-semibold text-gray-900">{payout.amount}</p>
-                      <span className="text-xs font-semibold text-amber-600">{payout.status}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <Button
-              className="mt-4 w-full bg-orange-500 text-white"
-              onClick={handleApproveNextPayout}
-              disabled={isApprovingPayout || payoutQueue.length === 0}
-            >
-              {isApprovingPayout ? "Releasing payout..." : "Approve next payout"}
-            </Button>
-          </div>
+        {/* ── 2. Color-coded KPI strip ───────────────────────────────────── */}
+        <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          {[
+            { label: "Total Requests", value: metrics?.totalRequests ?? "—", prefix: "", accent: "text-gray-900", bg: "bg-white" },
+            { label: "Active Bids", value: metrics?.activeBids ?? "—", prefix: "", accent: "text-gray-900", bg: "bg-white" },
+            { label: "Escrow Held", value: metrics ? Number(metrics.escrowHeld).toLocaleString() : "—", prefix: symbol, accent: "text-amber-600", bg: "bg-amber-50" },
+            { label: "Open Disputes", value: metrics?.pendingDisputes ?? "—", prefix: "", accent: (metrics?.pendingDisputes ?? 0) > 3 ? "text-red-600" : "text-gray-900", bg: (metrics?.pendingDisputes ?? 0) > 3 ? "bg-red-50" : "bg-white" },
+            { label: "Pending Vendors", value: metrics?.newVendors ?? "—", prefix: "", accent: (metrics?.newVendors ?? 0) > 0 ? "text-amber-600" : "text-gray-900", bg: (metrics?.newVendors ?? 0) > 0 ? "bg-amber-50" : "bg-white" },
+          ].map((metric) => (
+            <motion.div key={metric.label} className={`rounded-3xl p-6 shadow-sm ${metric.bg}`} whileHover={{ y: -3 }}>
+              <p className="text-sm text-gray-500">{metric.label}</p>
+              <h3 className={`mt-3 text-3xl font-semibold ${metric.accent}`}>{metric.prefix}{metric.value}</h3>
+            </motion.div>
+          ))}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+        {/* ── 3. Orders table + Payout queue ────────────────────────────── */}
+        <div className="grid gap-4 lg:grid-cols-[1.4fr_0.9fr]">
           <div className="rounded-3xl bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Orders</p>
                 <h2 className="text-2xl font-semibold text-gray-900">Network performance</h2>
               </div>
-              <Button variant="ghost" size="sm" className="text-orange-600">
-                View all
-              </Button>
             </div>
             <div className="mt-4 flex items-center gap-2 rounded-2xl border border-gray-100 px-3 py-2">
               <Search className="h-4 w-4 text-gray-400" />
               <input
                 value={orderSearch}
-                onChange={(event) => setOrderSearch(event.target.value)}
+                onChange={(e) => setOrderSearch(e.target.value)}
                 placeholder="Search order, buyer, vendor"
                 className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
               />
@@ -415,7 +348,7 @@ export function AdminDashboard() {
                   <tr>
                     <th className="pb-3">Order</th>
                     <th className="pb-3">Buyer</th>
-                    <th className="pb-3">Vendor</th>
+                    <th className="pb-3">Item</th>
                     <th className="pb-3">Amount</th>
                     <th className="pb-3">Status</th>
                     <th className="pb-3 text-right">Action</th>
@@ -429,7 +362,7 @@ export function AdminDashboard() {
                       <td className="py-3">{order.request?.foodName ?? "—"}</td>
                       <td className="py-3 font-semibold">{symbol}{Number(order.totalAmount).toLocaleString()}</td>
                       <td className="py-3">
-                        <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
+                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${order.status === "completed" ? "bg-emerald-50 text-emerald-700" : order.status === "dispute" ? "bg-red-50 text-red-700" : "bg-gray-100 text-gray-600"}`}>
                           {order.status}
                         </span>
                       </td>
@@ -441,11 +374,7 @@ export function AdminDashboard() {
                     </tr>
                   ))}
                   {filteredOrders.length === 0 && (
-                    <tr>
-                      <td colSpan={6} className="py-6 text-center text-sm text-gray-500">
-                        No orders match “{orderSearch}”. Try another buyer, vendor, or status.
-                      </td>
-                    </tr>
+                    <tr><td colSpan={6} className="py-6 text-center text-sm text-gray-500">No orders match "{orderSearch}"</td></tr>
                   )}
                 </tbody>
               </table>
@@ -454,60 +383,122 @@ export function AdminDashboard() {
 
           <div className="rounded-3xl bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Vendor compliance</h3>
-              <Button variant="ghost" size="sm">See queue</Button>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Payout queue</p>
+                <h3 className="text-2xl font-semibold text-gray-900">{symbol}{payoutTotal.toLocaleString()}</h3>
+                <p className="text-xs text-gray-500">{payoutQueue.length} pending · awaiting release</p>
+              </div>
+              <DollarSign className="h-5 w-5 text-emerald-500" />
+            </div>
+            <div className="mt-4 space-y-3">
+              {payoutQueue.length === 0 && (
+                <p className="rounded-2xl border border-dashed border-gray-200 p-4 text-center text-sm text-gray-500">No pending payouts.</p>
+              )}
+              {payoutQueue.map((payout) => (
+                <div key={payout.id} className="rounded-2xl border border-gray-100 p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{payout.vendor}</p>
+                      <p className="text-xs text-gray-500">Age {payout.age}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-base font-semibold text-gray-900">{symbol}{payout.amount.toLocaleString()}</p>
+                      <span className="text-xs font-semibold text-amber-600">{payout.status}</span>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    className="mt-3 w-full bg-orange-500 text-white hover:bg-orange-600"
+                    disabled={approvingPayoutId === payout.id}
+                    onClick={() => handleApprovePayout(payout.id)}
+                  >
+                    {approvingPayoutId === payout.id ? "Releasing..." : "Approve payout"}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── 4. Open disputes + Vendor KYC queue ───────────────────────── */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="rounded-3xl bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Open disputes</h3>
+                <p className="text-sm text-gray-500">{openDisputes.length} requiring resolution</p>
+              </div>
+              <AlertTriangle className={`h-5 w-5 ${openDisputes.length > 3 ? "text-red-500" : "text-amber-500"}`} />
+            </div>
+            <div className="mt-4 space-y-3">
+              {adminDisputes.length === 0 && <p className="text-sm text-gray-400">No disputes found.</p>}
+              {adminDisputes.map((dispute) => (
+                <div key={dispute.id} className={`rounded-2xl border p-4 ${dispute.status === "open" ? "border-amber-100 bg-amber-50/40" : "border-gray-100"}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{dispute.reason}</p>
+                      <p className="text-xs text-gray-500">By {dispute.openedBy?.name ?? "Unknown"} · Order {dispute.order?.id?.slice(-8).toUpperCase() ?? "—"}</p>
+                      <p className="text-xs text-gray-400">{new Date(dispute.openedAt).toLocaleDateString()}</p>
+                    </div>
+                    <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${dispute.status === "open" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"}`}>
+                      {dispute.status}
+                    </span>
+                  </div>
+                  {dispute.status === "open" && (
+                    <div className="mt-3 flex gap-2">
+                      <Button size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700"
+                        disabled={resolvingDisputeId === dispute.id}
+                        onClick={() => handleResolveDispute(dispute.id)}>
+                        {resolvingDisputeId === dispute.id ? "Resolving..." : "Resolve"}
+                      </Button>
+                      <Button size="sm" variant="outline" className="border-gray-200 text-gray-700"
+                        onClick={() => { const o = adminOrders.find((ord) => ord.id === dispute.order?.id); if (o) setActiveOrderId(o.id); }}>
+                        View order
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-3xl bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Vendor KYC queue</h3>
+                <p className="text-sm text-gray-500">{pendingVendors.length} pending · {adminVendors.length} total</p>
+              </div>
+              <Shield className="h-5 w-5 text-orange-500" />
             </div>
             <div className="mt-4 flex items-center gap-2 rounded-2xl border border-gray-100 px-3 py-2">
               <Search className="h-4 w-4 text-gray-400" />
-              <input
-                value={vendorSearch}
-                onChange={(event) => setVendorSearch(event.target.value)}
+              <input value={vendorSearch} onChange={(e) => setVendorSearch(e.target.value)}
                 placeholder="Search vendor or ID"
-                className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
-              />
+                className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400" />
             </div>
-            <div className="mt-4 space-y-4">
+            <div className="mt-4 space-y-3">
               {filteredVendors.map((vendor) => (
                 <div key={vendor.id} className="rounded-2xl border border-gray-100 p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{vendor.id}</p>
-                      <h4 className="text-lg font-semibold text-gray-900">{vendor.name}</h4>
-                      <p className="text-sm text-gray-500">{vendor.totalOrders} lifetime orders</p>
+                      <h4 className="text-sm font-semibold text-gray-900">{vendor.name}</h4>
+                      <p className="text-xs text-gray-500">{vendor.kitchenName || vendor.address || vendor.id}</p>
                     </div>
-                    <div className="text-right">
-                      <span
-                        className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${
-                          vendor.kycStatus === "Approved"
-                            ? "bg-green-50 text-green-600"
-                            : vendor.kycStatus === "Pending"
-                            ? "bg-amber-50 text-amber-600"
-                            : "bg-red-50 text-red-600"
-                        }`}
-                      >
-                        <CheckCircle2 className="h-3.5 w-3.5" /> {vendor.kycStatus}
-                      </span>
-                      <p className="mt-2 text-sm font-semibold text-gray-900">⭐ {vendor.rating}</p>
-                      {recentAudits[vendor.id] && (
-                        <p className="text-xs text-emerald-600">Audit scheduled {recentAudits[vendor.id]}</p>
-                      )}
-                    </div>
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${vendor.kycStatus === "Approved" ? "bg-emerald-50 text-emerald-700" : vendor.kycStatus === "Pending" ? "bg-amber-50 text-amber-700" : "bg-red-50 text-red-700"}`}>
+                      <CheckCircle2 className="mr-1 inline h-3 w-3" />{vendor.kycStatus}
+                    </span>
                   </div>
-                  <div className="mt-4 flex flex-wrap gap-2 text-xs">
+                  <div className="mt-3 flex flex-wrap gap-2">
                     <Button variant="outline" size="sm" className="border-gray-200 text-gray-700" onClick={() => setActiveVendorId(vendor.id)}>
                       View dossier
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-orange-600"
-                      onClick={() => handleTriggerAudit(vendor.id)}
+                    <Button variant="ghost" size="sm" className="text-orange-600"
                       disabled={isSchedulingAudit === vendor.id}
-                    >
-                      {isSchedulingAudit === vendor.id ? "Scheduling..." : recentAudits[vendor.id] ? "Audit scheduled" : "Trigger audit"}
+                      onClick={() => handleTriggerAudit(vendor.id)}>
+                      {isSchedulingAudit === vendor.id ? "Scheduling..." : recentAudits[vendor.id] ? "Audit scheduled ✓" : "Trigger audit"}
                     </Button>
                     {vendor.kycStatus !== "Approved" && (
-                      <Button size="sm" className="bg-green-600 text-white" onClick={() => handleVerifyVendor(vendor.id)}>
+                      <Button size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700" onClick={() => handleVerifyVendor(vendor.id)}>
                         Approve KYC
                       </Button>
                     )}
@@ -516,66 +507,35 @@ export function AdminDashboard() {
               ))}
               {filteredVendors.length === 0 && (
                 <div className="rounded-2xl border border-dashed border-gray-200 p-6 text-center text-sm text-gray-500">
-                  No vendors match “{vendorSearch}”. Double-check the ID or adjust your filters.
+                  No vendors match "{vendorSearch}"
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        {/* ── 5. Escalation queue (conditional) ─────────────────────────── */}
+        {escalationQueue.length > 0 && (
           <div className="rounded-3xl bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Audit log</h3>
-              <Button variant="ghost" size="sm">Export</Button>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Escalation queue</h3>
+                <p className="text-sm text-gray-500">{escalationQueue.length} open ticket{escalationQueue.length !== 1 ? "s" : ""}</p>
+              </div>
+              <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">{escalationQueue.length} open</span>
             </div>
-            <div className="mt-4 space-y-4">
-              {adminDisputes.length === 0 && (
-                <p className="text-sm text-gray-400">No disputes found.</p>
-              )}
-              {adminDisputes.map((dispute) => (
-                <div key={dispute.id} className="flex items-center justify-between rounded-2xl border border-gray-100 p-4">
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{dispute.openedBy?.name ?? "Unknown"}</p>
-                    <p className="text-sm text-gray-500">{dispute.reason}</p>
-                    <p className="text-xs text-gray-400">Order: {dispute.order?.id?.slice(-8).toUpperCase()}</p>
-                  </div>
-                  <span className={`text-xs font-semibold ${dispute.status === "open" ? "text-amber-600" : "text-green-600"}`}>
-                    {dispute.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Escalation queue</h3>
-              <Inbox className="h-5 w-5 text-orange-500" />
-            </div>
-            <div className="mt-4 space-y-4">
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {escalationQueue.map((ticket) => (
                 <div key={ticket.id} className="rounded-2xl border border-gray-100 p-4">
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <p className="uppercase tracking-[0.3em]">{ticket.id}</p>
-                    <span
-                      className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
-                        ticket.severity === "High"
-                          ? "bg-red-50 text-red-600"
-                          : ticket.severity === "Medium"
-                          ? "bg-amber-50 text-amber-600"
-                          : "bg-emerald-50 text-emerald-600"
-                      }`}
-                    >
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{ticket.id}</p>
+                    <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${ticket.severity === "High" ? "bg-red-50 text-red-600" : ticket.severity === "Medium" ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"}`}>
                       {ticket.severity}
                     </span>
                   </div>
                   <p className="mt-2 text-sm font-semibold text-gray-900">{ticket.title}</p>
-                  <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
-                    <span>Owner: {ticket.owner}</span>
-                    <span>{ticket.eta}</span>
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+                  <p className="text-xs text-gray-500">Owner: {ticket.owner} · {ticket.eta}</p>
+                  <div className="mt-3 flex gap-2">
                     <Button variant="outline" size="sm" className="border-gray-200 text-gray-700" onClick={() => handleResolveEscalation(ticket.id)}>
                       Resolve
                     </Button>
@@ -585,78 +545,19 @@ export function AdminDashboard() {
                   </div>
                 </div>
               ))}
-              {escalationQueue.length === 0 && (
-                <p className="rounded-2xl border border-dashed border-gray-200 p-4 text-center text-sm text-gray-500">
-                  All clear. No open escalations right now.
-                </p>
-              )}
             </div>
-            <Button variant="outline" className="mt-4 w-full border-gray-200">Assign next</Button>
           </div>
+        )}
 
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Moderation actions</h3>
-              <Gavel className="h-5 w-5 text-orange-500" />
-            </div>
-            <div className="mt-4 space-y-4">
-              {moderationQueue.map((item) => (
-                <div key={item.id} className="rounded-2xl border border-gray-100 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{item.id}</p>
-                      <p className="text-sm font-semibold text-gray-900">{item.flag}</p>
-                      <p className="text-xs text-gray-500">{item.vendor}</p>
-                    </div>
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        item.status === "Resolved"
-                          ? "bg-emerald-50 text-emerald-600"
-                          : item.status === "Needs review"
-                          ? "bg-amber-50 text-amber-600"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
-                    >
-                      {item.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <Button className="mt-4 w-full bg-orange-500 text-white">Open moderation room</Button>
-          </div>
-
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Trust tasks</h3>
-              <ClipboardCheck className="h-5 w-5 text-emerald-500" />
-            </div>
-            <div className="mt-4 space-y-4">
-              {trustTasks.map((task) => (
-                <div key={task.id} className="rounded-2xl border border-gray-100 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{task.id}</p>
-                      <p className="text-sm font-semibold text-gray-900">{task.title}</p>
-                      <p className="text-xs text-gray-500">Owner {task.owner} • Due {task.due}</p>
-                    </div>
-                    <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">{task.status}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <Button variant="outline" className="mt-4 w-full border-gray-200">Dispatch to on-call</Button>
-          </div>
-        </div>
         <AdminOrderDetailModal
-          order={activeOrderId ? adminOrders.find((order) => order.id === activeOrderId) ?? null : null}
+          order={activeOrderId ? adminOrders.find((o) => o.id === activeOrderId) ?? null : null}
           profile={activeOrderId ? orderProfiles[activeOrderId] ?? null : null}
           isEscalating={isEscalatingOrder}
           onCreateEscalation={handleCreateEscalation}
           onClose={() => setActiveOrderId(null)}
         />
         <VendorDossierModal
-          vendor={activeVendorId ? adminVendors.find((vendor) => vendor.id === activeVendorId) ?? null : null}
+          vendor={activeVendorId ? adminVendors.find((v) => v.id === activeVendorId) ?? null : null}
           dossier={activeVendorId ? vendorProfiles[activeVendorId] ?? null : null}
           onClose={() => setActiveVendorId(null)}
         />
