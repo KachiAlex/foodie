@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
 import { prisma } from "../lib/prisma";
+import type { AuthUser } from "../middleware/auth";
 
 export const listBids = asyncHandler(async (req: Request, res: Response) => {
   const requestId = req.query.requestId as string | undefined;
@@ -16,12 +17,23 @@ export const listBids = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const createBid = asyncHandler(async (req: Request, res: Response) => {
-  const { requestId, vendorId, bidAmount, prepTimeMinutes, estimatedDeliveryTime, message } = req.body;
+  const { requestId, bidAmount, prepTimeMinutes, estimatedDeliveryTime, message } = req.body;
+  const authUser = (req as Request & { user?: AuthUser }).user!;
+
+  const profile = await prisma.vendorProfile.findUnique({
+    where: { userId: authUser.id },
+    select: { id: true },
+  });
+
+  if (!profile) {
+    res.status(404).json({ success: false, error: { message: "Vendor profile not found" } });
+    return;
+  }
 
   const bid = await prisma.bid.create({
     data: {
       requestId,
-      vendorId,
+      vendorId: profile.id,
       bidAmount: Number(bidAmount) || 0,
       prepTimeMinutes: Number(prepTimeMinutes) || 0,
       estimatedDeliveryTime,

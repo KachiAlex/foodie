@@ -41,12 +41,25 @@ const savedBriefs = [
 ];
 
 export function BuyerDashboard() {
-  const { requests, orders, bids } = useApp();
+  const { requests, orders, bids, acceptBid } = useApp();
   const { symbol } = useCurrency();
   const [showNewRequest, setShowNewRequest] = useState(false);
   const [bidFilter, setBidFilter] = useState<"all" | "collecting_bids" | "in_progress" | "fulfilled">("all");
   const [timelineRequestId, setTimelineRequestId] = useState<string | null>(null);
   const [activeBriefId, setActiveBriefId] = useState<string | null>(null);
+  const [acceptingBidId, setAcceptingBidId] = useState<string | null>(null);
+
+  const handleAcceptBid = async (bidId: string, requestId: string) => {
+    if (acceptingBidId) return;
+    setAcceptingBidId(bidId);
+    try {
+      await acceptBid(bidId, requestId);
+    } catch {
+      // error handled by context
+    } finally {
+      setAcceptingBidId(null);
+    }
+  };
   const activeRequests = requests.filter((request) => request.status !== "fulfilled").length;
   const onDeckOrders = orders.filter((order) => order.status !== "Delivered");
   const todayDeliveries = onDeckOrders.filter((order) => order.eta.includes("Today")).length;
@@ -480,9 +493,19 @@ export function BuyerDashboard() {
                               <span className="text-xs font-semibold text-emerald-600">{bid.confidence}% confidence</span>
                             </div>
                             <div className="mt-2 flex items-center justify-between text-sm text-gray-600">
-                              <span>${bid.price}</span>
+                              <span>{symbol}{bid.price}</span>
                               <span>{bid.eta}</span>
                             </div>
+                            {request.status === "collecting_bids" && (
+                              <Button
+                                size="sm"
+                                className="mt-2 w-full bg-orange-500 text-white text-xs"
+                                disabled={acceptingBidId === bid.id}
+                                onClick={() => handleAcceptBid(bid.id, request.id)}
+                              >
+                                {acceptingBidId === bid.id ? "Accepting..." : "Accept bid"}
+                              </Button>
+                            )}
                           </div>
                         ))}
                       </div>

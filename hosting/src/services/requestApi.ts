@@ -132,6 +132,11 @@ export async function createBid(payload: CreateBidPayload): Promise<VendorBid> {
   return mapBid(data);
 }
 
+export async function selectBid(bidId: string): Promise<VendorBid> {
+  const data = await api.patch<BackendBid>(`/bids/${bidId}/select`, {});
+  return mapBid(data);
+}
+
 // Admin actions
 export async function deleteRequest(requestId: string): Promise<void> {
   await api.del(`/requests/${requestId}`);

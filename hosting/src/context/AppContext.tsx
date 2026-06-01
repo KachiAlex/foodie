@@ -15,6 +15,7 @@ import {
   updateRequestStatus,
   fetchBids,
   createBid,
+  selectBid,
 } from "@/services/requestApi";
 import {
   fetchOrders,
@@ -51,6 +52,7 @@ interface AppContextValue extends AppState {
   addRequest: (payload: CreateRequestPayload) => Promise<BuyerRequest>;
   changeRequestStatus: (id: string, status: BuyerRequest["status"]) => Promise<BuyerRequest>;
   addBid: (payload: CreateBidPayload) => Promise<VendorBid>;
+  acceptBid: (bidId: string, requestId: string) => Promise<VendorBid>;
   addOrder: (payload: CreateOrderPayload) => Promise<BuyerOrder>;
   changeOrderStatus: (payload: UpdateOrderStatusPayload) => Promise<BuyerOrder>;
   changeVendorOrderStatus: (id: string, status: VendorOrderStage["status"]) => Promise<VendorOrderStage>;
@@ -146,6 +148,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [showToast]
   );
 
+  const acceptBid = useCallback(
+    async (bidId: string, requestId: string) => {
+      const updated = await selectBid(bidId);
+      setBids((prev) => prev.map((b) => b.id === bidId ? { ...b } : b));
+      setRequests((prev) =>
+        prev.map((r) => r.id === requestId ? { ...r, status: "in_progress" as const } : r)
+      );
+      showToast("Bid accepted! Order is now in progress.");
+      return updated;
+    },
+    [showToast]
+  );
+
   const addOrder = useCallback(
     async (payload: CreateOrderPayload) => {
       const created = await createOrder(payload);
@@ -205,6 +220,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addRequest,
       changeRequestStatus,
       addBid,
+      acceptBid,
       addOrder,
       changeOrderStatus,
       changeVendorOrderStatus,
@@ -224,6 +240,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addRequest,
       changeRequestStatus,
       addBid,
+      acceptBid,
       addOrder,
       changeOrderStatus,
       changeVendorOrderStatus,
