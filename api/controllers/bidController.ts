@@ -20,20 +20,10 @@ export const createBid = asyncHandler(async (req: Request, res: Response) => {
   const { requestId, bidAmount, prepTimeMinutes, estimatedDeliveryTime, message } = req.body;
   const authUser = (req as Request & { user?: AuthUser }).user!;
 
-  const profile = await prisma.vendorProfile.findUnique({
-    where: { userId: authUser.id },
-    select: { id: true },
-  });
-
-  if (!profile) {
-    res.status(404).json({ success: false, error: { message: "Vendor profile not found" } });
-    return;
-  }
-
   const bid = await prisma.bid.create({
     data: {
       requestId,
-      vendorId: profile.id,
+      vendorId: authUser.id,
       bidAmount: Number(bidAmount) || 0,
       prepTimeMinutes: Number(prepTimeMinutes) || 0,
       estimatedDeliveryTime,
