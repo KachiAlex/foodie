@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import {
   Activity,
+  AlertTriangle,
   CheckCircle2,
   ClipboardList,
   Clock3,
@@ -12,16 +13,20 @@ import {
   X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { useCurrency } from "@/context/CurrencyContext";
 
 const statusColumns = ["New", "Cooking", "Ready", "Delivered"] as const;
 
 export function VendorDashboard() {
   const { vendorOpenRequests, vendorOrders, menuItems, vendorMetrics, addBid } = useApp();
+  const { user } = useAuth();
   const { symbol } = useCurrency();
+  const isPendingVerification = user?.verificationStatus === "pending";
   const [checklistItems, setChecklistItems] = useState([
     { label: "Upload new kitchen shots", detail: "Highlight clean surfaces + plating station", complete: true },
     { label: "Verify cold-chain logs", detail: "Attach latest HACCP sheet", complete: false },
@@ -106,6 +111,27 @@ export function VendorDashboard() {
       }
     >
       <section className="space-y-8">
+        {isPendingVerification && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4"
+          >
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-amber-800">Your account is pending verification</p>
+              <p className="mt-0.5 text-sm text-amber-700">
+                An admin is reviewing your kitchen documents. You can browse open requests but cannot place bids or add menu items until verified.
+              </p>
+            </div>
+            <Link
+              to="/auth/sign-in"
+              className="shrink-0 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-600"
+            >
+              Learn more
+            </Link>
+          </motion.div>
+        )}
         <div className="grid gap-4 sm:grid-cols-3">
           {vendorMetrics.map((metric) => (
             <motion.div
