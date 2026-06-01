@@ -1,4 +1,4 @@
-import type { BuyerRequest, RequestStatus, VendorBid } from "@/data/mock";
+import type { BuyerRequest, RequestStatus, VendorBid } from "@/types/domain";
 import { api } from "./apiClient";
 
 /* Backend shape mapping */

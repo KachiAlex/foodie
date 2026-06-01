@@ -8,7 +8,7 @@ import type {
   MenuItem,
   VendorMetric,
   VendorOpenRequest,
-} from "@/data/mock";
+} from "@/types/domain";
 import {
   fetchRequests,
   createRequest,

@@ -74,23 +74,39 @@ export function AdminDashboard() {
       .catch((err) => console.error("Failed to load disputes", err));
   }, []);
 
-  const [escalationQueue, setEscalationQueue] = useState([
-    { id: "ESC-491", title: "Buyer flagged late delivery", owner: "Joy", severity: "High", eta: "Respond in 30m" },
-    { id: "ESC-523", title: "Vendor disputes refund", owner: "Kachi", severity: "Medium", eta: "Due in 1h" },
-    { id: "ESC-537", title: "Chef onboarding docs missing", owner: "Amaka", severity: "Low", eta: "Due tomorrow" },
-  ]);
+  const [escalationQueue, setEscalationQueue] = useState<{ id: string; title: string; owner: string; severity: string; eta: string }[]>([]);
 
-  const moderationQueue = [
-    { id: "MOD-204", flag: "Menu photo quality", vendor: "Lagos Test Kitchen", status: "Needs review" },
-    { id: "MOD-205", flag: "Pricing mismatch", vendor: "Chef Mimi", status: "Resolved" },
-    { id: "MOD-206", flag: "Hygiene certificate expiring", vendor: "Chef Zubair", status: "Pending" },
-  ];
+  const moderationQueue = useMemo(
+    () =>
+      adminVendors
+        .filter((v) => v.kycStatus === "Pending")
+        .map((v) => ({ id: v.id, flag: "KYC pending review", vendor: v.kitchenName || v.name, status: "Pending" })),
+    [adminVendors]
+  );
 
-  const opsAlerts = [
-    { label: "SLA risk", value: "3 routes", detail: "+1 vs avg", severity: "High" },
-    { label: "Disputes awaiting vendor", value: "4 cases", detail: "avg age 42m", severity: "Medium" },
-    { label: "Payout backlog", value: `${symbol}18k`, detail: "2 vendors flagged", severity: "High" },
-  ];
+  const opsAlerts = useMemo(
+    () => [
+      {
+        label: "Open Disputes",
+        value: `${metrics?.pendingDisputes ?? 0} cases`,
+        detail: "requiring resolution",
+        severity: (metrics?.pendingDisputes ?? 0) > 3 ? "High" : "Medium",
+      },
+      {
+        label: "Pending Vendors",
+        value: `${metrics?.newVendors ?? 0} vendors`,
+        detail: "awaiting KYC",
+        severity: (metrics?.newVendors ?? 0) > 0 ? "Medium" : "Low",
+      },
+      {
+        label: "Payout Backlog",
+        value: `${symbol}${Number(metrics?.escrowHeld ?? 0).toLocaleString()}`,
+        detail: "in escrow",
+        severity: (metrics?.escrowHeld ?? 0) > 10000 ? "High" : "Medium",
+      },
+    ],
+    [metrics, symbol]
+  );
 
   const payoutQueue = useMemo(
     () =>
@@ -106,11 +122,19 @@ export function AdminDashboard() {
     [escrowTxns, symbol]
   );
 
-  const trustTasks = [
-    { id: "TS-11", title: "Re-review flagged media", owner: "Ada", due: "Today", status: "In progress" },
-    { id: "TS-09", title: "Confirm bank change", owner: "Tobi", due: "2h", status: "Waiting" },
-    { id: "TS-06", title: "Schedule kitchen audit", owner: "Joy", due: "Tomorrow", status: "Backlog" },
-  ];
+  const trustTasks = useMemo(
+    () =>
+      adminDisputes
+        .filter((d) => d.status === "open")
+        .map((d) => ({
+          id: d.id,
+          title: d.reason,
+          owner: d.openedBy?.name ?? "Unknown",
+          due: new Date(d.openedAt).toLocaleDateString(),
+          status: "Open",
+        })),
+    [adminDisputes]
+  );
 
   const orderProfiles = useMemo(
     () =>

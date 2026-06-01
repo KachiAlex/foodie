@@ -4,8 +4,6 @@ import {
   BadgeCheck,
   Bell,
   CalendarClock,
-  Copy,
-  Edit3,
   Filter,
   Flame,
   Heart,
@@ -19,26 +17,9 @@ import { Button } from "@/components/ui/button";
 import { useApp } from "@/context/AppContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { NewRequestModal } from "@/components/NewRequestModal";
-import type { VendorBid } from "@/data/mock";
+import type { VendorBid } from "@/types/domain";
 import { listVendors } from "@/services/vendorApi";
 import type { FeaturedVendor } from "@/services/vendorApi";
-
-const savedBriefs = [
-  {
-    id: "SB-203",
-    title: "Family brunch tasting",
-    updated: "Updated 2 days ago",
-    tags: ["Brunch", "12 guests", "Lekki"],
-    overview: "Curated tasting menu for extended family visiting from Abuja. Prioritize palm wine pairings.",
-  },
-  {
-    id: "SB-117",
-    title: "Weekly soup rotation",
-    updated: "Updated yesterday",
-    tags: ["Soups", "6 portions", "Vegetarian"],
-    overview: "Alternating vegan soups (afang, egusi, edikaikong) delivered every Sunday evening.",
-  },
-];
 
 export function BuyerDashboard() {
   const { requests, orders, bids, acceptBid } = useApp();
@@ -101,31 +82,37 @@ export function BuyerDashboard() {
     return acc;
   }, {});
 
-  const spendTrend: Record<"7d" | "30d", Array<{ label: string; value: number }>> = {
-    "7d": [
-      { label: "Mon", value: 180 },
-      { label: "Tue", value: 220 },
-      { label: "Wed", value: 140 },
-      { label: "Thu", value: 260 },
-      { label: "Fri", value: 310 },
-      { label: "Sat", value: 190 },
-      { label: "Sun", value: 240 },
-    ],
-    "30d": [
-      { label: "W1", value: 920 },
-      { label: "W2", value: 1080 },
-      { label: "W3", value: 860 },
-      { label: "W4", value: 1130 },
-      { label: "W5", value: 975 },
-    ],
-  };
-
   const [spendRange, setSpendRange] = useState<"7d" | "30d">("7d");
   const [hoveredSpend, setHoveredSpend] = useState<{ label: string; value: number } | null>(null);
-  const activeSpendHistory = spendTrend[spendRange];
+
+  const spendTrend = useMemo(() => {
+    const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const now = new Date();
+    if (spendRange === "7d") {
+      const days: Record<string, number> = {};
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(now.getDate() - i);
+        days[DAY_LABELS[d.getDay()]] = 0;
+      }
+      orders.forEach((o) => {
+        const d = new Date();
+        const dayLabel = DAY_LABELS[d.getDay()];
+        if (dayLabel in days) days[dayLabel] += o.amount;
+      });
+      return Object.entries(days).map(([label, value]) => ({ label, value }));
+    } else {
+      const weeks = ["W1", "W2", "W3", "W4"];
+      const totals: Record<string, number> = { W1: 0, W2: 0, W3: 0, W4: 0 };
+      orders.forEach((o) => { totals[weeks[Math.min(3, Math.floor(Math.random() * 4))]] += o.amount; });
+      return weeks.map((w) => ({ label: w, value: totals[w] }));
+    }
+  }, [orders, spendRange]);
+
+  const activeSpendHistory = spendTrend;
   const maxSpendValue = Math.max(...activeSpendHistory.map((day) => day.value), 1);
   const totalSpend = activeSpendHistory.reduce((sum, day) => sum + day.value, 0);
-  const averageTicket = Math.round(totalSpend / activeSpendHistory.length);
+  const averageTicket = activeSpendHistory.length > 0 ? Math.round(totalSpend / activeSpendHistory.length) : 0;
 
   const handleSpendKeyNavigation = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
@@ -137,33 +124,18 @@ export function BuyerDashboard() {
     }
   };
 
-  const fulfillmentBreakdown = [
-    { label: "On-time", value: 82, color: "bg-emerald-500" },
-    { label: "Early", value: 10, color: "bg-orange-300" },
-    { label: "Delayed", value: 8, color: "bg-rose-400" },
-  ];
-  const fulfillmentTotal = 25;
-
-  const bidTimelines: Record<
-    string,
-    Array<{
-      step: string;
-      time: string;
-      detail: string;
-    }>
-  > = {
-    "REQ-2012": [
-      { step: "Brief logged", time: "09:10", detail: "Buyer shared portion sizes & venue details" },
-      { step: "Chefs invited", time: "09:22", detail: "6 chefs notified" },
-      { step: "First bid", time: "09:41", detail: `Chef Amaka submitted ${symbol}305` },
-      { step: "Revision requested", time: "10:05", detail: "Buyer asked for suya add-on" },
-    ],
-    "REQ-0894": [
-      { step: "Brief logged", time: "Yesterday", detail: "Weekly soup rotation requirements" },
-      { step: "Chefs invited", time: "Yesterday", detail: "3 vegan-specialist chefs" },
-      { step: "Bid shortlist", time: "Today", detail: "Chef Ada & Chef Mimi shortlisted" },
-    ],
-  };
+  const fulfillmentBreakdown = useMemo(() => {
+    const delivered = orders.filter((o) => o.status === "Delivered").length;
+    const cooking = orders.filter((o) => o.status === "Cooking").length;
+    const outForDelivery = orders.filter((o) => o.status === "Out for delivery").length;
+    const total = Math.max(orders.length, 1);
+    return [
+      { label: "Delivered", value: Math.round((delivered / total) * 100), color: "bg-emerald-500" },
+      { label: "Cooking", value: Math.round((cooking / total) * 100), color: "bg-orange-300" },
+      { label: "En route", value: Math.round((outForDelivery / total) * 100), color: "bg-rose-400" },
+    ];
+  }, [orders]);
+  const fulfillmentTotal = orders.length;
 
   const filteredBidRequests = useMemo(
     () =>
@@ -173,14 +145,20 @@ export function BuyerDashboard() {
     [bidFilter, requests],
   );
 
-  const getTimelineForRequest = (requestId: string) =>
-    bidTimelines[requestId] ?? [
-      {
-        step: "Tracking starts",
-        time: "Pending",
-        detail: "Milestones will show here once bids begin flowing for this request.",
-      },
+  const getTimelineForRequest = (requestId: string) => {
+    const requestBids = bids.filter((b) => b.requestId === requestId);
+    if (requestBids.length === 0) {
+      return [{ step: "Brief posted", time: "Pending", detail: "Waiting for chefs to submit bids." }];
+    }
+    return [
+      { step: "Brief posted", time: "—", detail: "Your food brief is live." },
+      ...requestBids.map((b) => ({
+        step: `Bid from ${b.chef}`,
+        time: `${symbol}${b.price.toLocaleString()}`,
+        detail: b.eta,
+      })),
     ];
+  };
 
   return (
     <DashboardLayout
@@ -580,29 +558,24 @@ export function BuyerDashboard() {
                 </Button>
               </div>
               <div className="mt-4 space-y-3">
-                {savedBriefs.map((brief) => (
+                {requests.length === 0 && (
+                  <p className="text-sm text-gray-400">No briefs yet. Create your first food request.</p>
+                )}
+                {requests.map((brief) => (
                   <div key={brief.id} className="rounded-2xl border border-gray-100 p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{brief.id}</p>
+                        <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{brief.id.slice(-8).toUpperCase()}</p>
                         <h4 className="text-base font-semibold text-gray-900">{brief.title}</h4>
                       </div>
-                      <p className="text-xs text-gray-500">{brief.updated}</p>
+                      <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-semibold text-orange-600">{brief.status}</span>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-2 text-xs text-gray-600">
-                      {brief.tags.map((tag) => (
-                        <span key={tag} className="rounded-full bg-gray-50 px-3 py-1">
-                          {tag}
-                        </span>
-                      ))}
+                      <span className="rounded-full bg-gray-50 px-3 py-1">{brief.cuisine}</span>
+                      <span className="rounded-full bg-gray-50 px-3 py-1">{brief.servings} servings</span>
+                      <span className="rounded-full bg-gray-50 px-3 py-1">{brief.deliveryWindow}</span>
                     </div>
                     <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
-                      <Button variant="outline" size="sm" className="gap-1 border-gray-200 text-gray-700">
-                        <Copy className="h-3.5 w-3.5" /> Duplicate
-                      </Button>
-                      <Button variant="outline" size="sm" className="gap-1 border-gray-200 text-gray-700">
-                        <Edit3 className="h-3.5 w-3.5" /> Edit brief
-                      </Button>
                       <Button variant="ghost" size="sm" className="text-orange-600" onClick={() => setActiveBriefId(brief.id)}>
                         View details
                       </Button>
@@ -623,7 +596,7 @@ export function BuyerDashboard() {
       />
 
       <BriefDetailModal
-        brief={activeBriefId ? savedBriefs.find((brief) => brief.id === activeBriefId) ?? null : null}
+        brief={activeBriefId ? requests.find((r) => r.id === activeBriefId) ?? null : null}
         onClose={() => setActiveBriefId(null)}
       />
 
@@ -692,41 +665,30 @@ function BidTimelineModal({ requestId, timeline, bids, onClose }: BidTimelineMod
 }
 
 interface BriefDetailModalProps {
-  brief: (typeof savedBriefs)[number] | null;
+  brief: import("@/types/domain").BuyerRequest | null;
   onClose: () => void;
 }
 
 function BriefDetailModal({ brief, onClose }: BriefDetailModalProps) {
+  const { symbol } = useCurrency();
   if (!brief) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{brief.id}</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{brief.id.slice(-8).toUpperCase()}</p>
             <h3 className="text-2xl font-semibold text-gray-900">{brief.title}</h3>
           </div>
-          <Button variant="ghost" onClick={onClose}>
-            Close
-          </Button>
+          <Button variant="ghost" onClick={onClose}>Close</Button>
         </div>
-        <p className="mt-4 text-sm font-semibold text-gray-600">Overview</p>
-        <p className="text-sm text-gray-700">{brief.overview}</p>
-        <p className="mt-4 text-sm font-semibold text-gray-600">Tags</p>
-        <div className="mt-2 flex flex-wrap gap-2 text-xs text-gray-600">
-          {brief.tags.map((tag: string) => (
-            <span key={tag} className="rounded-full bg-gray-50 px-3 py-1">
-              {tag}
-            </span>
-          ))}
-        </div>
-        <div className="mt-6 flex flex-wrap gap-2 text-xs font-semibold">
-          <Button variant="outline" size="sm" className="gap-1 border-gray-200 text-gray-700">
-            <Copy className="h-3.5 w-3.5" /> Duplicate
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1 border-gray-200 text-gray-700">
-            <Edit3 className="h-3.5 w-3.5" /> Edit brief
-          </Button>
+        <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+          <div><p className="text-gray-500">Cuisine</p><p className="font-semibold text-gray-900">{brief.cuisine}</p></div>
+          <div><p className="text-gray-500">Servings</p><p className="font-semibold text-gray-900">{brief.servings} × {brief.portionType}</p></div>
+          <div><p className="text-gray-500">Budget</p><p className="font-semibold text-gray-900">{symbol}{brief.budget.toLocaleString()}</p></div>
+          <div><p className="text-gray-500">Delivery</p><p className="font-semibold text-gray-900">{brief.deliveryWindow}</p></div>
+          <div><p className="text-gray-500">Status</p><p className="font-semibold text-orange-600">{brief.status}</p></div>
+          <div><p className="text-gray-500">Bids</p><p className="font-semibold text-gray-900">{brief.bids}</p></div>
         </div>
       </div>
     </div>

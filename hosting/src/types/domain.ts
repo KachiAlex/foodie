@@ -64,34 +64,14 @@ export interface MenuItem {
   tags: string[];
 }
 
-export interface AdminMetric {
-  label: string;
-  value: string;
-  delta: string;
-  trend: "up" | "down";
-}
-
-export interface AdminOrder {
-  id: string;
-  buyer: string;
-  vendor: string;
-  amount: string;
-  status: string;
-}
-
 export interface AdminVendorRecord {
   id: string;
   name: string;
+  email?: string;
   kycStatus: "Pending" | "Approved" | "Flagged";
   rating: number;
   totalOrders: number;
+  kitchenName?: string;
+  address?: string;
+  landmark?: string;
 }
-
-export interface AuditLogEntry {
-  id: string;
-  actor: string;
-  action: string;
-  target: string;
-  timestamp: string;
-}
-

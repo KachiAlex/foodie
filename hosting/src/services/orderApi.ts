@@ -1,4 +1,4 @@
-import type { BuyerOrder, VendorOrderStage } from "@/data/mock";
+import type { BuyerOrder, VendorOrderStage } from "@/types/domain";
 import { api } from "./apiClient";
 
 /* Backend shape mapping */

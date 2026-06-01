@@ -27,35 +27,42 @@ export function VendorDashboard() {
   const { user } = useAuth();
   const { symbol } = useCurrency();
   const isPendingVerification = user?.verificationStatus === "pending";
-  const [checklistItems, setChecklistItems] = useState([
-    { label: "Upload new kitchen shots", detail: "Highlight clean surfaces + plating station", complete: true },
-    { label: "Verify cold-chain logs", detail: "Attach latest HACCP sheet", complete: false },
-    { label: "Refresh tasting menu", detail: "Add seasonal palm wine pairings", complete: false },
-  ]);
   const [activeRequest, setActiveRequest] = useState<(typeof vendorOpenRequests)[number] | null>(null);
   const [isSubmittingBid, setIsSubmittingBid] = useState(false);
   const [bidSent, setBidSent] = useState(false);
-  const bidTrend = [
-    { label: "Mon", value: 3 },
-    { label: "Tue", value: 4 },
-    { label: "Wed", value: 2 },
-    { label: "Thu", value: 5 },
-    { label: "Fri", value: 6 },
-    { label: "Sat", value: 4 },
-    { label: "Sun", value: 3 },
-  ];
 
-  const totalBidVolume = useMemo(() => bidTrend.reduce((sum, day) => sum + day.value, 0), [bidTrend]);
-  const [bidFocus, setBidFocus] = useState<(typeof bidTrend)[number] | null>(null);
+  const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const bidTrend = useMemo(() => {
+    const counts: Record<string, number> = {};
+    DAY_LABELS.forEach((d) => { counts[d] = 0; });
+    const todayLabel = DAY_LABELS[new Date().getDay()];
+    vendorOrders.forEach(() => {
+      counts[todayLabel] = (counts[todayLabel] ?? 0) + 1;
+    });
+    const today = new Date().getDay();
+    return Array.from({ length: 7 }, (_, i) => {
+      const idx = (today - 6 + i + 7) % 7;
+      const label = DAY_LABELS[idx];
+      return { label, value: counts[label] ?? 0 };
+    });
+  }, [vendorOrders]);
+
+  const totalBidVolume = useMemo(() => vendorOrders.length, [vendorOrders]);
+  const [bidFocus, setBidFocus] = useState<{ label: string; value: number } | null>(null);
   const maxBidValue = Math.max(...bidTrend.map((day) => day.value), 1);
-  const completedChecklist = checklistItems.filter((item) => item.complete).length;
-  const checklistProgress = Math.round((completedChecklist / checklistItems.length) * 100);
 
-  const handleChecklistToggle = (label: string) => {
-    setChecklistItems((items) =>
-      items.map((item) => (item.label === label ? { ...item, complete: !item.complete } : item)),
-    );
-  };
+  const deliveredOrders = useMemo(() => vendorOrders.filter((o) => o.status === "Delivered").length, [vendorOrders]);
+  const winRate = vendorOrders.length > 0 ? Math.round((deliveredOrders / vendorOrders.length) * 100) : 0;
+  const totalEarned = useMemo(() => vendorMetrics.find((m) => m.label === "Total Earned")?.value ?? "0", [vendorMetrics]);
+
+  const checklistItems = useMemo(() => [
+    { label: "Menu items added", detail: `${menuItems.length} items on your menu`, complete: menuItems.length > 0 },
+    { label: "Profile verified", detail: user?.verificationStatus === "verified" ? "Your account is verified" : "Pending admin review", complete: user?.verificationStatus === "verified" },
+    { label: "Orders fulfilled", detail: `${deliveredOrders} orders delivered so far`, complete: deliveredOrders > 0 },
+  ], [menuItems.length, user?.verificationStatus, deliveredOrders]);
+
+  const completedChecklist = checklistItems.filter((item) => item.complete).length;
+  const checklistProgress = checklistItems.length > 0 ? Math.round((completedChecklist / checklistItems.length) * 100) : 0;
 
   const openRequestModal = (request: (typeof vendorOpenRequests)[number]) => {
     setActiveRequest(request);
@@ -197,19 +204,11 @@ export function VendorDashboard() {
               )}
             </div>
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
-              {[{
-                label: "Win rate",
-                value: "38%",
-                icon: Activity,
-              }, {
-                label: "Avg tip",
-                value: `${symbol}4.8k`,
-                icon: CheckCircle2,
-              }, {
-                label: "Chef score",
-                value: "4.9/5",
-                icon: Clock3,
-              }].map((stat) => (
+              {[
+                { label: "Win rate", value: `${winRate}%`, icon: Activity },
+                { label: "Total earned", value: `${symbol}${totalEarned}`, icon: CheckCircle2 },
+                { label: "Orders done", value: `${deliveredOrders}`, icon: Clock3 },
+              ].map((stat) => (
                 <div key={stat.label} className="rounded-2xl bg-gray-50 p-4">
                   <stat.icon className="h-4 w-4 text-orange-500" />
                   <p className="mt-2 text-xl font-semibold text-gray-900">{stat.value}</p>
@@ -245,14 +244,6 @@ export function VendorDashboard() {
                       <p className="text-sm font-semibold text-gray-900">{item.label}</p>
                       <p className="text-xs text-gray-500">{item.detail}</p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="ml-auto text-orange-600"
-                      onClick={() => handleChecklistToggle(item.label)}
-                    >
-                      {item.complete ? "Undo" : "Mark done"}
-                    </Button>
                   </div>
                 </div>
               ))}

@@ -1,4 +1,4 @@
-import type { VendorMetric, MenuItem, VendorOpenRequest } from "@/data/mock";
+import type { VendorMetric, MenuItem, VendorOpenRequest } from "@/types/domain";
 import { api } from "./apiClient";
 
 /* Backend shape mapping */
