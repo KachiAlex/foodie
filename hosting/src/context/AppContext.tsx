@@ -52,7 +52,7 @@ interface AppContextValue extends AppState {
   addRequest: (payload: CreateRequestPayload) => Promise<BuyerRequest>;
   changeRequestStatus: (id: string, status: BuyerRequest["status"]) => Promise<BuyerRequest>;
   addBid: (payload: CreateBidPayload) => Promise<VendorBid>;
-  acceptBid: (bidId: string, requestId: string) => Promise<VendorBid>;
+  acceptBid: (bidId: string, requestId: string) => Promise<{ bid: VendorBid; orderId: string }>;
   addOrder: (payload: CreateOrderPayload) => Promise<BuyerOrder>;
   changeOrderStatus: (payload: UpdateOrderStatusPayload) => Promise<BuyerOrder>;
   changeVendorOrderStatus: (id: string, status: VendorOrderStage["status"]) => Promise<VendorOrderStage>;
@@ -150,13 +150,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const acceptBid = useCallback(
     async (bidId: string, requestId: string) => {
-      const updated = await selectBid(bidId);
+      const bid = await selectBid(bidId);
+      // Create the order record immediately so we have an orderId for payment
+      const order = await createOrder({
+        chef: bid.chef,
+        dishes: bid.requestId,
+        amount: bid.price,
+        eta: bid.eta,
+        requestId,
+        bidId,
+        vendorId: bid.vendorId,
+      });
       setBids((prev) => prev.map((b) => b.id === bidId ? { ...b } : b));
       setRequests((prev) =>
         prev.map((r) => r.id === requestId ? { ...r, status: "in_progress" as const } : r)
       );
-      showToast("Bid accepted! Order is now in progress.");
-      return updated;
+      setOrders((prev) => [order, ...prev]);
+      showToast("Bid accepted — complete payment to confirm your order.");
+      return { bid, orderId: order.id };
     },
     [showToast]
   );

@@ -201,14 +201,17 @@ model EscrowWallet {
 }
 
 model EscrowTransaction {
-  id        String            @id @default(cuid())
-  orderId   String?
-  vendorId  String
-  vendor    User              @relation(fields: [vendorId], references: [id])
-  amount    Decimal           @db.Decimal(10, 2)
-  type      TransactionType
-  status    TransactionStatus @default(pending)
-  createdAt DateTime          @default(now())
+  id                 String            @id @default(cuid())
+  orderId            String?
+  vendorId           String
+  vendor             User              @relation(fields: [vendorId], references: [id])
+  amount             Decimal           @db.Decimal(10, 2)
+  type               TransactionType
+  status             TransactionStatus @default(pending)
+  paystackReference  String?
+  paystackAccessCode String?
+  metadata           String?
+  createdAt          DateTime          @default(now())
 
   @@map("escrow_transactions")
 }

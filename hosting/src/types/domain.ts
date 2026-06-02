@@ -27,6 +27,7 @@ export interface BuyerOrder {
 export interface VendorBid {
   id: string;
   requestId: string;
+  vendorId: string;
   chef: string;
   price: number;
   eta: string;

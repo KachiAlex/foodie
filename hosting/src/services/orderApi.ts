@@ -71,6 +71,9 @@ export interface CreateOrderPayload {
   dishes: string;
   amount: number;
   eta: string;
+  requestId?: string;
+  bidId?: string;
+  vendorId?: string;
 }
 
 export interface UpdateOrderStatusPayload {
@@ -84,11 +87,18 @@ export async function fetchOrders(): Promise<BuyerOrder[]> {
 }
 
 export async function createOrder(payload: CreateOrderPayload): Promise<BuyerOrder> {
+  const platformFee = Math.round(payload.amount * 0.05);
+  const deliveryFee = Math.round(payload.amount * 0.10);
+  const escrowFee = Math.round(payload.amount * 0.02);
   const data = await api.post<BackendOrder>("/orders", {
-    requestId: "", // Placeholder; backend needs requestId. Frontend doesn't currently pass it.
-    foodCost: payload.amount * 0.85,
-    deliveryFee: payload.amount * 0.15,
-    totalAmount: payload.amount,
+    requestId: payload.requestId ?? "",
+    bidId: payload.bidId ?? "",
+    vendorId: payload.vendorId ?? "",
+    foodCost: payload.amount,
+    deliveryFee,
+    platformFee,
+    escrowFee,
+    totalAmount: payload.amount + deliveryFee + platformFee + escrowFee,
   });
   return mapBuyerOrder(data);
 }

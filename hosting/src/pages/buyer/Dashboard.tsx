@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { useApp } from "@/context/AppContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { NewRequestModal } from "@/components/NewRequestModal";
+import { PaystackCheckout } from "@/components/PaystackCheckout";
 import type { VendorBid } from "@/types/domain";
 import { listVendors } from "@/services/vendorApi";
 import type { FeaturedVendor } from "@/services/vendorApi";
@@ -32,6 +33,7 @@ export function BuyerDashboard() {
   const [timelineRequestId, setTimelineRequestId] = useState<string | null>(null);
   const [activeBriefId, setActiveBriefId] = useState<string | null>(null);
   const [acceptingBidId, setAcceptingBidId] = useState<string | null>(null);
+  const [checkoutOrder, setCheckoutOrder] = useState<{ orderId: string; amount: number; foodName: string } | null>(null);
   const [vendors, setVendors] = useState<FeaturedVendor[]>([]);
   const [expandedRequestIds, setExpandedRequestIds] = useState<Set<string>>(new Set());
   const [spendRange, setSpendRange] = useState<"7d" | "30d">("7d");
@@ -41,11 +43,13 @@ export function BuyerDashboard() {
     listVendors().then(setVendors).catch(() => {});
   }, []);
 
-  const handleAcceptBid = async (bidId: string, requestId: string) => {
+  const handleAcceptBid = async (bid: VendorBid, requestId: string) => {
     if (acceptingBidId) return;
-    setAcceptingBidId(bidId);
+    setAcceptingBidId(bid.id);
     try {
-      await acceptBid(bidId, requestId);
+      const { orderId } = await acceptBid(bid.id, requestId);
+      const req = requests.find((r) => r.id === requestId);
+      setCheckoutOrder({ orderId, amount: bid.price, foodName: req?.title ?? bid.chef });
     } catch {
       // handled by context
     } finally {
@@ -434,7 +438,7 @@ export function BuyerDashboard() {
                                   size="sm"
                                   className="mt-3 w-full bg-orange-500 text-white hover:bg-orange-600"
                                   disabled={acceptingBidId === bid.id}
-                                  onClick={() => handleAcceptBid(bid.id, request.id)}
+                                  onClick={() => handleAcceptBid(bid, request.id)}
                                 >
                                   {acceptingBidId === bid.id ? "Accepting..." : "Accept this bid"}
                                 </Button>
@@ -532,6 +536,16 @@ export function BuyerDashboard() {
       />
 
       {showNewRequest && <NewRequestModal onClose={() => setShowNewRequest(false)} />}
+
+      {checkoutOrder && (
+        <PaystackCheckout
+          orderId={checkoutOrder.orderId}
+          orderAmount={checkoutOrder.amount}
+          foodName={checkoutOrder.foodName}
+          onClose={() => setCheckoutOrder(null)}
+          onSuccess={() => setCheckoutOrder(null)}
+        />
+      )}
     </DashboardLayout>
   );
 }

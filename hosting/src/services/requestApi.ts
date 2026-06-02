@@ -21,7 +21,8 @@ interface BackendRequest {
 interface BackendBid {
   id: string;
   requestId: string;
-  vendor?: { name: string };
+  vendorId: string;
+  vendor?: { id: string; name: string };
   bidAmount: number;
   estimatedDeliveryTime?: string;
   message?: string;
@@ -62,6 +63,7 @@ function mapBid(b: BackendBid): VendorBid {
   return {
     id: b.id,
     requestId: b.requestId,
+    vendorId: b.vendorId ?? b.vendor?.id ?? "",
     chef: b.vendor?.name || "Unknown",
     price: b.bidAmount,
     eta: b.estimatedDeliveryTime || "TBD",
