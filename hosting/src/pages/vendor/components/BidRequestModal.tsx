@@ -79,20 +79,25 @@ export function BidRequestModal({ request, onClose, isSubmitting, onSubmit, bidS
             <label className="text-sm font-semibold text-gray-700">
               Bid amount
               <input
-                type="text"
+                type="number"
+                min={1}
+                required
                 value={bidAmount}
                 onChange={(e) => setBidAmount(e.target.value)}
-                className="mt-1 w-full rounded-2xl border border-gray-200 px-3 py-2 text-base text-gray-900"
+                className="mt-1 w-full rounded-2xl border border-gray-200 px-3 py-2 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </label>
             <label className="text-sm font-semibold text-gray-700">
               Kitchen notes
               <textarea
+                required
+                maxLength={500}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={4}
-                className="mt-1 w-full rounded-2xl border border-gray-200 px-3 py-2 text-base text-gray-900"
+                className="mt-1 w-full rounded-2xl border border-gray-200 px-3 py-2 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
+              <p className="mt-1 text-xs text-gray-500">{notes.length}/500</p>
             </label>
             <p className="text-xs text-gray-500">Tip: mention prep timeline + plating style to win trust.</p>
           </div>

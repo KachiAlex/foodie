@@ -2,7 +2,7 @@ import type { ChangeEvent, FormEvent } from "react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChefHat, Loader2, MapPin, Camera, ShieldCheck, Video as VideoIcon, X } from "lucide-react";
+import { ChefHat, Loader2, MapPin, Camera, ShieldCheck, Video as VideoIcon, X, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { publicRoleOptions, type Role } from "@/context/RoleContext";
@@ -63,6 +63,12 @@ export function SignUpPage() {
   const [vendorDetails, setVendorDetails] = useState<VendorRequirementFields>(initialVendorState);
   const [mediaPreviews, setMediaPreviews] = useState<MediaPreview[]>([]);
   const [compressingMedia, setCompressingMedia] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [touched, setTouched] = useState({ name: false, email: false, password: false });
+
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
+  const passwordValid = form.password.length >= 8;
+  const nameValid = form.name.trim().length >= 2;
 
   const vendorSteps = [
     {
@@ -152,6 +158,13 @@ export function SignUpPage() {
     const files = event.target.files ? Array.from(event.target.files).slice(0, 6) : [];
     event.target.value = "";
     if (files.length === 0) return;
+    const maxBytes = 10 * 1024 * 1024; // 10 MB
+    const oversized = files.filter((f) => f.size > maxBytes);
+    if (oversized.length > 0) {
+      setError(`${oversized.length} file(s) exceed 10MB limit.`);
+      return;
+    }
+    setError(null);
     setCompressingMedia(true);
     try {
       const processed = await Promise.all(
@@ -228,12 +241,19 @@ export function SignUpPage() {
                 </label>
                 <input
                   id="name"
+                  name="name"
+                  autoComplete="name"
                   required
+                  minLength={2}
                   value={form.name}
                   onChange={handleTextChange("name")}
+                  onBlur={() => setTouched((p) => ({ ...p, name: true }))}
                   className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                   placeholder="Adaeze Emmanuel"
                 />
+                {touched.name && !nameValid && (
+                  <p className="text-xs text-red-500">Name must be at least 2 characters.</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -242,28 +262,69 @@ export function SignUpPage() {
                 </label>
                 <input
                   id="email"
+                  name="email"
+                  autoComplete="email"
                   type="email"
                   required
                   value={form.email}
                   onChange={handleTextChange("email")}
+                  onBlur={() => setTouched((p) => ({ ...p, email: true }))}
                   className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                   placeholder="you@foodie.market"
                 />
+                {touched.email && !emailValid && (
+                  <p className="text-xs text-red-500">Enter a valid email address.</p>
+                )}
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700" htmlFor="password">
                   Password
                 </label>
-                <input
-                  id="password"
-                  type="password"
-                  required
-                  value={form.password}
-                  onChange={handleTextChange("password")}
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input
+                    id="password"
+                    name="password"
+                    autoComplete="new-password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    minLength={8}
+                    value={form.password}
+                    onChange={handleTextChange("password")}
+                    onBlur={() => setTouched((p) => ({ ...p, password: true }))}
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 pr-10 text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                    placeholder="Min 8 characters"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+                {touched.password && !passwordValid && (
+                  <p className="text-xs text-red-500">Password must be at least 8 characters.</p>
+                )}
+                {form.password && (
+                  <div className="flex items-center gap-2">
+                    <div className="flex flex-1 gap-1">
+                      {[1, 2, 3].map((i) => (
+                        <div
+                          key={i}
+                          className={`h-1 flex-1 rounded-full ${
+                            i <= (form.password.length >= 12 ? 3 : form.password.length >= 10 ? 2 : 1)
+                              ? "bg-emerald-400" : "bg-gray-200"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-[10px] font-medium text-gray-500">
+                      {form.password.length >= 12 ? "Strong" : form.password.length >= 10 ? "Fair" : "Weak"}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -339,13 +400,18 @@ export function SignUpPage() {
                     </label>
                     <textarea
                       id="vendor-address"
+                      name="address"
+                      autoComplete="street-address"
                       required
+                      maxLength={200}
                       value={vendorDetails.address}
                       onChange={handleVendorTextChange("address")}
                       className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                       placeholder="12 Palm Avenue, Lekki Phase 1, Lagos"
                       rows={3}
+                      aria-describedby="address-hint"
                     />
+                    <p id="address-hint" className="text-xs text-gray-500">{vendorDetails.address.length}/200</p>
                   </div>
 
                   <div className="space-y-2">
@@ -354,12 +420,16 @@ export function SignUpPage() {
                     </label>
                     <input
                       id="vendor-landmark"
+                      name="landmark"
                       required
+                      maxLength={100}
                       value={vendorDetails.landmark}
                       onChange={handleVendorTextChange("landmark")}
                       className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                       placeholder="Opposite Palm View Hotel"
+                      aria-describedby="landmark-hint"
                     />
+                    <p id="landmark-hint" className="text-xs text-gray-500">{vendorDetails.landmark.length}/100</p>
                   </div>
 
                   <div className="space-y-2">
@@ -455,7 +525,12 @@ export function SignUpPage() {
                 </div>
               )}
 
-              {error && <p className="text-sm text-red-500">{error}</p>}
+              {error && (
+                <div className="flex items-start gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
 
               <Button type="submit" className="w-full bg-orange-500 text-white" disabled={loading}>
                 {loading ? (

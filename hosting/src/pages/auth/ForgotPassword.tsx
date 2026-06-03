@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, KeyRound, Loader2, Mail } from "lucide-react";
+import { ArrowLeft, KeyRound, Loader2, Mail, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { requestPasswordReset, resetPassword } from "@/services/authApi";
 
 export function ForgotPasswordPage() {
+  const navigate = useNavigate();
   const [step, setStep] = useState<"email" | "reset">("email");
   const [email, setEmail] = useState("");
   const [resetToken, setResetToken] = useState("");
@@ -14,6 +15,10 @@ export function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const passwordStrength =
+    newPassword.length >= 12 ? 3 : newPassword.length >= 10 ? 2 : newPassword.length >= 6 ? 1 : 0;
 
   async function handleRequestReset(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -50,7 +55,7 @@ export function ForgotPasswordPage() {
       await resetPassword(resetToken, newPassword);
       setSuccess("Password reset successfully! Redirecting to sign in...");
       setTimeout(() => {
-        window.location.href = "/auth/sign-in";
+        navigate("/auth/sign-in");
       }, 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to reset password");
@@ -99,6 +104,8 @@ export function ForgotPasswordPage() {
                 <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <input
                   type="email"
+                  name="email"
+                  autoComplete="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -123,25 +130,59 @@ export function ForgotPasswordPage() {
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">New password</label>
-              <input
-                type="password"
-                required
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
-                placeholder="Min 6 characters"
-              />
+              <div className="relative">
+                <input
+                  name="new-password"
+                  autoComplete="new-password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  minLength={6}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 px-4 py-3 pr-10 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                  placeholder="Min 6 characters"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+              {newPassword && (
+                <div className="mt-2 flex items-center gap-2">
+                  <div className="flex flex-1 gap-1">
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className={`h-1 flex-1 rounded-full ${i <= passwordStrength ? "bg-emerald-400" : "bg-gray-200"}`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[10px] font-medium text-gray-500">
+                    {passwordStrength === 3 ? "Strong" : passwordStrength === 2 ? "Fair" : "Weak"}
+                  </span>
+                </div>
+              )}
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">Confirm password</label>
               <input
-                type="password"
+                name="confirm-password"
+                autoComplete="new-password"
+                type={showPassword ? "text" : "password"}
                 required
+                minLength={6}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                 placeholder="Repeat password"
               />
+              {confirmPassword && newPassword !== confirmPassword && (
+                <p className="mt-1 text-xs text-red-500">Passwords do not match.</p>
+              )}
             </div>
             <Button
               type="submit"
