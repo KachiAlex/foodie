@@ -54,7 +54,13 @@ function mapRequest(r: BackendRequest): BuyerRequest {
     servings: r.quantity,
     budget: r.budgetMax || r.budgetMin || 0,
     status: mapStatus(r.status),
-    deliveryWindow: r.deliveryAddress || new Date(r.deliveryDateTime).toLocaleString(),
+    deliveryWindow: new Date(r.deliveryDateTime).toLocaleString(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
     bids: Array.isArray(r.bids) ? r.bids.length : 0,
   };
 }
@@ -78,7 +84,9 @@ export interface CreateRequestPayload {
   uom: string;
   servings: number;
   budget: number;
-  deliveryWindow: string;
+  deliveryDate: string;
+  deliveryTime: string;
+  deliveryAddress: string;
 }
 
 export interface CreateBidPayload {
@@ -95,6 +103,7 @@ export async function fetchRequests(): Promise<BuyerRequest[]> {
 }
 
 export async function createRequest(payload: CreateRequestPayload): Promise<BuyerRequest> {
+  const dt = new Date(`${payload.deliveryDate}T${payload.deliveryTime}`);
   const data = await api.post<BackendRequest>("/requests", {
     foodName: payload.title,
     category: payload.cuisine,
@@ -102,8 +111,8 @@ export async function createRequest(payload: CreateRequestPayload): Promise<Buye
     unit: payload.portionType,
     budgetMin: payload.budget * 0.8,
     budgetMax: payload.budget,
-    deliveryAddress: payload.deliveryWindow,
-    deliveryDateTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    deliveryAddress: payload.deliveryAddress,
+    deliveryDateTime: dt.toISOString(),
     instructions: "",
     imageUrl: "",
   });

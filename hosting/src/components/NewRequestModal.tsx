@@ -14,6 +14,10 @@ export function NewRequestModal({ onClose }: NewRequestModalProps) {
   const { symbol } = useCurrency();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState(0);
+  const now = new Date();
+  const todayStr = now.toISOString().split("T")[0];
+  const timeStr = `${String(now.getHours() + 2).padStart(2, "0")}:00`;
+
   const [form, setForm] = useState<CreateRequestPayload>({
     title: "",
     cuisine: "Nigerian",
@@ -21,7 +25,9 @@ export function NewRequestModal({ onClose }: NewRequestModalProps) {
     uom: "Plate",
     servings: 10,
     budget: 200,
-    deliveryWindow: "Today, 6:00 PM",
+    deliveryDate: todayStr,
+    deliveryTime: timeStr,
+    deliveryAddress: "",
   });
 
   const steps = ["Details", "Portion & Budget", "Review"];
@@ -116,15 +122,36 @@ export function NewRequestModal({ onClose }: NewRequestModalProps) {
               </select>
             </label>
             <label className="block text-sm font-semibold text-gray-700">
-              Delivery window
+              Delivery address
               <input
                 type="text"
-                value={form.deliveryWindow}
-                onChange={(e) => update("deliveryWindow", e.target.value)}
-                placeholder="e.g. Today, 6:00 PM"
+                value={form.deliveryAddress}
+                onChange={(e) => update("deliveryAddress", e.target.value)}
+                placeholder="e.g. 12 Admiralty Way, Lekki Phase 1"
                 className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </label>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block text-sm font-semibold text-gray-700">
+                Delivery date
+                <input
+                  type="date"
+                  value={form.deliveryDate}
+                  min={todayStr}
+                  onChange={(e) => update("deliveryDate", e.target.value)}
+                  className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </label>
+              <label className="block text-sm font-semibold text-gray-700">
+                Delivery time
+                <input
+                  type="time"
+                  value={form.deliveryTime}
+                  onChange={(e) => update("deliveryTime", e.target.value)}
+                  className="mt-1 w-full rounded-2xl border border-gray-200 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </label>
+            </div>
           </div>
         )}
 
@@ -210,7 +237,8 @@ export function NewRequestModal({ onClose }: NewRequestModalProps) {
               <p><span className="font-medium text-gray-900">UoM:</span> {form.uom}</p>
               <p><span className="font-medium text-gray-900">Servings:</span> {form.servings}</p>
               <p><span className="font-medium text-gray-900">Budget:</span> {symbol}{form.budget}</p>
-              <p><span className="font-medium text-gray-900">Delivery:</span> {form.deliveryWindow}</p>
+              <p><span className="font-medium text-gray-900">Delivery:</span> {form.deliveryDate} at {form.deliveryTime}</p>
+              <p><span className="font-medium text-gray-900">Address:</span> {form.deliveryAddress || "—"}</p>
             </div>
           </div>
         )}
