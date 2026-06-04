@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd hosting && npm run build",
+  "buildCommand": "npx prisma generate && cd hosting && npm run build",
   "outputDirectory": "hosting/dist",
   "installCommand": "npm install && cd hosting && npm install",
   "rewrites": [
