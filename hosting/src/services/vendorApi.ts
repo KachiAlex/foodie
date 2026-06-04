@@ -102,6 +102,23 @@ interface BackendVendorProfile {
   menuItems: { name: string; price: number }[];
 }
 
+export async function searchVendors(query: string): Promise<FeaturedVendor[]> {
+  const data = await api.get<BackendVendorProfile[]>("/vendors/search?q=" + encodeURIComponent(query));
+  return data.map((v) => ({
+    id: v.userId,
+    name: v.user?.name ?? "Unknown Chef",
+    kitchenName: v.kitchenName ?? "",
+    address: v.address ?? "",
+    specialties: v.specialties ?? [],
+    menuItems: v.menuItems ?? [],
+  }));
+}
+
+export async function toggleVendorOnline(): Promise<boolean> {
+  const data = await api.patch<{ isOnline: boolean }>("/vendors/toggle-online", {});
+  return data.isOnline;
+}
+
 export async function listVendors(): Promise<FeaturedVendor[]> {
   const data = await api.get<BackendVendorProfile[]>("/vendors");
   return data.map((v) => ({

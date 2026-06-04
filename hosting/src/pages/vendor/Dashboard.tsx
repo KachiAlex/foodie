@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useApp } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
+import { toggleVendorOnline } from "@/services/vendorApi";
 import { VendorMetricsGrid } from "./components/VendorMetricsGrid";
 import { BidHealthChart } from "./components/BidHealthChart";
 import { KitchenReadinessCard } from "./components/KitchenReadinessCard";
@@ -14,6 +16,7 @@ import { BidMarketplace } from "./components/BidMarketplace";
 import { MenuHighlights } from "./components/MenuHighlights";
 import { OrdersPipeline } from "./components/OrdersPipeline";
 import { BidRequestModal } from "./components/BidRequestModal";
+import { AddMenuItemModal } from "./components/AddMenuItemModal";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 type StatusColumn = "New" | "Cooking" | "Ready" | "Delivered";
@@ -29,8 +32,9 @@ const SIDEBAR = {
 };
 
 export function VendorDashboard() {
-  const { vendorOpenRequests, vendorOrders, menuItems, vendorMetrics, addBid, changeVendorOrderStatus, isLoading } = useApp();
+  const { vendorOpenRequests, vendorOrders, menuItems, vendorMetrics, addBid, changeVendorOrderStatus, addMenuItem, isLoading } = useApp();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [searchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") ?? "overview";
   const isPendingVerification = user?.verificationStatus === "pending";
@@ -38,6 +42,9 @@ export function VendorDashboard() {
   const [isSubmittingBid, setIsSubmittingBid] = useState(false);
   const [bidSent, setBidSent] = useState(false);
   const [promotingOrders, setPromotingOrders] = useState<Set<string>>(new Set());
+  const [showMenuModal, setShowMenuModal] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [togglingPause, setTogglingPause] = useState(false);
 
   const promoteOrder = async (orderId: string, nextStatus: StatusColumn) => {
     setPromotingOrders((prev) => new Set(prev).add(orderId));
@@ -89,6 +96,20 @@ export function VendorDashboard() {
     setIsSubmittingBid(false);
   };
 
+  const handleTogglePause = async () => {
+    if (togglingPause) return;
+    setTogglingPause(true);
+    try {
+      const newState = await toggleVendorOnline();
+      setIsPaused(!newState);
+      showToast(newState ? "Kitchen is now online — accepting orders." : "Kitchen paused — you won't receive new orders.");
+    } catch {
+      showToast("Failed to toggle kitchen status");
+    } finally {
+      setTogglingPause(false);
+    }
+  };
+
   const handleSubmitBid = async (values: { bidAmount: string; notes: string }) => {
     if (!activeRequest || isSubmittingBid || bidSent) return;
     setIsSubmittingBid(true);
@@ -138,8 +159,12 @@ export function VendorDashboard() {
       description="Bid on custom requests, manage orders, and showcase your menu."
       actions={
         <div className="flex gap-2">
-          <Button variant="outline">Pause Orders</Button>
-          <Button className="bg-orange-500 text-white">Add Menu Item</Button>
+          <Button variant="outline" onClick={handleTogglePause} disabled={togglingPause}>
+            {isPaused ? "Resume Orders" : "Pause Orders"}
+          </Button>
+          <Button className="bg-orange-500 text-white" onClick={() => setShowMenuModal(true)}>
+            Add Menu Item
+          </Button>
         </div>
       }
     >
@@ -211,7 +236,7 @@ export function VendorDashboard() {
           </div>
           <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
             <BidMarketplace requests={vendorOpenRequests} onOpenRequest={openRequestModal} />
-            <MenuHighlights items={menuItems} compact />
+            <MenuHighlights items={menuItems} compact onAddMenuItem={() => setShowMenuModal(true)} />
           </div>
           <OrdersPipeline orders={vendorOrders} promotingOrders={promotingOrders} onPromote={promoteOrder} />
         </>}
@@ -223,6 +248,15 @@ export function VendorDashboard() {
           isSubmitting={isSubmittingBid}
           onSubmit={handleSubmitBid}
           bidSent={bidSent}
+        />
+      )}
+      {showMenuModal && (
+        <AddMenuItemModal
+          onClose={() => setShowMenuModal(false)}
+          onSubmit={async (payload: import("@/services/vendorApi").AddMenuItemPayload) => {
+            await addMenuItem(payload);
+            setShowMenuModal(false);
+          }}
         />
       )}
     </DashboardLayout>

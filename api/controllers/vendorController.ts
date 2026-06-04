@@ -114,6 +114,42 @@ export const addMenuItem = asyncHandler(async (req: Request, res: Response) => {
   res.status(201).json({ success: true, data: item });
 });
 
+export const searchVendors = asyncHandler(async (req: Request, res: Response) => {
+  const q = ((req.query.q as string) || "").trim().toLowerCase();
+  const vendors = await prisma.vendorProfile.findMany({
+    where: {
+      verified: true,
+      OR: [
+        { kitchenName: { contains: q, mode: "insensitive" } },
+        { address: { contains: q, mode: "insensitive" } },
+        { user: { name: { contains: q, mode: "insensitive" } } },
+        { menuItems: { some: { name: { contains: q, mode: "insensitive" } } } },
+      ],
+    },
+    include: {
+      user: { select: { id: true, name: true } },
+      menuItems: { take: 3, select: { name: true, price: true } },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+  });
+  res.json({ success: true, data: vendors });
+});
+
+export const toggleOnline = asyncHandler(async (req: Request, res: Response) => {
+  const vendorId = (req as Request & { user?: { id: string } }).user?.id as string;
+  const profile = await prisma.vendorProfile.findUnique({ where: { userId: vendorId } });
+  if (!profile) {
+    res.status(404).json({ success: false, error: { message: "Vendor not found" } });
+    return;
+  }
+  const updated = await prisma.vendorProfile.update({
+    where: { userId: vendorId },
+    data: { isOnline: !profile.isOnline },
+  });
+  res.json({ success: true, data: updated });
+});
+
 export const getOpenRequests = asyncHandler(async (_req: Request, res: Response) => {
   const data = await prisma.foodRequest.findMany({
     where: { status: "open" },

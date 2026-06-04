@@ -98,3 +98,8 @@ export async function resolveDispute(disputeId: string): Promise<ActionResponse>
   const data = await api.patch<ActionResponse>(`/admin/disputes/${disputeId}/resolve`, {});
   return data;
 }
+
+export async function flagVendor(vendorId: string, reason?: string): Promise<ActionResponse> {
+  const data = await api.post<{ success: boolean; message: string }>(`/admin/vendors/${vendorId}/flag`, { reason });
+  return data;
+}

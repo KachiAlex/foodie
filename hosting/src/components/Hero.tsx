@@ -2,13 +2,28 @@ import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 export function Hero() {
+  const [location, setLocation] = useState("");
   const stats = [
     { label: "Home Chefs", value: "500+" },
     { label: "Happy Customers", value: "10k+" },
     { label: "Cuisines", value: "50+" },
   ];
+
+  useEffect(() => {
+    const saved = localStorage.getItem("foodie_location");
+    if (saved) setLocation(saved);
+  }, []);
+
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setLocation(value);
+    if (value.trim()) {
+      localStorage.setItem("foodie_location", value.trim());
+    }
+  };
 
   return (
     <section className="relative bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 pt-24 pb-16 overflow-hidden">
@@ -36,6 +51,8 @@ export function Hero() {
                 <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
+                  value={location}
+                  onChange={handleLocationChange}
                   placeholder="Enter your delivery address"
                   className="w-full pl-12 pr-4 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-lg"
                 />
@@ -45,7 +62,9 @@ export function Hero() {
                 className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 text-lg rounded-xl h-auto"
                 asChild
               >
-                <Link to="/dashboard/buyer">Find Food</Link>
+                <Link to={`/dashboard/buyer${location ? `?search=${encodeURIComponent(location)}` : ""}`}>
+                  Find Food
+                </Link>
               </Button>
             </div>
 

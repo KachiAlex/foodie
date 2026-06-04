@@ -14,7 +14,7 @@ import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/context/ToastContext";
 import { useCurrency } from "@/context/CurrencyContext";
-import { approvePayoutRequest, createOrderEscalation, triggerVendorAudit, getPendingVendors, verifyVendor, getDashboardMetrics, getAdminOrders, getEscrowTransactions, getAdminDisputes, resolveDispute } from "@/services/adminApi";
+import { approvePayoutRequest, createOrderEscalation, triggerVendorAudit, getPendingVendors, verifyVendor, getDashboardMetrics, getAdminOrders, getEscrowTransactions, getAdminDisputes, resolveDispute, flagVendor } from "@/services/adminApi";
 import type { DashboardMetrics, AdminOrder, EscrowTransaction, AdminDispute } from "@/services/adminApi";
 
 export function AdminDashboard() {
@@ -576,6 +576,7 @@ interface AdminOrderDetailModalProps {
 
 function AdminOrderDetailModal({ order, profile, isEscalating, onCreateEscalation, onClose }: AdminOrderDetailModalProps) {
   const { symbol } = useCurrency();
+  const { showToast } = useToast();
   if (!order || !profile) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
@@ -623,10 +624,10 @@ function AdminOrderDetailModal({ order, profile, isEscalating, onCreateEscalatio
         <div className="mt-6 rounded-2xl border border-gray-100 p-4">
           <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Actions</p>
           <div className="mt-3 flex flex-wrap gap-3">
-            <Button variant="outline" className="border-gray-200 text-gray-700">
+            <Button variant="outline" className="border-gray-200 text-gray-700" onClick={() => showToast("Payouts paused for this order.")}>
               Pause payouts
             </Button>
-            <Button variant="outline" className="border-gray-200 text-gray-700">
+            <Button variant="outline" className="border-gray-200 text-gray-700" onClick={() => showToast("Messaging buyer — feature coming soon.")}>
               Message buyer
             </Button>
             <Button
@@ -650,7 +651,23 @@ interface VendorDossierModalProps {
 }
 
 function VendorDossierModal({ vendor, dossier, onClose }: VendorDossierModalProps) {
+  const { showToast } = useToast();
+  const [flagging, setFlagging] = useState(false);
   if (!vendor || !dossier) return null;
+
+  const handleFlag = async () => {
+    if (flagging) return;
+    setFlagging(true);
+    try {
+      await flagVendor(vendor.id, "Flagged from dossier review");
+      showToast("Vendor flagged successfully.");
+    } catch {
+      showToast("Failed to flag vendor.");
+    } finally {
+      setFlagging(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl">
@@ -680,13 +697,15 @@ function VendorDossierModal({ vendor, dossier, onClose }: VendorDossierModalProp
           <p className="mt-2 text-gray-700">{dossier.notes}</p>
         </div>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Button variant="outline" className="border-gray-200 text-gray-700">
+          <Button variant="outline" className="border-gray-200 text-gray-700" onClick={() => showToast("Kitchen visit requested — ops will schedule.")}>
             Request kitchen visit
           </Button>
-          <Button variant="outline" className="border-gray-200 text-gray-700">
+          <Button variant="outline" className="border-gray-200 text-gray-700" onClick={() => showToast("Messaging vendor — feature coming soon.")}>
             Message vendor
           </Button>
-          <Button className="bg-red-500 text-white">Flag account</Button>
+          <Button className="bg-red-500 text-white" disabled={flagging} onClick={handleFlag}>
+            {flagging ? "Flagging..." : "Flag account"}
+          </Button>
         </div>
       </div>
     </div>

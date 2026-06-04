@@ -172,8 +172,8 @@ export function BuyerDashboard() {
       description="Coordinate custom food requests, bids, and direct orders."
       actions={
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2">
-            <Search className="h-4 w-4" /> Find Vendors
+          <Button variant="outline" className="gap-2" asChild>
+            <Link to="/dashboard/buyer">Find Vendors</Link>
           </Button>
           <Button className="gap-2 bg-orange-500 text-white" onClick={() => setShowNewRequest(true)}>
             <Plus className="h-4 w-4" /> New Request

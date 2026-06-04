@@ -1,4 +1,35 @@
 import { ChefHat, Facebook, Twitter, Instagram, Youtube } from "lucide-react";
+import { Link } from "react-router-dom";
+
+const routeMap: Record<string, string> = {
+  "About Us": "/",
+  "How It Works": "/",
+  "Become a Chef": "/auth/sign-up?role=vendor",
+  "Chef Dashboard": "/dashboard/vendor",
+  "Browse Chefs": "/dashboard/buyer",
+  "Popular Dishes": "/dashboard/buyer",
+  "Cuisines": "/dashboard/buyer",
+};
+
+function FooterLink({ label }: { label: string }) {
+  const to = routeMap[label];
+  if (to) {
+    return (
+      <li>
+        <Link to={to} className="hover:text-orange-500 transition-colors">
+          {label}
+        </Link>
+      </li>
+    );
+  }
+  return (
+    <li>
+      <span className="cursor-not-allowed opacity-50" title="Coming soon">
+        {label}
+      </span>
+    </li>
+  );
+}
 
 export function Footer() {
   const footerLinks = {
@@ -34,18 +65,18 @@ export function Footer() {
               Connecting home chefs with hungry customers. Fresh, local, and delicious.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="bg-gray-800 p-2 rounded-lg hover:bg-gray-700 transition-colors">
+              <span className="bg-gray-800 p-2 rounded-lg cursor-not-allowed opacity-50" title="Coming soon">
                 <Facebook className="w-5 h-5" />
-              </a>
-              <a href="#" className="bg-gray-800 p-2 rounded-lg hover:bg-gray-700 transition-colors">
+              </span>
+              <span className="bg-gray-800 p-2 rounded-lg cursor-not-allowed opacity-50" title="Coming soon">
                 <Twitter className="w-5 h-5" />
-              </a>
-              <a href="#" className="bg-gray-800 p-2 rounded-lg hover:bg-gray-700 transition-colors">
+              </span>
+              <span className="bg-gray-800 p-2 rounded-lg cursor-not-allowed opacity-50" title="Coming soon">
                 <Instagram className="w-5 h-5" />
-              </a>
-              <a href="#" className="bg-gray-800 p-2 rounded-lg hover:bg-gray-700 transition-colors">
+              </span>
+              <span className="bg-gray-800 p-2 rounded-lg cursor-not-allowed opacity-50" title="Coming soon">
                 <Youtube className="w-5 h-5" />
-              </a>
+              </span>
             </div>
           </div>
 
@@ -55,11 +86,7 @@ export function Footer() {
               <h3 className="text-white font-bold mb-4">{section.title}</h3>
               <ul className="space-y-3">
                 {section.links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="hover:text-orange-500 transition-colors">
-                      {link}
-                    </a>
-                  </li>
+                  <FooterLink key={link} label={link} />
                 ))}
               </ul>
             </div>
@@ -73,9 +100,9 @@ export function Footer() {
               © 2026 Foodie Market. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
-              <a href="#" className="hover:text-orange-500 transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-orange-500 transition-colors">Terms of Service</a>
-              <a href="#" className="hover:text-orange-500 transition-colors">Cookie Settings</a>
+              <span className="cursor-not-allowed opacity-50" title="Coming soon">Privacy Policy</span>
+              <span className="cursor-not-allowed opacity-50" title="Coming soon">Terms of Service</span>
+              <span className="cursor-not-allowed opacity-50" title="Coming soon">Cookie Settings</span>
             </div>
           </div>
         </div>

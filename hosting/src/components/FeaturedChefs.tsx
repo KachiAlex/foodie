@@ -1,6 +1,7 @@
 import { Star, MapPin, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
+import { Link } from "react-router-dom";
 
 export function FeaturedChefs() {
   const chefs = [
@@ -60,8 +61,8 @@ export function FeaturedChefs() {
               Discover talented chefs in your neighborhood
             </p>
           </div>
-          <Button variant="outline" className="hidden sm:block">
-            View All Chefs
+          <Button variant="outline" className="hidden sm:block" asChild>
+            <Link to="/dashboard/buyer">View All Chefs</Link>
           </Button>
         </div>
 
@@ -112,8 +113,8 @@ export function FeaturedChefs() {
         </div>
 
         <div className="text-center mt-8 sm:hidden">
-          <Button variant="outline" className="w-full">
-            View All Chefs
+          <Button variant="outline" className="w-full" asChild>
+            <Link to="/dashboard/buyer">View All Chefs</Link>
           </Button>
         </div>
       </div>

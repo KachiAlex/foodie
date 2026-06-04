@@ -132,3 +132,35 @@ export const verifyVendor = asyncHandler(async (req: Request, res: Response) => 
   });
   res.json({ success: true, data: profile });
 });
+
+export const triggerVendorAudit = asyncHandler(async (req: Request, res: Response) => {
+  await prisma.auditLog.create({
+    data: {
+      actor: "admin",
+      action: "VENDOR_AUDIT",
+      target: req.params.id,
+      metadata: JSON.stringify({ triggeredAt: new Date().toISOString() }),
+    },
+  });
+  res.json({ success: true, message: "Audit scheduled for vendor" });
+});
+
+export const flagVendor = asyncHandler(async (req: Request, res: Response) => {
+  const { reason } = req.body;
+  const profile = await prisma.vendorProfile.update({
+    where: { userId: req.params.id },
+    data: { verified: false },
+    include: {
+      user: { select: { id: true, name: true, email: true } },
+    },
+  });
+  await prisma.auditLog.create({
+    data: {
+      actor: "admin",
+      action: "VENDOR_FLAG",
+      target: req.params.id,
+      metadata: JSON.stringify({ reason: reason || "No reason provided", flaggedAt: new Date().toISOString() }),
+    },
+  });
+  res.json({ success: true, message: "Vendor flagged successfully", data: profile });
+});

@@ -17,5 +17,7 @@ router.get("/disputes", adminController.listDisputes);
 router.patch("/disputes/:id/resolve", adminController.resolveDispute);
 router.get("/vendors/pending", adminController.listPendingVendors);
 router.patch("/vendors/:id/verify", adminController.verifyVendor);
+router.post("/vendors/:id/audit", adminController.triggerVendorAudit);
+router.post("/vendors/:id/flag", adminController.flagVendor);
 
 export default router;

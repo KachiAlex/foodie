@@ -1,7 +1,30 @@
+import { useState } from "react";
 import { Heart, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 import { useCurrency } from "@/context/CurrencyContext";
+import { Link } from "react-router-dom";
+
+function FavoriteButton({ dishId }: { dishId: number }) {
+  const [favorited, setFavorited] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem(`foodie_fav_${dishId}`) === "1";
+  });
+  const toggle = () => {
+    const next = !favorited;
+    setFavorited(next);
+    localStorage.setItem(`foodie_fav_${dishId}`, next ? "1" : "");
+  };
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); toggle(); }}
+      className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-gray-100 transition-colors"
+      aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+    >
+      <Heart className={`w-5 h-5 ${favorited ? "text-red-500 fill-red-500" : "text-gray-600"}`} />
+    </button>
+  );
+}
 
 export function PopularDishes() {
   const { symbol } = useCurrency();
@@ -78,8 +101,8 @@ export function PopularDishes() {
               Freshly prepared meals you'll love
             </p>
           </div>
-          <Button variant="outline" className="hidden sm:block">
-            Explore All Dishes
+          <Button variant="outline" className="hidden sm:block" asChild>
+            <Link to="/dashboard/buyer">Explore All Dishes</Link>
           </Button>
         </div>
 
@@ -95,9 +118,7 @@ export function PopularDishes() {
                   alt={dish.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />
-                <button className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-gray-100 transition-colors">
-                  <Heart className="w-5 h-5 text-gray-600" />
-                </button>
+                <FavoriteButton dishId={dish.id} />
                 {dish.isVegetarian && (
                   <div className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
                     Vegetarian
@@ -121,9 +142,11 @@ export function PopularDishes() {
                       <span className="text-sm text-gray-400 line-through">{symbol}{dish.originalPrice}</span>
                     )}
                   </div>
-                  <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-4">
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add
+                  <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-4" asChild>
+                    <Link to="/dashboard/buyer">
+                      <Plus className="w-4 h-4 mr-1" />
+                      Add
+                    </Link>
                   </Button>
                 </div>
               </div>
@@ -132,8 +155,8 @@ export function PopularDishes() {
         </div>
 
         <div className="text-center mt-8 sm:hidden">
-          <Button variant="outline" className="w-full">
-            Explore All Dishes
+          <Button variant="outline" className="w-full" asChild>
+            <Link to="/dashboard/buyer">Explore All Dishes</Link>
           </Button>
         </div>
       </div>

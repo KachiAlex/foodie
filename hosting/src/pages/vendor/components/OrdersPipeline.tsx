@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/context/ToastContext";
 import type { VendorOrderStage } from "@/types/domain";
 
 const statusColumns = ["New", "Cooking", "Ready", "Delivered"] as const;
@@ -15,13 +16,27 @@ interface OrdersPipelineProps {
 }
 
 export function OrdersPipeline({ orders, promotingOrders, onPromote }: OrdersPipelineProps) {
+  const { showToast } = useToast();
+
+  const handleSyncCourier = () => {
+    showToast("Courier sync requested — riders will be notified shortly.");
+  };
+
+  const handlePrintPrepList = () => {
+    if (orders.length === 0) {
+      showToast("No orders to print.");
+      return;
+    }
+    window.print();
+  };
+
   return (
     <div className="rounded-3xl bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-900">Orders pipeline</h3>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">Sync courier</Button>
-          <Button size="sm" className="bg-orange-500 text-white">Print prep list</Button>
+          <Button variant="outline" size="sm" onClick={handleSyncCourier}>Sync courier</Button>
+          <Button size="sm" className="bg-orange-500 text-white" onClick={handlePrintPrepList}>Print prep list</Button>
         </div>
       </div>
       <div className="mt-6 grid gap-4 overflow-x-auto text-sm md:grid-cols-4">

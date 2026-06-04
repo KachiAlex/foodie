@@ -1,23 +1,29 @@
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCurrency } from "@/context/CurrencyContext";
+import { Link } from "react-router-dom";
 import type { MenuItem } from "@/types/domain";
 
 interface MenuHighlightsProps {
   items: MenuItem[];
   compact?: boolean;
+  onAddMenuItem?: () => void;
 }
 
-export function MenuHighlights({ items, compact = false }: MenuHighlightsProps) {
+export function MenuHighlights({ items, compact = false, onAddMenuItem }: MenuHighlightsProps) {
   const { symbol } = useCurrency();
   return (
     <div className="rounded-3xl bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-900">{compact ? "Menu Highlights" : "Menu"}</h3>
         {compact ? (
-          <Button variant="ghost" size="sm">Manage</Button>
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/dashboard/vendor?tab=menu">Manage</Link>
+          </Button>
         ) : (
-          <Button size="sm" className="bg-orange-500 text-white">Add menu item</Button>
+          <Button size="sm" className="bg-orange-500 text-white" onClick={onAddMenuItem}>
+            Add menu item
+          </Button>
         )}
       </div>
       <div className="mt-4 space-y-4">
@@ -26,7 +32,9 @@ export function MenuHighlights({ items, compact = false }: MenuHighlightsProps) 
             <Plus className="h-7 w-7 text-gray-300" />
             <p className="text-sm font-semibold text-gray-500">Your menu is empty</p>
             <p className="text-xs text-gray-400">Add your first dish to start receiving bids.</p>
-            <Button size="sm" className="mt-1 bg-orange-500 text-white">Add menu item</Button>
+            <Button size="sm" className="mt-1 bg-orange-500 text-white" onClick={onAddMenuItem}>
+              Add menu item
+            </Button>
           </div>
         )}
         {items.map((item) => (
