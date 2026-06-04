@@ -3,13 +3,14 @@ import { LandingPage } from "@/pages/Landing";
 import { DashboardLanding } from "@/pages/DashboardLanding";
 import { DashboardGuard } from "@/pages/DashboardGuard";
 import { ToastViewport } from "@/components/ToastViewport";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SignUpPage } from "@/pages/auth/SignUp";
 import { SignInPage } from "@/pages/auth/SignIn";
 import { ForgotPasswordPage } from "@/pages/auth/ForgotPassword";
 
 export default function App() {
   return (
-    <>
+    <ErrorBoundary>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/auth/sign-up" element={<SignUpPage />} />
@@ -19,6 +20,6 @@ export default function App() {
         <Route path="/dashboard/:roleSlug" element={<DashboardGuard />} />
       </Routes>
       <ToastViewport />
-    </>
+    </ErrorBoundary>
   );
 }
