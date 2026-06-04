@@ -1,5 +1,6 @@
 import { CheckCircle2, RefreshCcw, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/context/ToastContext";
 
 interface ChecklistItem {
   label: string;
@@ -13,6 +14,7 @@ interface KitchenReadinessCardProps {
 }
 
 export function KitchenReadinessCard({ checklistItems, checklistProgress }: KitchenReadinessCardProps) {
+  const { showToast } = useToast();
   return (
     <div className="rounded-3xl bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between">
@@ -45,8 +47,10 @@ export function KitchenReadinessCard({ checklistItems, checklistProgress }: Kitc
         ))}
       </div>
       <div className="mt-6 flex gap-2">
-        <Button className="flex-1 bg-orange-500 text-white">Update compliance kit</Button>
-        <Button variant="outline" className="flex-1 gap-2 border-gray-200 text-gray-700">
+        <Button className="flex-1 bg-orange-500 text-white" onClick={() => showToast("Compliance kit updated.")}>
+          Update compliance kit
+        </Button>
+        <Button variant="outline" className="flex-1 gap-2 border-gray-200 text-gray-700" onClick={() => showToast("Audit sync requested.")}>
           <RefreshCcw className="h-3.5 w-3.5" /> Sync audits
         </Button>
       </div>

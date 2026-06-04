@@ -5,6 +5,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useRole } from "@/context/RoleContext";
 import { RoleToggle } from "@/components/RoleToggle";
+import { useToast } from "@/context/ToastContext";
 
 interface DashboardLayoutProps {
   sidebar: {
@@ -19,8 +20,10 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ sidebar, title, description, actions, children }: DashboardLayoutProps) {
   const [open, setOpen] = useState(false);
+  const [dashSearch, setDashSearch] = useState("");
   const { setRole } = useRole();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const SidebarContent = (
     <div className="flex flex-col h-full">
@@ -84,15 +87,27 @@ export function DashboardLayout({ sidebar, title, description, actions, children
                   navigate(`/dashboard/${nextRole}`);
                 }}
               />
-              <div className="hidden md:flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-500 shadow-sm focus-within:ring-2 focus-within:ring-orange-500">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (dashSearch.trim()) navigate(`/dashboard/buyer?search=${encodeURIComponent(dashSearch.trim())}`);
+                }}
+                className="hidden md:flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-500 shadow-sm focus-within:ring-2 focus-within:ring-orange-500"
+              >
                 <Search className="h-4 w-4 text-gray-400" />
                 <input
                   type="search"
+                  value={dashSearch}
+                  onChange={(e) => setDashSearch(e.target.value)}
                   placeholder="Search requests, chefs, orders..."
                   className="w-48 bg-transparent text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none"
                 />
-              </div>
-              <button className="relative rounded-full border border-gray-200 p-2 text-gray-600 transition hover:border-orange-200 hover:text-orange-500">
+              </form>
+              <button
+                className="relative rounded-full border border-gray-200 p-2 text-gray-600 transition hover:border-orange-200 hover:text-orange-500"
+                aria-label="Notifications"
+                onClick={() => showToast("Notifications — coming soon.")}
+              >
                 <Bell className="h-5 w-5" />
                 <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-orange-500 text-[10px] font-semibold text-white">3</span>
               </button>

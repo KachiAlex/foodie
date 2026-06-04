@@ -12,9 +12,9 @@ import {
   MapPin,
   Plus,
   Quote,
-  Search,
   Zap,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/context/AppContext";
@@ -492,7 +492,9 @@ export function BuyerDashboard() {
             <div className="rounded-3xl bg-white p-6 shadow-sm">
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-semibold text-gray-900">Verified chefs</h3>
-                <Button variant="ghost" size="sm" className="text-xs text-orange-600">View all</Button>
+                <Button variant="ghost" size="sm" className="text-xs text-orange-600" asChild>
+                  <Link to="/dashboard/buyer">View all</Link>
+                </Button>
               </div>
               <div className="mt-4 space-y-3">
                 {vendors.length === 0 && <p className="text-sm text-gray-400">No verified chefs yet.</p>}

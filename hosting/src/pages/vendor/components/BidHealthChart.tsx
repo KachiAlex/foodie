@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Activity, CheckCircle2, Clock3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useToast } from "@/context/ToastContext";
 
 interface BidDay {
   label: string;
@@ -18,6 +19,7 @@ interface BidHealthChartProps {
 
 export function BidHealthChart({ bidTrend, totalBidVolume, winRate, totalEarned, deliveredOrders }: BidHealthChartProps) {
   const { symbol } = useCurrency();
+  const { showToast } = useToast();
   const [bidFocus, setBidFocus] = useState<BidDay | null>(null);
   const maxBidValue = Math.max(...bidTrend.map((d) => d.value), 1);
 
@@ -29,7 +31,7 @@ export function BidHealthChart({ bidTrend, totalBidVolume, winRate, totalEarned,
           <h3 className="text-2xl font-semibold text-gray-900">{totalBidVolume} bids this week</h3>
           <p className="text-xs text-gray-500">Average response time 14m</p>
         </div>
-        <Button variant="ghost" size="sm" className="text-orange-600">View playbook</Button>
+        <Button variant="ghost" size="sm" className="text-orange-600" onClick={() => showToast("Bid playbook — coming soon.")}>View playbook</Button>
       </div>
       <div className="mt-6 flex gap-2">
         {bidTrend.map((day) => (
