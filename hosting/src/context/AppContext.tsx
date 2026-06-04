@@ -102,7 +102,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setVendorOpenRequests(openReqData);
       setIsInitialized(true);
     } catch (error) {
-      showToast("Failed to sync with database");
+      const message = error instanceof Error ? error.message : "";
+      if (message.includes("Unauthorized") || message.includes("missing token")) {
+        // silently fail when user is not logged in
+      } else {
+        showToast("Failed to sync with database");
+      }
       console.error("[AppContext] Refresh failed:", error);
     } finally {
       setIsLoading(false);
