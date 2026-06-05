@@ -87,7 +87,9 @@ export interface FeaturedVendor {
   id: string;
   name: string;
   kitchenName: string;
-  address: string;
+  streetAddress: string;
+  city: string;
+  state: string;
   specialties: string[];
   menuItems: { name: string; price: number }[];
 }
@@ -96,7 +98,9 @@ interface BackendVendorProfile {
   id: string;
   userId: string;
   kitchenName: string;
-  address: string;
+  streetAddress: string;
+  city: string;
+  state: string;
   specialties: string[];
   user: { id: string; name: string };
   menuItems: { name: string; price: number }[];
@@ -108,7 +112,9 @@ export async function searchVendors(query: string): Promise<FeaturedVendor[]> {
     id: v.userId,
     name: v.user?.name ?? "Unknown Chef",
     kitchenName: v.kitchenName ?? "",
-    address: v.address ?? "",
+    streetAddress: v.streetAddress ?? "",
+    city: v.city ?? "",
+    state: v.state ?? "",
     specialties: v.specialties ?? [],
     menuItems: v.menuItems ?? [],
   }));
@@ -125,7 +131,9 @@ export async function listVendors(): Promise<FeaturedVendor[]> {
     id: v.userId,
     name: v.user?.name ?? "Unknown Chef",
     kitchenName: v.kitchenName ?? "",
-    address: v.address ?? "",
+    streetAddress: v.streetAddress ?? "",
+    city: v.city ?? "",
+    state: v.state ?? "",
     specialties: v.specialties ?? [],
     menuItems: v.menuItems ?? [],
   }));

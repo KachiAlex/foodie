@@ -33,7 +33,7 @@ export const getProfile = asyncHandler(async (req: Request, res: Response) => {
 
 export const updateProfile = asyncHandler(async (req: Request, res: Response) => {
   const vendorId = req.params.id;
-  const { kitchenName, address, landmark, specialties, isOnline } = req.body;
+  const { kitchenName, streetAddress, city, state, landmark, specialties, isOnline } = req.body;
   const existing = await prisma.vendorProfile.findUnique({ where: { userId: vendorId } });
   if (!existing) {
     res.status(404).json({ success: false, error: { message: "Vendor not found" } });
@@ -43,7 +43,9 @@ export const updateProfile = asyncHandler(async (req: Request, res: Response) =>
     where: { userId: vendorId },
     data: {
       kitchenName,
-      address,
+      streetAddress,
+      city,
+      state,
       landmark,
       specialties,
       isOnline,
@@ -126,7 +128,9 @@ export const searchVendors = asyncHandler(async (req: Request, res: Response) =>
       verified: true,
       OR: [
         { kitchenName: { contains: q, mode: "insensitive" } },
-        { address: { contains: q, mode: "insensitive" } },
+        { streetAddress: { contains: q, mode: "insensitive" } },
+        { city: { contains: q, mode: "insensitive" } },
+        { state: { contains: q, mode: "insensitive" } },
         { user: { name: { contains: q, mode: "insensitive" } } },
         { menuItems: { some: { name: { contains: q, mode: "insensitive" } } } },
       ],

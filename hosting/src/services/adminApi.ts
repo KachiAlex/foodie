@@ -45,7 +45,9 @@ interface PendingVendor {
   userId: string;
   user: { id: string; name: string; email: string };
   kitchenName: string;
-  address: string;
+  streetAddress: string;
+  city: string;
+  state: string;
   landmark: string;
   verified: boolean;
 }

@@ -503,7 +503,7 @@ export function BuyerDashboard() {
                     <div>
                       <p className="text-sm font-semibold text-gray-900">{vendor.name}</p>
                       <p className="text-xs text-gray-500 flex items-center gap-1">
-                        <MapPin className="h-3 w-3" /> {vendor.address || "Lagos"}
+                        <MapPin className="h-3 w-3" /> {vendor.city || "Lagos"}
                       </p>
                     </div>
                     <BadgeCheck className="h-4 w-4 text-orange-500" />

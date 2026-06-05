@@ -10,7 +10,9 @@ export interface AuthUser {
 }
 
 export interface VendorVerificationPayload {
-  address: string;
+  streetAddress: string;
+  city: string;
+  state: string;
   landmark: string;
   kitchenMediaCount: number;
   idCardProvided: boolean;

@@ -36,7 +36,9 @@ export const signUp = asyncHandler(async (req: Request, res: Response) => {
           ? {
               create: {
                 kitchenName: name,
-                address: vendorVerification.address || "",
+                streetAddress: vendorVerification.streetAddress || "",
+                city: vendorVerification.city || "",
+                state: vendorVerification.state || "",
                 landmark: vendorVerification.landmark || "",
                 specialties: ["Nigerian"],
                 rating: 0,

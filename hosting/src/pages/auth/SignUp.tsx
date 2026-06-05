@@ -10,7 +10,9 @@ import { useToast } from "@/context/ToastContext";
 import { compressImageFile } from "@/utils/fileHelpers";
 
 type VendorRequirementFields = {
-  address: string;
+  streetAddress: string;
+  city: string;
+  state: string;
   landmark: string;
   kitchenMedia: File[];
   idCardCapture: File | null;
@@ -18,7 +20,9 @@ type VendorRequirementFields = {
 };
 
 const initialVendorState: VendorRequirementFields = {
-  address: "",
+  streetAddress: "",
+  city: "",
+  state: "",
   landmark: "",
   kitchenMedia: [],
   idCardCapture: null,
@@ -33,8 +37,14 @@ type MediaPreview = {
 };
 
 function validateVendorRequirements(details: VendorRequirementFields) {
-  if (!details.address.trim()) {
-    return "Vendors must provide a precise kitchen address.";
+  if (!details.streetAddress.trim()) {
+    return "Vendors must provide a house number and street.";
+  }
+  if (!details.city.trim()) {
+    return "Vendors must provide a city.";
+  }
+  if (!details.state.trim()) {
+    return "Vendors must provide a state.";
   }
   if (!details.landmark.trim()) {
     return "Add a landmark so riders can find your kitchen.";
@@ -73,7 +83,12 @@ export function SignUpPage() {
   const vendorSteps = [
     {
       label: "Address & landmark",
-      complete: Boolean(vendorDetails.address.trim() && vendorDetails.landmark.trim()),
+      complete: Boolean(
+        vendorDetails.streetAddress.trim() &&
+        vendorDetails.city.trim() &&
+        vendorDetails.state.trim() &&
+        vendorDetails.landmark.trim()
+      ),
       Icon: MapPin,
     },
     {
@@ -125,7 +140,9 @@ export function SignUpPage() {
           throw new Error(vendorError);
         }
         vendorVerification = {
-          address: vendorDetails.address.trim(),
+          streetAddress: vendorDetails.streetAddress.trim(),
+          city: vendorDetails.city.trim(),
+          state: vendorDetails.state.trim(),
           landmark: vendorDetails.landmark.trim(),
           kitchenMediaCount: vendorDetails.kitchenMedia.length,
           idCardProvided: Boolean(vendorDetails.idCardCapture),
@@ -148,7 +165,7 @@ export function SignUpPage() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleVendorTextChange = (field: "address" | "landmark") =>
+  const handleVendorTextChange = (field: "streetAddress" | "city" | "state" | "landmark") =>
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const value = event.target.value;
       setVendorDetails((prev) => ({ ...prev, [field]: value }));
@@ -394,24 +411,64 @@ export function SignUpPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700" htmlFor="vendor-address">
-                      Kitchen address (street, city, state)
-                    </label>
-                    <textarea
-                      id="vendor-address"
-                      name="address"
-                      autoComplete="street-address"
-                      required
-                      maxLength={200}
-                      value={vendorDetails.address}
-                      onChange={handleVendorTextChange("address")}
-                      className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
-                      placeholder="12 Palm Avenue, Lekki Phase 1, Lagos"
-                      rows={3}
-                      aria-describedby="address-hint"
-                    />
-                    <p id="address-hint" className="text-xs text-gray-500">{vendorDetails.address.length}/200</p>
+                  <div className="space-y-3">
+                    <p className="text-sm font-semibold text-gray-700">Kitchen location</p>
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-gray-600" htmlFor="vendor-street">
+                        House no. & street
+                      </label>
+                      <input
+                        id="vendor-street"
+                        name="streetAddress"
+                        autoComplete="address-line1"
+                        required
+                        maxLength={120}
+                        value={vendorDetails.streetAddress}
+                        onChange={handleVendorTextChange("streetAddress")}
+                        className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                        placeholder="12 Palm Avenue, Lekki Phase 1"
+                        aria-describedby="street-hint"
+                      />
+                      <p id="street-hint" className="text-xs text-gray-500">{vendorDetails.streetAddress.length}/120</p>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-gray-600" htmlFor="vendor-city">
+                          City
+                        </label>
+                        <input
+                          id="vendor-city"
+                          name="city"
+                          autoComplete="address-level2"
+                          required
+                          maxLength={60}
+                          value={vendorDetails.city}
+                          onChange={handleVendorTextChange("city")}
+                          className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                          placeholder="Lekki"
+                          aria-describedby="city-hint"
+                        />
+                        <p id="city-hint" className="text-xs text-gray-500">{vendorDetails.city.length}/60</p>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-gray-600" htmlFor="vendor-state">
+                          State
+                        </label>
+                        <input
+                          id="vendor-state"
+                          name="state"
+                          autoComplete="address-level1"
+                          required
+                          maxLength={60}
+                          value={vendorDetails.state}
+                          onChange={handleVendorTextChange("state")}
+                          className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                          placeholder="Lagos"
+                          aria-describedby="state-hint"
+                        />
+                        <p id="state-hint" className="text-xs text-gray-500">{vendorDetails.state.length}/60</p>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="space-y-2">

@@ -49,7 +49,9 @@ export function AdminDashboard() {
           email: v.user.email,
           kycStatus: v.verified ? "Approved" : "Pending",
           kitchenName: v.kitchenName,
-          address: v.address,
+          streetAddress: v.streetAddress,
+          city: v.city,
+          state: v.state,
           landmark: v.landmark,
           rating: 0,
           totalOrders: 0,
@@ -482,7 +484,7 @@ export function AdminDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="text-sm font-semibold text-gray-900">{vendor.name}</h4>
-                      <p className="text-xs text-gray-500">{vendor.kitchenName || vendor.address || vendor.id}</p>
+                      <p className="text-xs text-gray-500">{vendor.kitchenName || `${vendor.streetAddress}, ${vendor.city}` || vendor.id}</p>
                     </div>
                     <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${vendor.kycStatus === "Approved" ? "bg-emerald-50 text-emerald-700" : vendor.kycStatus === "Pending" ? "bg-amber-50 text-amber-700" : "bg-red-50 text-red-700"}`}>
                       <CheckCircle2 className="mr-1 inline h-3 w-3" />{vendor.kycStatus}
@@ -645,7 +647,7 @@ function AdminOrderDetailModal({ order, profile, isEscalating, onCreateEscalatio
 }
 
 interface VendorDossierModalProps {
-  vendor: { id: string; name: string; email: string; kycStatus: string; kitchenName: string; address: string; landmark: string; rating: number; totalOrders: number } | null;
+  vendor: { id: string; name: string; email: string; kycStatus: string; kitchenName: string; streetAddress: string; city: string; state: string; landmark: string; rating: number; totalOrders: number } | null;
   dossier: { documents: Array<{ type: string; status: string }>; notes: string } | null;
   onClose: () => void;
 }
