@@ -17,12 +17,17 @@ interface BackendOrder {
 function mapOrderStatus(status: string): BuyerOrder["status"] {
   switch (status) {
     case "paid":
-    case "preparing":
+    case "accepted":
+    case "cooking":
       return "Cooking";
-    case "ready":
-    case "out_for_delivery":
+    case "ready_for_pickup":
+    case "picked_up":
       return "Out for delivery";
+    case "delivered":
     case "completed":
+      return "Delivered";
+    case "disputed":
+    case "cancelled":
       return "Delivered";
     default:
       return "Cooking";
@@ -32,12 +37,18 @@ function mapOrderStatus(status: string): BuyerOrder["status"] {
 function mapVendorOrderStatus(status: string): VendorOrderStage["status"] {
   switch (status) {
     case "paid":
+    case "accepted":
       return "New";
-    case "preparing":
+    case "cooking":
       return "Cooking";
-    case "ready":
+    case "ready_for_pickup":
+    case "picked_up":
       return "Ready";
+    case "delivered":
     case "completed":
+      return "Delivered";
+    case "disputed":
+    case "cancelled":
       return "Delivered";
     default:
       return "New";
@@ -104,7 +115,12 @@ export async function createOrder(payload: CreateOrderPayload): Promise<BuyerOrd
 }
 
 export async function updateOrderStatus({ orderId, status }: UpdateOrderStatusPayload): Promise<BuyerOrder> {
-  const backendStatus = status === "Delivered" ? "completed" : status === "Out for delivery" ? "out_for_delivery" : "preparing";
+  const backendStatus =
+    status === "Delivered"
+      ? "completed"
+      : status === "Out for delivery"
+        ? "picked_up"
+        : "cooking";
   const data = await api.patch<BackendOrder>(`/orders/${orderId}/status`, { status: backendStatus });
   return mapBuyerOrder(data);
 }
@@ -118,7 +134,14 @@ export async function updateVendorOrderStatus(
   orderId: string,
   status: VendorOrderStage["status"]
 ): Promise<VendorOrderStage> {
-  const backendStatus = status === "Delivered" ? "completed" : status === "Ready" ? "ready" : status === "Cooking" ? "preparing" : "paid";
+  const backendStatus =
+    status === "Delivered"
+      ? "completed"
+      : status === "Ready"
+        ? "ready_for_pickup"
+        : status === "Cooking"
+          ? "cooking"
+          : "paid";
   const data = await api.patch<BackendOrder>(`/orders/${orderId}/status`, { status: backendStatus });
   return mapVendorOrder(data);
 }

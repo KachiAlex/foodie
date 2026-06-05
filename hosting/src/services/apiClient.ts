@@ -1,4 +1,6 @@
-const API_BASE = "";
+const API_BASE =
+  (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_API_BASE) ||
+  "";
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;

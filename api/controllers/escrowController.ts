@@ -175,6 +175,11 @@ export const releaseEscrow = asyncHandler(async (req: Request, res: Response) =>
   const releaseAmount = amount - platformFee;
 
   // Move from pending → available in wallet
+  const wallet = await prisma.escrowWallet.findUnique({ where: { vendorId } });
+  if (!wallet) {
+    res.status(404).json({ success: false, error: { message: "Vendor wallet not found" } });
+    return;
+  }
   await prisma.escrowWallet.update({
     where: { vendorId },
     data: {

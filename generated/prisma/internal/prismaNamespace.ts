@@ -1322,9 +1322,6 @@ export const EscrowTransactionScalarFieldEnum = {
   amount: 'amount',
   type: 'type',
   status: 'status',
-  paystackReference: 'paystackReference',
-  paystackAccessCode: 'paystackAccessCode',
-  metadata: 'metadata',
   createdAt: 'createdAt'
 } as const
 

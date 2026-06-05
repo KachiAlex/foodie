@@ -34,6 +34,11 @@ export const getProfile = asyncHandler(async (req: Request, res: Response) => {
 export const updateProfile = asyncHandler(async (req: Request, res: Response) => {
   const vendorId = req.params.id;
   const { kitchenName, address, landmark, specialties, isOnline } = req.body;
+  const existing = await prisma.vendorProfile.findUnique({ where: { userId: vendorId } });
+  if (!existing) {
+    res.status(404).json({ success: false, error: { message: "Vendor not found" } });
+    return;
+  }
   const profile = await prisma.vendorProfile.update({
     where: { userId: vendorId },
     data: {

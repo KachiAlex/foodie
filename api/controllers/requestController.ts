@@ -78,6 +78,11 @@ export const getRequest = asyncHandler(async (req: Request, res: Response) => {
 
 export const updateStatus = asyncHandler(async (req: Request, res: Response) => {
   const { status } = req.body;
+  const existing = await prisma.foodRequest.findUnique({ where: { id: req.params.id } });
+  if (!existing) {
+    res.status(404).json({ success: false, error: { message: "Request not found" } });
+    return;
+  }
   const request = await prisma.foodRequest.update({
     where: { id: req.params.id },
     data: { status },

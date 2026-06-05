@@ -69,6 +69,11 @@ export const listEscrowTransactions = asyncHandler(async (_req: Request, res: Re
 });
 
 export const releaseEscrow = asyncHandler(async (req: Request, res: Response) => {
+  const existing = await prisma.escrowTransaction.findUnique({ where: { id: req.params.id } });
+  if (!existing) {
+    res.status(404).json({ success: false, error: { message: "Transaction not found" } });
+    return;
+  }
   const tx = await prisma.escrowTransaction.update({
     where: { id: req.params.id },
     data: { status: "completed" },
@@ -77,6 +82,11 @@ export const releaseEscrow = asyncHandler(async (req: Request, res: Response) =>
 });
 
 export const processRefund = asyncHandler(async (req: Request, res: Response) => {
+  const existing = await prisma.escrowTransaction.findUnique({ where: { id: req.params.id } });
+  if (!existing) {
+    res.status(404).json({ success: false, error: { message: "Transaction not found" } });
+    return;
+  }
   const tx = await prisma.escrowTransaction.update({
     where: { id: req.params.id },
     data: { status: "completed", type: "refund" },
@@ -97,6 +107,11 @@ export const listDisputes = asyncHandler(async (_req: Request, res: Response) =>
 
 export const resolveDispute = asyncHandler(async (req: Request, res: Response) => {
   const { resolution } = req.body;
+  const existing = await prisma.dispute.findUnique({ where: { id: req.params.id } });
+  if (!existing) {
+    res.status(404).json({ success: false, error: { message: "Dispute not found" } });
+    return;
+  }
   const dispute = await prisma.dispute.update({
     where: { id: req.params.id },
     data: {
@@ -123,6 +138,11 @@ export const listPendingVendors = asyncHandler(async (_req: Request, res: Respon
 });
 
 export const verifyVendor = asyncHandler(async (req: Request, res: Response) => {
+  const existing = await prisma.vendorProfile.findUnique({ where: { userId: req.params.id } });
+  if (!existing) {
+    res.status(404).json({ success: false, error: { message: "Vendor not found" } });
+    return;
+  }
   const profile = await prisma.vendorProfile.update({
     where: { userId: req.params.id },
     data: { verified: true },
@@ -147,6 +167,11 @@ export const triggerVendorAudit = asyncHandler(async (req: Request, res: Respons
 
 export const flagVendor = asyncHandler(async (req: Request, res: Response) => {
   const { reason } = req.body;
+  const existing = await prisma.vendorProfile.findUnique({ where: { userId: req.params.id } });
+  if (!existing) {
+    res.status(404).json({ success: false, error: { message: "Vendor not found" } });
+    return;
+  }
   const profile = await prisma.vendorProfile.update({
     where: { userId: req.params.id },
     data: { verified: false },

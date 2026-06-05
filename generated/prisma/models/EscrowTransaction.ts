@@ -41,9 +41,6 @@ export type EscrowTransactionMinAggregateOutputType = {
   amount: runtime.Decimal | null
   type: $Enums.TransactionType | null
   status: $Enums.TransactionStatus | null
-  paystackReference: string | null
-  paystackAccessCode: string | null
-  metadata: string | null
   createdAt: Date | null
 }
 
@@ -54,9 +51,6 @@ export type EscrowTransactionMaxAggregateOutputType = {
   amount: runtime.Decimal | null
   type: $Enums.TransactionType | null
   status: $Enums.TransactionStatus | null
-  paystackReference: string | null
-  paystackAccessCode: string | null
-  metadata: string | null
   createdAt: Date | null
 }
 
@@ -67,9 +61,6 @@ export type EscrowTransactionCountAggregateOutputType = {
   amount: number
   type: number
   status: number
-  paystackReference: number
-  paystackAccessCode: number
-  metadata: number
   createdAt: number
   _all: number
 }
@@ -90,9 +81,6 @@ export type EscrowTransactionMinAggregateInputType = {
   amount?: true
   type?: true
   status?: true
-  paystackReference?: true
-  paystackAccessCode?: true
-  metadata?: true
   createdAt?: true
 }
 
@@ -103,9 +91,6 @@ export type EscrowTransactionMaxAggregateInputType = {
   amount?: true
   type?: true
   status?: true
-  paystackReference?: true
-  paystackAccessCode?: true
-  metadata?: true
   createdAt?: true
 }
 
@@ -116,9 +101,6 @@ export type EscrowTransactionCountAggregateInputType = {
   amount?: true
   type?: true
   status?: true
-  paystackReference?: true
-  paystackAccessCode?: true
-  metadata?: true
   createdAt?: true
   _all?: true
 }
@@ -216,9 +198,6 @@ export type EscrowTransactionGroupByOutputType = {
   amount: runtime.Decimal
   type: $Enums.TransactionType
   status: $Enums.TransactionStatus
-  paystackReference: string | null
-  paystackAccessCode: string | null
-  metadata: string | null
   createdAt: Date
   _count: EscrowTransactionCountAggregateOutputType | null
   _avg: EscrowTransactionAvgAggregateOutputType | null
@@ -252,9 +231,6 @@ export type EscrowTransactionWhereInput = {
   amount?: Prisma.DecimalFilter<"EscrowTransaction"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   type?: Prisma.EnumTransactionTypeFilter<"EscrowTransaction"> | $Enums.TransactionType
   status?: Prisma.EnumTransactionStatusFilter<"EscrowTransaction"> | $Enums.TransactionStatus
-  paystackReference?: Prisma.StringNullableFilter<"EscrowTransaction"> | string | null
-  paystackAccessCode?: Prisma.StringNullableFilter<"EscrowTransaction"> | string | null
-  metadata?: Prisma.StringNullableFilter<"EscrowTransaction"> | string | null
   createdAt?: Prisma.DateTimeFilter<"EscrowTransaction"> | Date | string
   vendor?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
@@ -266,9 +242,6 @@ export type EscrowTransactionOrderByWithRelationInput = {
   amount?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  paystackReference?: Prisma.SortOrderInput | Prisma.SortOrder
-  paystackAccessCode?: Prisma.SortOrderInput | Prisma.SortOrder
-  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   vendor?: Prisma.UserOrderByWithRelationInput
 }
@@ -283,9 +256,6 @@ export type EscrowTransactionWhereUniqueInput = Prisma.AtLeast<{
   amount?: Prisma.DecimalFilter<"EscrowTransaction"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   type?: Prisma.EnumTransactionTypeFilter<"EscrowTransaction"> | $Enums.TransactionType
   status?: Prisma.EnumTransactionStatusFilter<"EscrowTransaction"> | $Enums.TransactionStatus
-  paystackReference?: Prisma.StringNullableFilter<"EscrowTransaction"> | string | null
-  paystackAccessCode?: Prisma.StringNullableFilter<"EscrowTransaction"> | string | null
-  metadata?: Prisma.StringNullableFilter<"EscrowTransaction"> | string | null
   createdAt?: Prisma.DateTimeFilter<"EscrowTransaction"> | Date | string
   vendor?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
@@ -297,9 +267,6 @@ export type EscrowTransactionOrderByWithAggregationInput = {
   amount?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  paystackReference?: Prisma.SortOrderInput | Prisma.SortOrder
-  paystackAccessCode?: Prisma.SortOrderInput | Prisma.SortOrder
-  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.EscrowTransactionCountOrderByAggregateInput
   _avg?: Prisma.EscrowTransactionAvgOrderByAggregateInput
@@ -318,9 +285,6 @@ export type EscrowTransactionScalarWhereWithAggregatesInput = {
   amount?: Prisma.DecimalWithAggregatesFilter<"EscrowTransaction"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   type?: Prisma.EnumTransactionTypeWithAggregatesFilter<"EscrowTransaction"> | $Enums.TransactionType
   status?: Prisma.EnumTransactionStatusWithAggregatesFilter<"EscrowTransaction"> | $Enums.TransactionStatus
-  paystackReference?: Prisma.StringNullableWithAggregatesFilter<"EscrowTransaction"> | string | null
-  paystackAccessCode?: Prisma.StringNullableWithAggregatesFilter<"EscrowTransaction"> | string | null
-  metadata?: Prisma.StringNullableWithAggregatesFilter<"EscrowTransaction"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"EscrowTransaction"> | Date | string
 }
 
@@ -330,9 +294,6 @@ export type EscrowTransactionCreateInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   type: $Enums.TransactionType
   status?: $Enums.TransactionStatus
-  paystackReference?: string | null
-  paystackAccessCode?: string | null
-  metadata?: string | null
   createdAt?: Date | string
   vendor: Prisma.UserCreateNestedOneWithoutTransactionsInput
 }
@@ -344,9 +305,6 @@ export type EscrowTransactionUncheckedCreateInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   type: $Enums.TransactionType
   status?: $Enums.TransactionStatus
-  paystackReference?: string | null
-  paystackAccessCode?: string | null
-  metadata?: string | null
   createdAt?: Date | string
 }
 
@@ -356,9 +314,6 @@ export type EscrowTransactionUpdateInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   type?: Prisma.EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
   status?: Prisma.EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
-  paystackReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paystackAccessCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vendor?: Prisma.UserUpdateOneRequiredWithoutTransactionsNestedInput
 }
@@ -370,9 +325,6 @@ export type EscrowTransactionUncheckedUpdateInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   type?: Prisma.EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
   status?: Prisma.EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
-  paystackReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paystackAccessCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -383,9 +335,6 @@ export type EscrowTransactionCreateManyInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   type: $Enums.TransactionType
   status?: $Enums.TransactionStatus
-  paystackReference?: string | null
-  paystackAccessCode?: string | null
-  metadata?: string | null
   createdAt?: Date | string
 }
 
@@ -395,9 +344,6 @@ export type EscrowTransactionUpdateManyMutationInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   type?: Prisma.EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
   status?: Prisma.EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
-  paystackReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paystackAccessCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -408,9 +354,6 @@ export type EscrowTransactionUncheckedUpdateManyInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   type?: Prisma.EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
   status?: Prisma.EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
-  paystackReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paystackAccessCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -431,9 +374,6 @@ export type EscrowTransactionCountOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  paystackReference?: Prisma.SortOrder
-  paystackAccessCode?: Prisma.SortOrder
-  metadata?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -448,9 +388,6 @@ export type EscrowTransactionMaxOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  paystackReference?: Prisma.SortOrder
-  paystackAccessCode?: Prisma.SortOrder
-  metadata?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -461,9 +398,6 @@ export type EscrowTransactionMinOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  paystackReference?: Prisma.SortOrder
-  paystackAccessCode?: Prisma.SortOrder
-  metadata?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -527,9 +461,6 @@ export type EscrowTransactionCreateWithoutVendorInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   type: $Enums.TransactionType
   status?: $Enums.TransactionStatus
-  paystackReference?: string | null
-  paystackAccessCode?: string | null
-  metadata?: string | null
   createdAt?: Date | string
 }
 
@@ -539,9 +470,6 @@ export type EscrowTransactionUncheckedCreateWithoutVendorInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   type: $Enums.TransactionType
   status?: $Enums.TransactionStatus
-  paystackReference?: string | null
-  paystackAccessCode?: string | null
-  metadata?: string | null
   createdAt?: Date | string
 }
 
@@ -581,9 +509,6 @@ export type EscrowTransactionScalarWhereInput = {
   amount?: Prisma.DecimalFilter<"EscrowTransaction"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   type?: Prisma.EnumTransactionTypeFilter<"EscrowTransaction"> | $Enums.TransactionType
   status?: Prisma.EnumTransactionStatusFilter<"EscrowTransaction"> | $Enums.TransactionStatus
-  paystackReference?: Prisma.StringNullableFilter<"EscrowTransaction"> | string | null
-  paystackAccessCode?: Prisma.StringNullableFilter<"EscrowTransaction"> | string | null
-  metadata?: Prisma.StringNullableFilter<"EscrowTransaction"> | string | null
   createdAt?: Prisma.DateTimeFilter<"EscrowTransaction"> | Date | string
 }
 
@@ -593,9 +518,6 @@ export type EscrowTransactionCreateManyVendorInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   type: $Enums.TransactionType
   status?: $Enums.TransactionStatus
-  paystackReference?: string | null
-  paystackAccessCode?: string | null
-  metadata?: string | null
   createdAt?: Date | string
 }
 
@@ -605,9 +527,6 @@ export type EscrowTransactionUpdateWithoutVendorInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   type?: Prisma.EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
   status?: Prisma.EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
-  paystackReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paystackAccessCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -617,9 +536,6 @@ export type EscrowTransactionUncheckedUpdateWithoutVendorInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   type?: Prisma.EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
   status?: Prisma.EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
-  paystackReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paystackAccessCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -629,9 +545,6 @@ export type EscrowTransactionUncheckedUpdateManyWithoutVendorInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   type?: Prisma.EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
   status?: Prisma.EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
-  paystackReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  paystackAccessCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -644,9 +557,6 @@ export type EscrowTransactionSelect<ExtArgs extends runtime.Types.Extensions.Int
   amount?: boolean
   type?: boolean
   status?: boolean
-  paystackReference?: boolean
-  paystackAccessCode?: boolean
-  metadata?: boolean
   createdAt?: boolean
   vendor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["escrowTransaction"]>
@@ -658,9 +568,6 @@ export type EscrowTransactionSelectCreateManyAndReturn<ExtArgs extends runtime.T
   amount?: boolean
   type?: boolean
   status?: boolean
-  paystackReference?: boolean
-  paystackAccessCode?: boolean
-  metadata?: boolean
   createdAt?: boolean
   vendor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["escrowTransaction"]>
@@ -672,9 +579,6 @@ export type EscrowTransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   amount?: boolean
   type?: boolean
   status?: boolean
-  paystackReference?: boolean
-  paystackAccessCode?: boolean
-  metadata?: boolean
   createdAt?: boolean
   vendor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["escrowTransaction"]>
@@ -686,13 +590,10 @@ export type EscrowTransactionSelectScalar = {
   amount?: boolean
   type?: boolean
   status?: boolean
-  paystackReference?: boolean
-  paystackAccessCode?: boolean
-  metadata?: boolean
   createdAt?: boolean
 }
 
-export type EscrowTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderId" | "vendorId" | "amount" | "type" | "status" | "paystackReference" | "paystackAccessCode" | "metadata" | "createdAt", ExtArgs["result"]["escrowTransaction"]>
+export type EscrowTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderId" | "vendorId" | "amount" | "type" | "status" | "createdAt", ExtArgs["result"]["escrowTransaction"]>
 export type EscrowTransactionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   vendor?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -715,9 +616,6 @@ export type $EscrowTransactionPayload<ExtArgs extends runtime.Types.Extensions.I
     amount: runtime.Decimal
     type: $Enums.TransactionType
     status: $Enums.TransactionStatus
-    paystackReference: string | null
-    paystackAccessCode: string | null
-    metadata: string | null
     createdAt: Date
   }, ExtArgs["result"]["escrowTransaction"]>
   composites: {}
@@ -1149,9 +1047,6 @@ export interface EscrowTransactionFieldRefs {
   readonly amount: Prisma.FieldRef<"EscrowTransaction", 'Decimal'>
   readonly type: Prisma.FieldRef<"EscrowTransaction", 'TransactionType'>
   readonly status: Prisma.FieldRef<"EscrowTransaction", 'TransactionStatus'>
-  readonly paystackReference: Prisma.FieldRef<"EscrowTransaction", 'String'>
-  readonly paystackAccessCode: Prisma.FieldRef<"EscrowTransaction", 'String'>
-  readonly metadata: Prisma.FieldRef<"EscrowTransaction", 'String'>
   readonly createdAt: Prisma.FieldRef<"EscrowTransaction", 'DateTime'>
 }
     

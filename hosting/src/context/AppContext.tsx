@@ -34,6 +34,7 @@ import type { CreateRequestPayload, CreateBidPayload } from "@/services/requestA
 import type { CreateOrderPayload, UpdateOrderStatusPayload } from "@/services/orderApi";
 import type { AddMenuItemPayload } from "@/services/vendorApi";
 import { useToast } from "@/context/ToastContext";
+import { useAuth } from "@/context/AuthContext";
 
 interface AppState {
   requests: BuyerRequest[];
@@ -63,6 +64,7 @@ const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const { showToast } = useToast();
+  const { user } = useAuth();
   const [requests, setRequests] = useState<BuyerRequest[]>([]);
   const [orders, setOrders] = useState<BuyerOrder[]>([]);
   const [bids, setBids] = useState<VendorBid[]>([]);
@@ -115,8 +117,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [showToast]);
 
   useEffect(() => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
     refresh();
-  }, [refresh]);
+  }, [refresh, user]);
 
   const addRequest = useCallback(
     async (payload: CreateRequestPayload) => {

@@ -1,6 +1,7 @@
 .vercel
 .env*
 
-/generated/prisma
+api/generated/prisma
 
 node_modules/
+*.tsbuildinfo

@@ -22,7 +22,6 @@ export const listOrders = asyncHandler(async (req: Request, res: Response) => {
 export const createOrder = asyncHandler(async (req: Request, res: Response) => {
   const {
     requestId,
-    buyerId,
     vendorId,
     bidId,
     foodCost,
@@ -32,15 +31,21 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     totalAmount,
   } = req.body;
 
-  const userId = (req as Request & { user?: { id: string } }).user?.id;
-  const resolvedBuyerId = buyerId || userId;
-  const resolvedVendorId = vendorId || userId;
+  const buyerId = (req as Request & { user?: { id: string } }).user?.id;
+  if (!buyerId) {
+    res.status(401).json({ success: false, error: { message: "Unauthorized" } });
+    return;
+  }
+  if (!vendorId) {
+    res.status(400).json({ success: false, error: { message: "vendorId is required" } });
+    return;
+  }
 
   const order = await prisma.order.create({
     data: {
       requestId,
-      buyerId: resolvedBuyerId,
-      vendorId: resolvedVendorId,
+      buyerId,
+      vendorId,
       bidId,
       foodCost: Number(foodCost) || 0,
       deliveryFee: Number(deliveryFee) || 0,
@@ -80,8 +85,29 @@ export const getOrder = asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, data: order });
 });
 
+const VALID_ORDER_STATUSES = [
+  "paid",
+  "accepted",
+  "cooking",
+  "ready_for_pickup",
+  "picked_up",
+  "delivered",
+  "completed",
+  "disputed",
+  "cancelled",
+] as const;
+
 export const updateStatus = asyncHandler(async (req: Request, res: Response) => {
   const { status } = req.body;
+  if (!VALID_ORDER_STATUSES.includes(status)) {
+    res.status(400).json({ success: false, error: { message: "Invalid order status" } });
+    return;
+  }
+  const existing = await prisma.order.findUnique({ where: { id: req.params.id } });
+  if (!existing) {
+    res.status(404).json({ success: false, error: { message: "Order not found" } });
+    return;
+  }
   const order = await prisma.order.update({
     where: { id: req.params.id },
     data: { status },
@@ -90,6 +116,11 @@ export const updateStatus = asyncHandler(async (req: Request, res: Response) => 
 });
 
 export const confirmDelivery = asyncHandler(async (req: Request, res: Response) => {
+  const existing = await prisma.order.findUnique({ where: { id: req.params.id } });
+  if (!existing) {
+    res.status(404).json({ success: false, error: { message: "Order not found" } });
+    return;
+  }
   const order = await prisma.order.update({
     where: { id: req.params.id },
     data: { status: "completed", deliveredAt: new Date() },
@@ -103,6 +134,12 @@ export const confirmDelivery = asyncHandler(async (req: Request, res: Response) 
 
 export const openDispute = asyncHandler(async (req: Request, res: Response) => {
   const { reason, openedById } = req.body;
+
+  const existing = await prisma.order.findUnique({ where: { id: req.params.id } });
+  if (!existing) {
+    res.status(404).json({ success: false, error: { message: "Order not found" } });
+    return;
+  }
 
   const order = await prisma.order.update({
     where: { id: req.params.id },

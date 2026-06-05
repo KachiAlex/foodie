@@ -20,6 +20,16 @@ export const createBid = asyncHandler(async (req: Request, res: Response) => {
   const { requestId, bidAmount, prepTimeMinutes, estimatedDeliveryTime, message } = req.body;
   const authUser = (req as Request & { user?: AuthUser }).user!;
 
+  const request = await prisma.foodRequest.findUnique({ where: { id: requestId } });
+  if (!request) {
+    res.status(404).json({ success: false, error: { message: "Request not found" } });
+    return;
+  }
+  if (request.status !== "open") {
+    res.status(400).json({ success: false, error: { message: "Request is no longer open for bids" } });
+    return;
+  }
+
   const bid = await prisma.bid.create({
     data: {
       requestId,
@@ -55,6 +65,12 @@ export const getBid = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const selectBid = asyncHandler(async (req: Request, res: Response) => {
+  const existing = await prisma.bid.findUnique({ where: { id: req.params.id } });
+  if (!existing) {
+    res.status(404).json({ success: false, error: { message: "Bid not found" } });
+    return;
+  }
+
   const selected = await prisma.bid.update({
     where: { id: req.params.id },
     data: { status: "selected" },
@@ -80,6 +96,12 @@ export const selectBid = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const rejectBid = asyncHandler(async (req: Request, res: Response) => {
+  const existing = await prisma.bid.findUnique({ where: { id: req.params.id } });
+  if (!existing) {
+    res.status(404).json({ success: false, error: { message: "Bid not found" } });
+    return;
+  }
+
   const bid = await prisma.bid.update({
     where: { id: req.params.id },
     data: { status: "rejected" },
