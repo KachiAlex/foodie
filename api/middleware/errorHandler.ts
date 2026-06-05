@@ -42,6 +42,9 @@ export function errorHandler(
   res: Response,
   _next: NextFunction
 ) {
+  // eslint-disable-next-line no-console
+  console.error("[errorHandler]", err);
+
   let statusCode = err.statusCode || 500;
   let message = err.message || "Internal server error";
   let code = err.code || "INTERNAL_ERROR";
