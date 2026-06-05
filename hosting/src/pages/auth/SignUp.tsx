@@ -441,7 +441,6 @@ export function SignUpPage() {
                       type="file"
                       accept="image/*,video/*"
                       multiple
-                      required
                       onChange={handleKitchenMediaChange}
                       className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm text-gray-600"
                     />
@@ -494,7 +493,6 @@ export function SignUpPage() {
                         type="file"
                         accept="image/*"
                         capture="environment"
-                        required
                         onChange={handleSingleFileChange("idCardCapture")}
                         className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm text-gray-600"
                       />
@@ -512,7 +510,6 @@ export function SignUpPage() {
                         id="utility-bill"
                         type="file"
                         accept="application/pdf,image/*"
-                        required
                         onChange={handleSingleFileChange("utilityBill")}
                         className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm text-gray-600"
                       />
