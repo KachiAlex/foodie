@@ -78,30 +78,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [
-        reqData,
-        orderData,
-        bidData,
-        venOrderData,
-        menuData,
-        metricData,
-        openReqData,
-      ] = await Promise.all([
-        fetchRequests(),
-        fetchOrders(),
-        fetchBids(),
-        fetchVendorOrders(),
-        fetchMenuItems(),
-        fetchVendorMetrics(),
-        fetchVendorOpenRequests(),
+      const role = user?.role;
+
+      const [reqData, orderData] = await Promise.all([
+        role === "buyer" || role === "admin" ? fetchRequests() : Promise.resolve([]),
+        role === "buyer" || role === "admin" ? fetchOrders() : Promise.resolve([]),
       ]);
       setRequests(reqData);
       setOrders(orderData);
-      setBids(bidData);
-      setVendorOrders(venOrderData);
-      setMenuItems(menuData);
-      setVendorMetrics(metricData);
-      setVendorOpenRequests(openReqData);
+
+      if (role === "vendor") {
+        const [bidData, venOrderData, menuData, metricData, openReqData] = await Promise.all([
+          fetchBids(),
+          fetchVendorOrders(),
+          fetchMenuItems(),
+          fetchVendorMetrics(),
+          fetchVendorOpenRequests(),
+        ]);
+        setBids(bidData);
+        setVendorOrders(venOrderData);
+        setMenuItems(menuData);
+        setVendorMetrics(metricData);
+        setVendorOpenRequests(openReqData);
+      } else {
+        setBids([]);
+        setVendorOrders([]);
+        setMenuItems([]);
+        setVendorMetrics([]);
+        setVendorOpenRequests([]);
+      }
+
       setIsInitialized(true);
     } catch (error) {
       const message = error instanceof Error ? error.message : "";
@@ -114,7 +120,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [showToast]);
+  }, [showToast, user]);
 
   useEffect(() => {
     if (!user) {
