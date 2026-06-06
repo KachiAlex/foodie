@@ -1,9 +1,15 @@
 import { v2 as cloudinary } from "cloudinary";
 
+const url = process.env.CLOUDINARY_URL;
+if (!url) {
+  throw new Error("CLOUDINARY_URL is not set");
+}
+
+const parsed = new URL(url);
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: parsed.hostname,
+  api_key: parsed.username,
+  api_secret: parsed.password,
   secure: true,
 });
 
