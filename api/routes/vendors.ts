@@ -13,6 +13,8 @@ router.get("/wallet", authenticate, vendorController.getWallet);
 router.get("/orders", authenticate, vendorController.getVendorOrders);
 router.get("/menu", authenticate, vendorController.getMenu);
 router.post("/menu", authenticate, requireVerifiedVendor, vendorController.addMenuItem);
+router.get("/documents", authenticate, vendorController.getDocuments);
+router.post("/documents", authenticate, vendorController.uploadDocument);
 router.get("/open-requests", authenticate, vendorController.getOpenRequests);
 
 export default router;

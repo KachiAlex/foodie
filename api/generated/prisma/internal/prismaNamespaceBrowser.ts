@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   VendorProfile: 'VendorProfile',
+  VendorDocument: 'VendorDocument',
   MenuItem: 'MenuItem',
   FoodRequest: 'FoodRequest',
   Bid: 'Bid',
@@ -111,6 +112,19 @@ export const VendorProfileScalarFieldEnum = {
 } as const
 
 export type VendorProfileScalarFieldEnum = (typeof VendorProfileScalarFieldEnum)[keyof typeof VendorProfileScalarFieldEnum]
+
+
+export const VendorDocumentScalarFieldEnum = {
+  id: 'id',
+  vendorId: 'vendorId',
+  type: 'type',
+  url: 'url',
+  publicId: 'publicId',
+  status: 'status',
+  uploadedAt: 'uploadedAt'
+} as const
+
+export type VendorDocumentScalarFieldEnum = (typeof VendorDocumentScalarFieldEnum)[keyof typeof VendorDocumentScalarFieldEnum]
 
 
 export const MenuItemScalarFieldEnum = {

@@ -40,6 +40,15 @@ export interface AdminDispute {
   openedAt: string;
 }
 
+export interface VendorDocument {
+  id: string;
+  vendorId: string;
+  type: string;
+  url: string;
+  status: string;
+  uploadedAt: string;
+}
+
 interface PendingVendor {
   id: string;
   userId: string;
@@ -50,6 +59,7 @@ interface PendingVendor {
   state?: string | null;
   landmark: string;
   verified: boolean;
+  documents: VendorDocument[];
 }
 
 export async function getDashboardMetrics(): Promise<DashboardMetrics> {

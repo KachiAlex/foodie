@@ -52,6 +52,7 @@ export function AdminDashboard() {
           landmark: v.landmark,
           rating: 0,
           totalOrders: 0,
+          documents: v.documents || [],
         })))
       ),
       getDashboardMetrics().then(setMetrics),
@@ -504,7 +505,7 @@ function AdminOrderDetailModal({ order, onClose }: AdminOrderDetailModalProps) {
 }
 
 interface VendorDossierModalProps {
-  vendor: { id: string; name: string; email: string; kycStatus: string; kitchenName: string; streetAddress: string; city: string; state: string; landmark: string; rating: number; totalOrders: number } | null;
+  vendor: { id: string; name: string; email: string; kycStatus: string; kitchenName: string; streetAddress: string; city: string; state: string; landmark: string; rating: number; totalOrders: number; documents: Array<{ id: string; type: string; url: string; status: string; uploadedAt: string }> } | null;
   onClose: () => void;
 }
 
@@ -558,6 +559,31 @@ function VendorDossierModal({ vendor, onClose }: VendorDossierModalProps) {
             <div className="rounded-2xl bg-gray-50 p-4">
               <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Orders</p>
               <p className="mt-1 font-semibold text-gray-900">{vendor.totalOrders}</p>
+            </div>
+          </div>
+          <div className="rounded-2xl bg-gray-50 p-4">
+            <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Documents ({vendor.documents.length})</p>
+            {vendor.documents.length === 0 && (
+              <p className="mt-2 text-gray-500">No documents submitted.</p>
+            )}
+            <div className="mt-2 space-y-2">
+              {vendor.documents.map((doc) => (
+                <a
+                  key={doc.id}
+                  href={doc.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-3 hover:bg-gray-50"
+                >
+                  <div>
+                    <p className="font-semibold text-gray-900 capitalize">{doc.type.replace("_", " ")}</p>
+                    <p className="text-xs text-gray-500">{new Date(doc.uploadedAt).toLocaleDateString()}</p>
+                  </div>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${doc.status === "approved" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"}`}>
+                    {doc.status}
+                  </span>
+                </a>
+              ))}
             </div>
           </div>
         </div>

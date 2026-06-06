@@ -10,6 +10,7 @@
  */
 export type * from './models/User'
 export type * from './models/VendorProfile'
+export type * from './models/VendorDocument'
 export type * from './models/MenuItem'
 export type * from './models/FoodRequest'
 export type * from './models/Bid'

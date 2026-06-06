@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
 import { prisma } from "../lib/prisma";
+import { cloudinary } from "../lib/cloudinary";
 
 export const listVendors = asyncHandler(async (_req: Request, res: Response) => {
   const vendors = await prisma.vendorProfile.findMany({
@@ -173,4 +174,49 @@ export const getOpenRequests = asyncHandler(async (_req: Request, res: Response)
     },
   });
   res.json({ success: true, data });
+});
+
+export const uploadDocument = asyncHandler(async (req: Request, res: Response) => {
+  const vendorId = (req as Request & { user?: { id: string } }).user?.id as string;
+  const { type, fileBase64 } = req.body;
+
+  if (!type || !fileBase64) {
+    res.status(400).json({ success: false, error: { message: "Document type and file are required" } });
+    return;
+  }
+
+  const profile = await prisma.vendorProfile.findUnique({ where: { userId: vendorId } });
+  if (!profile) {
+    res.status(404).json({ success: false, error: { message: "Vendor not found" } });
+    return;
+  }
+
+  const uploadResult = await cloudinary.uploader.upload(fileBase64, {
+    folder: `foodie/vendors/${vendorId}`,
+    resource_type: "auto",
+  });
+
+  const doc = await prisma.vendorDocument.create({
+    data: {
+      vendorId: profile.id,
+      type,
+      url: uploadResult.secure_url,
+      publicId: uploadResult.public_id,
+    },
+  });
+
+  res.status(201).json({ success: true, data: doc });
+});
+
+export const getDocuments = asyncHandler(async (req: Request, res: Response) => {
+  const vendorId = (req.params.id || (req as Request & { user?: { id: string } }).user?.id) as string;
+  const profile = await prisma.vendorProfile.findUnique({
+    where: { userId: vendorId },
+    include: { documents: { orderBy: { uploadedAt: "desc" } } },
+  });
+  if (!profile) {
+    res.status(404).json({ success: false, error: { message: "Vendor not found" } });
+    return;
+  }
+  res.json({ success: true, data: profile.documents });
 });

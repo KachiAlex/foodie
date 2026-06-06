@@ -62,8 +62,22 @@ model VendorProfile {
   updatedAt   DateTime @updatedAt
 
   menuItems MenuItem[]
+  documents VendorDocument[]
 
   @@map("vendor_profiles")
+}
+
+model VendorDocument {
+  id        String   @id @default(cuid())
+  vendorId  String
+  vendor    VendorProfile @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  type      String   // e.g. "id_card", "kitchen_photo", "business_license", "cac"
+  url       String
+  publicId  String?  // Cloudinary public_id for deletion
+  status    String   @default("pending") // pending | approved | rejected
+  uploadedAt DateTime @default(now())
+
+  @@map("vendor_documents")
 }
 
 model MenuItem {

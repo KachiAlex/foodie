@@ -386,6 +386,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   User: 'User',
   VendorProfile: 'VendorProfile',
+  VendorDocument: 'VendorDocument',
   MenuItem: 'MenuItem',
   FoodRequest: 'FoodRequest',
   Bid: 'Bid',
@@ -409,7 +410,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "vendorProfile" | "menuItem" | "foodRequest" | "bid" | "order" | "escrowWallet" | "escrowTransaction" | "dispute" | "auditLog"
+    modelProps: "user" | "vendorProfile" | "vendorDocument" | "menuItem" | "foodRequest" | "bid" | "order" | "escrowWallet" | "escrowTransaction" | "dispute" | "auditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -558,6 +559,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.VendorProfileCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.VendorProfileCountAggregateOutputType> | number
+        }
+      }
+    }
+    VendorDocument: {
+      payload: Prisma.$VendorDocumentPayload<ExtArgs>
+      fields: Prisma.VendorDocumentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.VendorDocumentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendorDocumentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.VendorDocumentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendorDocumentPayload>
+        }
+        findFirst: {
+          args: Prisma.VendorDocumentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendorDocumentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.VendorDocumentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendorDocumentPayload>
+        }
+        findMany: {
+          args: Prisma.VendorDocumentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendorDocumentPayload>[]
+        }
+        create: {
+          args: Prisma.VendorDocumentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendorDocumentPayload>
+        }
+        createMany: {
+          args: Prisma.VendorDocumentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.VendorDocumentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendorDocumentPayload>[]
+        }
+        delete: {
+          args: Prisma.VendorDocumentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendorDocumentPayload>
+        }
+        update: {
+          args: Prisma.VendorDocumentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendorDocumentPayload>
+        }
+        deleteMany: {
+          args: Prisma.VendorDocumentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.VendorDocumentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.VendorDocumentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendorDocumentPayload>[]
+        }
+        upsert: {
+          args: Prisma.VendorDocumentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VendorDocumentPayload>
+        }
+        aggregate: {
+          args: Prisma.VendorDocumentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateVendorDocument>
+        }
+        groupBy: {
+          args: Prisma.VendorDocumentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VendorDocumentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.VendorDocumentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VendorDocumentCountAggregateOutputType> | number
         }
       }
     }
@@ -1226,6 +1301,19 @@ export const VendorProfileScalarFieldEnum = {
 export type VendorProfileScalarFieldEnum = (typeof VendorProfileScalarFieldEnum)[keyof typeof VendorProfileScalarFieldEnum]
 
 
+export const VendorDocumentScalarFieldEnum = {
+  id: 'id',
+  vendorId: 'vendorId',
+  type: 'type',
+  url: 'url',
+  publicId: 'publicId',
+  status: 'status',
+  uploadedAt: 'uploadedAt'
+} as const
+
+export type VendorDocumentScalarFieldEnum = (typeof VendorDocumentScalarFieldEnum)[keyof typeof VendorDocumentScalarFieldEnum]
+
+
 export const MenuItemScalarFieldEnum = {
   id: 'id',
   vendorId: 'vendorId',
@@ -1689,6 +1777,7 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   vendorProfile?: Prisma.VendorProfileOmit
+  vendorDocument?: Prisma.VendorDocumentOmit
   menuItem?: Prisma.MenuItemOmit
   foodRequest?: Prisma.FoodRequestOmit
   bid?: Prisma.BidOmit

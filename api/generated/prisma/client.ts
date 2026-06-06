@@ -50,6 +50,11 @@ export type User = Prisma.UserModel
  */
 export type VendorProfile = Prisma.VendorProfileModel
 /**
+ * Model VendorDocument
+ * 
+ */
+export type VendorDocument = Prisma.VendorDocumentModel
+/**
  * Model MenuItem
  * 
  */

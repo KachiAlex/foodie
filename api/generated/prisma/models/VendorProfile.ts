@@ -290,6 +290,7 @@ export type VendorProfileWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"VendorProfile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   menuItems?: Prisma.MenuItemListRelationFilter
+  documents?: Prisma.VendorDocumentListRelationFilter
 }
 
 export type VendorProfileOrderByWithRelationInput = {
@@ -309,6 +310,7 @@ export type VendorProfileOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   menuItems?: Prisma.MenuItemOrderByRelationAggregateInput
+  documents?: Prisma.VendorDocumentOrderByRelationAggregateInput
 }
 
 export type VendorProfileWhereUniqueInput = Prisma.AtLeast<{
@@ -331,6 +333,7 @@ export type VendorProfileWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"VendorProfile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   menuItems?: Prisma.MenuItemListRelationFilter
+  documents?: Prisma.VendorDocumentListRelationFilter
 }, "id" | "userId">
 
 export type VendorProfileOrderByWithAggregationInput = {
@@ -391,6 +394,7 @@ export type VendorProfileCreateInput = {
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutVendorProfileInput
   menuItems?: Prisma.MenuItemCreateNestedManyWithoutVendorInput
+  documents?: Prisma.VendorDocumentCreateNestedManyWithoutVendorInput
 }
 
 export type VendorProfileUncheckedCreateInput = {
@@ -409,6 +413,7 @@ export type VendorProfileUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   menuItems?: Prisma.MenuItemUncheckedCreateNestedManyWithoutVendorInput
+  documents?: Prisma.VendorDocumentUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorProfileUpdateInput = {
@@ -427,6 +432,7 @@ export type VendorProfileUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutVendorProfileNestedInput
   menuItems?: Prisma.MenuItemUpdateManyWithoutVendorNestedInput
+  documents?: Prisma.VendorDocumentUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorProfileUncheckedUpdateInput = {
@@ -445,6 +451,7 @@ export type VendorProfileUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   menuItems?: Prisma.MenuItemUncheckedUpdateManyWithoutVendorNestedInput
+  documents?: Prisma.VendorDocumentUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorProfileCreateManyInput = {
@@ -639,6 +646,20 @@ export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
 
+export type VendorProfileCreateNestedOneWithoutDocumentsInput = {
+  create?: Prisma.XOR<Prisma.VendorProfileCreateWithoutDocumentsInput, Prisma.VendorProfileUncheckedCreateWithoutDocumentsInput>
+  connectOrCreate?: Prisma.VendorProfileCreateOrConnectWithoutDocumentsInput
+  connect?: Prisma.VendorProfileWhereUniqueInput
+}
+
+export type VendorProfileUpdateOneRequiredWithoutDocumentsNestedInput = {
+  create?: Prisma.XOR<Prisma.VendorProfileCreateWithoutDocumentsInput, Prisma.VendorProfileUncheckedCreateWithoutDocumentsInput>
+  connectOrCreate?: Prisma.VendorProfileCreateOrConnectWithoutDocumentsInput
+  upsert?: Prisma.VendorProfileUpsertWithoutDocumentsInput
+  connect?: Prisma.VendorProfileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.VendorProfileUpdateToOneWithWhereWithoutDocumentsInput, Prisma.VendorProfileUpdateWithoutDocumentsInput>, Prisma.VendorProfileUncheckedUpdateWithoutDocumentsInput>
+}
+
 export type VendorProfileCreateNestedOneWithoutMenuItemsInput = {
   create?: Prisma.XOR<Prisma.VendorProfileCreateWithoutMenuItemsInput, Prisma.VendorProfileUncheckedCreateWithoutMenuItemsInput>
   connectOrCreate?: Prisma.VendorProfileCreateOrConnectWithoutMenuItemsInput
@@ -668,6 +689,7 @@ export type VendorProfileCreateWithoutUserInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   menuItems?: Prisma.MenuItemCreateNestedManyWithoutVendorInput
+  documents?: Prisma.VendorDocumentCreateNestedManyWithoutVendorInput
 }
 
 export type VendorProfileUncheckedCreateWithoutUserInput = {
@@ -685,6 +707,7 @@ export type VendorProfileUncheckedCreateWithoutUserInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   menuItems?: Prisma.MenuItemUncheckedCreateNestedManyWithoutVendorInput
+  documents?: Prisma.VendorDocumentUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorProfileCreateOrConnectWithoutUserInput = {
@@ -718,10 +741,100 @@ export type VendorProfileUpdateWithoutUserInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   menuItems?: Prisma.MenuItemUpdateManyWithoutVendorNestedInput
+  documents?: Prisma.VendorDocumentUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorProfileUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  kitchenName?: Prisma.StringFieldUpdateOperationsInput | string
+  streetAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landmark?: Prisma.StringFieldUpdateOperationsInput | string
+  specialties?: Prisma.VendorProfileUpdatespecialtiesInput | string[]
+  rating?: Prisma.FloatFieldUpdateOperationsInput | number
+  totalOrders?: Prisma.IntFieldUpdateOperationsInput | number
+  isOnline?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  menuItems?: Prisma.MenuItemUncheckedUpdateManyWithoutVendorNestedInput
+  documents?: Prisma.VendorDocumentUncheckedUpdateManyWithoutVendorNestedInput
+}
+
+export type VendorProfileCreateWithoutDocumentsInput = {
+  id?: string
+  kitchenName: string
+  streetAddress?: string | null
+  city?: string | null
+  state?: string | null
+  landmark: string
+  specialties?: Prisma.VendorProfileCreatespecialtiesInput | string[]
+  rating?: number
+  totalOrders?: number
+  isOnline?: boolean
+  verified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutVendorProfileInput
+  menuItems?: Prisma.MenuItemCreateNestedManyWithoutVendorInput
+}
+
+export type VendorProfileUncheckedCreateWithoutDocumentsInput = {
+  id?: string
+  userId: string
+  kitchenName: string
+  streetAddress?: string | null
+  city?: string | null
+  state?: string | null
+  landmark: string
+  specialties?: Prisma.VendorProfileCreatespecialtiesInput | string[]
+  rating?: number
+  totalOrders?: number
+  isOnline?: boolean
+  verified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  menuItems?: Prisma.MenuItemUncheckedCreateNestedManyWithoutVendorInput
+}
+
+export type VendorProfileCreateOrConnectWithoutDocumentsInput = {
+  where: Prisma.VendorProfileWhereUniqueInput
+  create: Prisma.XOR<Prisma.VendorProfileCreateWithoutDocumentsInput, Prisma.VendorProfileUncheckedCreateWithoutDocumentsInput>
+}
+
+export type VendorProfileUpsertWithoutDocumentsInput = {
+  update: Prisma.XOR<Prisma.VendorProfileUpdateWithoutDocumentsInput, Prisma.VendorProfileUncheckedUpdateWithoutDocumentsInput>
+  create: Prisma.XOR<Prisma.VendorProfileCreateWithoutDocumentsInput, Prisma.VendorProfileUncheckedCreateWithoutDocumentsInput>
+  where?: Prisma.VendorProfileWhereInput
+}
+
+export type VendorProfileUpdateToOneWithWhereWithoutDocumentsInput = {
+  where?: Prisma.VendorProfileWhereInput
+  data: Prisma.XOR<Prisma.VendorProfileUpdateWithoutDocumentsInput, Prisma.VendorProfileUncheckedUpdateWithoutDocumentsInput>
+}
+
+export type VendorProfileUpdateWithoutDocumentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  kitchenName?: Prisma.StringFieldUpdateOperationsInput | string
+  streetAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  landmark?: Prisma.StringFieldUpdateOperationsInput | string
+  specialties?: Prisma.VendorProfileUpdatespecialtiesInput | string[]
+  rating?: Prisma.FloatFieldUpdateOperationsInput | number
+  totalOrders?: Prisma.IntFieldUpdateOperationsInput | number
+  isOnline?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutVendorProfileNestedInput
+  menuItems?: Prisma.MenuItemUpdateManyWithoutVendorNestedInput
+}
+
+export type VendorProfileUncheckedUpdateWithoutDocumentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   kitchenName?: Prisma.StringFieldUpdateOperationsInput | string
   streetAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -752,6 +865,7 @@ export type VendorProfileCreateWithoutMenuItemsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutVendorProfileInput
+  documents?: Prisma.VendorDocumentCreateNestedManyWithoutVendorInput
 }
 
 export type VendorProfileUncheckedCreateWithoutMenuItemsInput = {
@@ -769,6 +883,7 @@ export type VendorProfileUncheckedCreateWithoutMenuItemsInput = {
   verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  documents?: Prisma.VendorDocumentUncheckedCreateNestedManyWithoutVendorInput
 }
 
 export type VendorProfileCreateOrConnectWithoutMenuItemsInput = {
@@ -802,6 +917,7 @@ export type VendorProfileUpdateWithoutMenuItemsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutVendorProfileNestedInput
+  documents?: Prisma.VendorDocumentUpdateManyWithoutVendorNestedInput
 }
 
 export type VendorProfileUncheckedUpdateWithoutMenuItemsInput = {
@@ -819,6 +935,7 @@ export type VendorProfileUncheckedUpdateWithoutMenuItemsInput = {
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documents?: Prisma.VendorDocumentUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 
@@ -828,10 +945,12 @@ export type VendorProfileUncheckedUpdateWithoutMenuItemsInput = {
 
 export type VendorProfileCountOutputType = {
   menuItems: number
+  documents: number
 }
 
 export type VendorProfileCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   menuItems?: boolean | VendorProfileCountOutputTypeCountMenuItemsArgs
+  documents?: boolean | VendorProfileCountOutputTypeCountDocumentsArgs
 }
 
 /**
@@ -849,6 +968,13 @@ export type VendorProfileCountOutputTypeDefaultArgs<ExtArgs extends runtime.Type
  */
 export type VendorProfileCountOutputTypeCountMenuItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.MenuItemWhereInput
+}
+
+/**
+ * VendorProfileCountOutputType without action
+ */
+export type VendorProfileCountOutputTypeCountDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.VendorDocumentWhereInput
 }
 
 
@@ -869,6 +995,7 @@ export type VendorProfileSelect<ExtArgs extends runtime.Types.Extensions.Interna
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   menuItems?: boolean | Prisma.VendorProfile$menuItemsArgs<ExtArgs>
+  documents?: boolean | Prisma.VendorProfile$documentsArgs<ExtArgs>
   _count?: boolean | Prisma.VendorProfileCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["vendorProfile"]>
 
@@ -929,6 +1056,7 @@ export type VendorProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalA
 export type VendorProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   menuItems?: boolean | Prisma.VendorProfile$menuItemsArgs<ExtArgs>
+  documents?: boolean | Prisma.VendorProfile$documentsArgs<ExtArgs>
   _count?: boolean | Prisma.VendorProfileCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type VendorProfileIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -943,6 +1071,7 @@ export type $VendorProfilePayload<ExtArgs extends runtime.Types.Extensions.Inter
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
     menuItems: Prisma.$MenuItemPayload<ExtArgs>[]
+    documents: Prisma.$VendorDocumentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1355,6 +1484,7 @@ export interface Prisma__VendorProfileClient<T, Null = never, ExtArgs extends ru
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   menuItems<T extends Prisma.VendorProfile$menuItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VendorProfile$menuItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MenuItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documents<T extends Prisma.VendorProfile$documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VendorProfile$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VendorDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1820,6 +1950,30 @@ export type VendorProfile$menuItemsArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.MenuItemScalarFieldEnum | Prisma.MenuItemScalarFieldEnum[]
+}
+
+/**
+ * VendorProfile.documents
+ */
+export type VendorProfile$documentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the VendorDocument
+   */
+  select?: Prisma.VendorDocumentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the VendorDocument
+   */
+  omit?: Prisma.VendorDocumentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VendorDocumentInclude<ExtArgs> | null
+  where?: Prisma.VendorDocumentWhereInput
+  orderBy?: Prisma.VendorDocumentOrderByWithRelationInput | Prisma.VendorDocumentOrderByWithRelationInput[]
+  cursor?: Prisma.VendorDocumentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.VendorDocumentScalarFieldEnum | Prisma.VendorDocumentScalarFieldEnum[]
 }
 
 /**

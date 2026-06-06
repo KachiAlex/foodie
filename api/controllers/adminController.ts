@@ -132,6 +132,7 @@ export const listPendingVendors = asyncHandler(async (_req: Request, res: Respon
     where: { verified: false },
     include: {
       user: { select: { id: true, name: true, email: true } },
+      documents: { orderBy: { uploadedAt: "desc" } },
     },
   });
   res.json({ success: true, data });
