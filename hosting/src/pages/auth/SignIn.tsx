@@ -1,18 +1,15 @@
 import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChefHat, Loader2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
-import type { Role } from "@/context/RoleContext";
 
 export function SignInPage() {
   const { signIn, user } = useAuth();
   const navigate = useNavigate();
-  const [params] = useSearchParams();
-  const preselectedRole = (params.get("role") as Role | null) ?? undefined;
-  const [form, setForm] = useState({ email: "", password: "", role: preselectedRole ?? "buyer" });
+  const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -60,7 +57,7 @@ export function SignInPage() {
             <div className="mb-8 space-y-3">
               <p className="text-sm uppercase tracking-[0.3em] text-gray-400">Welcome back</p>
               <h1 className="text-3xl font-semibold text-gray-900">Sign in to continue</h1>
-              <p className="text-sm text-gray-500">Use the email you registered with. Role determines which workspace opens.</p>
+              <p className="text-sm text-gray-500">Use the email you registered with.</p>
             </div>
 
             <form className="space-y-6" onSubmit={handleSubmit}>
@@ -106,21 +103,6 @@ export function SignInPage() {
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700" htmlFor="role">
-                  Workspace to open
-                </label>
-                <select
-                  id="role"
-                  value={form.role}
-                  onChange={(event) => setForm((prev) => ({ ...prev, role: event.target.value as Role }))}
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
-                >
-                  <option value="buyer">Buyer</option>
-                  <option value="vendor">Vendor</option>
-                </select>
               </div>
 
               {error && <p className="text-sm text-red-500">{error}</p>}

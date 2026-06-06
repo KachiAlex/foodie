@@ -65,7 +65,9 @@ async function main() {
       vendorProfile: {
         create: {
           kitchenName: "Nneka's Kitchen",
-          address: "12 Lekki Phase 1, Lagos",
+          streetAddress: "12 Lekki Phase 1",
+          city: "Lagos",
+          state: "Lagos",
           landmark: "Near Silverbird Cinema",
           specialties: ["Nigerian", "Soups"],
           rating: 4.8,
@@ -88,7 +90,9 @@ async function main() {
       vendorProfile: {
         create: {
           kitchenName: "Tunde's Grills",
-          address: "45 Ikeja GRA, Lagos",
+          streetAddress: "45 Ikeja GRA",
+          city: "Lagos",
+          state: "Lagos",
           landmark: "Opposite GTBank",
           specialties: ["Grills", "Rice Dishes"],
           rating: 4.5,

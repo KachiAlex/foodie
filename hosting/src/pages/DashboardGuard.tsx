@@ -25,7 +25,7 @@ export function DashboardGuard() {
 
   useEffect(() => {
     if (!user) {
-      navigate(`/auth/sign-in?role=${roleSlug ?? "buyer"}`, { replace: true });
+      navigate(`/auth/sign-in`, { replace: true });
       return;
     }
     if (!roleSlug) return;
