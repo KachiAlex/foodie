@@ -8,11 +8,18 @@ if (!url) {
   throw new Error("CLOUDINARY_URL is not set");
 }
 
-const parsed = new URL(url);
+// Parse cloudinary://API_KEY:API_SECRET@CLOUD_NAME
+const match = url.match(/^cloudinary:\/\/([^:]+):([^@]+)@(.+)$/);
+if (!match) {
+  throw new Error("CLOUDINARY_URL format is invalid. Expected: cloudinary://api_key:api_secret@cloud_name");
+}
+
+const [, apiKey, apiSecret, cloudName] = match;
+
 cloudinary.config({
-  cloud_name: parsed.hostname,
-  api_key: parsed.username,
-  api_secret: parsed.password,
+  cloud_name: cloudName,
+  api_key: apiKey,
+  api_secret: apiSecret,
   secure: true,
 });
 
