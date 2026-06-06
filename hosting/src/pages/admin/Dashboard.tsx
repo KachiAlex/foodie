@@ -14,18 +14,16 @@ import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/context/ToastContext";
 import { useCurrency } from "@/context/CurrencyContext";
-import { approvePayoutRequest, createOrderEscalation, triggerVendorAudit, getPendingVendors, verifyVendor, getDashboardMetrics, getAdminOrders, getEscrowTransactions, getAdminDisputes, resolveDispute, flagVendor } from "@/services/adminApi";
+import { approvePayoutRequest, triggerVendorAudit, getPendingVendors, verifyVendor, getDashboardMetrics, getAdminOrders, getEscrowTransactions, getAdminDisputes, resolveDispute, flagVendor } from "@/services/adminApi";
 import type { DashboardMetrics, AdminOrder, EscrowTransaction, AdminDispute } from "@/services/adminApi";
 
 export function AdminDashboard() {
   const { symbol } = useCurrency();
-  const ESCALATION_CAP = 5;
   const { showToast } = useToast();
 
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
   const [activeVendorId, setActiveVendorId] = useState<string | null>(null);
   const [approvingPayoutId, setApprovingPayoutId] = useState<string | null>(null);
-  const [isEscalatingOrder, setIsEscalatingOrder] = useState(false);
   const [isSchedulingAudit, setIsSchedulingAudit] = useState<string | null>(null);
   const [resolvingDisputeId, setResolvingDisputeId] = useState<string | null>(null);
   const [orderSearch, setOrderSearch] = useState("");
@@ -37,7 +35,6 @@ export function AdminDashboard() {
   const [escrowTxns, setEscrowTxns] = useState<EscrowTransaction[]>([]);
   const [adminDisputes, setAdminDisputes] = useState<AdminDispute[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [escalationQueue, setEscalationQueue] = useState<{ id: string; title: string; owner: string; severity: string; eta: string }[]>([]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -93,43 +90,6 @@ export function AdminDashboard() {
     return alerts;
   }, [metrics, symbol]);
 
-  const orderProfiles = useMemo(
-    () =>
-      adminOrders.reduce<Record<string, { buyer: string; vendor: string; contact: string; timeline: Array<{ step: string; time: string }> }>>(
-        (acc, order) => {
-          acc[order.id] = {
-            buyer: order.buyer?.name ?? "Unknown",
-            vendor: order.request?.foodName ?? "Unknown",
-            contact: "ops@foodiemarket.com",
-            timeline: [
-              { step: "Order submitted", time: new Date(order.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) },
-              { step: "Vendor accepted", time: "—" },
-              { step: "Kitchen prep", time: "—" },
-              { step: order.status, time: "Now" },
-            ],
-          };
-          return acc;
-        },
-        {},
-      ),
-    [adminOrders],
-  );
-
-  const vendorProfiles = useMemo(
-    () =>
-      adminVendors.reduce<Record<string, { documents: Array<{ type: string; status: string }>; notes: string }>>((acc, vendor) => {
-        acc[vendor.id] = {
-          documents: [
-            { type: "ID Verification", status: vendor.kycStatus === "Approved" ? "Verified" : "Pending" },
-            { type: "Kitchen inspection", status: vendor.kycStatus === "Flagged" ? "Action required" : "Valid" },
-            { type: "Bank account", status: "Synced" },
-          ],
-          notes: "Last audit 2 weeks ago. Maintain photo freshness for listings.",
-        };
-        return acc;
-      }, {}),
-    [],
-  );
 
   const filteredVendors = useMemo(
     () =>
@@ -205,44 +165,6 @@ export function AdminDashboard() {
     } catch {
       showToast("Error verifying vendor");
     }
-  };
-
-  const handleCreateEscalation = async (orderId: string) => {
-    if (isEscalatingOrder) return;
-    setIsEscalatingOrder(true);
-    try {
-      const response = await createOrderEscalation(orderId);
-      setEscalationQueue((prev) => [
-        {
-          id: `ESC-${Date.now().toString().slice(-4)}`,
-          title: response.message,
-          owner: "Ops bot",
-          severity: "Medium",
-          eta: "Review ASAP",
-        },
-        ...prev,
-      ].slice(0, ESCALATION_CAP));
-      showToast(response.message);
-    } catch {
-      showToast("Error creating escalation");
-    } finally {
-      setIsEscalatingOrder(false);
-    }
-  };
-
-  const handleResolveEscalation = (ticketId: string) => {
-    setEscalationQueue((prev) => prev.filter((ticket) => ticket.id !== ticketId));
-    showToast(`Escalation ${ticketId} resolved`);
-  };
-
-  const handleSnoozeEscalation = (ticketId: string) => {
-    setEscalationQueue((prev) => {
-      const target = prev.find((ticket) => ticket.id === ticketId);
-      if (!target) return prev;
-      const updated = prev.filter((ticket) => ticket.id !== ticketId);
-      return [...updated, { ...target, eta: "Snoozed +1h" }];
-    });
-    showToast(`Escalation ${ticketId} snoozed`);
   };
 
   const SIDEBAR = {
@@ -516,51 +438,12 @@ export function AdminDashboard() {
           </div>
         </div>
 
-        {/* ── 5. Escalation queue (conditional) ─────────────────────────── */}
-        {escalationQueue.length > 0 && (
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Escalation queue</h3>
-                <p className="text-sm text-gray-500">{escalationQueue.length} open ticket{escalationQueue.length !== 1 ? "s" : ""}</p>
-              </div>
-              <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">{escalationQueue.length} open</span>
-            </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {escalationQueue.map((ticket) => (
-                <div key={ticket.id} className="rounded-2xl border border-gray-100 p-4">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{ticket.id}</p>
-                    <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${ticket.severity === "High" ? "bg-red-50 text-red-600" : ticket.severity === "Medium" ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"}`}>
-                      {ticket.severity}
-                    </span>
-                  </div>
-                  <p className="mt-2 text-sm font-semibold text-gray-900">{ticket.title}</p>
-                  <p className="text-xs text-gray-500">Owner: {ticket.owner} · {ticket.eta}</p>
-                  <div className="mt-3 flex gap-2">
-                    <Button variant="outline" size="sm" className="border-gray-200 text-gray-700" onClick={() => handleResolveEscalation(ticket.id)}>
-                      Resolve
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-orange-600" onClick={() => handleSnoozeEscalation(ticket.id)}>
-                      Snooze 1h
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         <AdminOrderDetailModal
           order={activeOrderId ? adminOrders.find((o) => o.id === activeOrderId) ?? null : null}
-          profile={activeOrderId ? orderProfiles[activeOrderId] ?? null : null}
-          isEscalating={isEscalatingOrder}
-          onCreateEscalation={handleCreateEscalation}
           onClose={() => setActiveOrderId(null)}
         />
         <VendorDossierModal
           vendor={activeVendorId ? adminVendors.find((v) => v.id === activeVendorId) ?? null : null}
-          dossier={activeVendorId ? vendorProfiles[activeVendorId] ?? null : null}
           onClose={() => setActiveVendorId(null)}
         />
       </section>
@@ -570,75 +453,49 @@ export function AdminDashboard() {
 
 interface AdminOrderDetailModalProps {
   order: import("@/services/adminApi").AdminOrder | null;
-  profile: { buyer: string; vendor: string; contact: string; timeline: Array<{ step: string; time: string }> } | null;
-  isEscalating: boolean;
-  onCreateEscalation: (orderId: string) => void;
   onClose: () => void;
 }
 
-function AdminOrderDetailModal({ order, profile, isEscalating, onCreateEscalation, onClose }: AdminOrderDetailModalProps) {
+function AdminOrderDetailModal({ order, onClose }: AdminOrderDetailModalProps) {
   const { symbol } = useCurrency();
-  const { showToast } = useToast();
-  if (!order || !profile) return null;
+  if (!order) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-3xl rounded-3xl bg-white p-6 shadow-2xl">
+      <div className="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{order.id}</p>
-            <h3 className="text-2xl font-semibold text-gray-900">Order dossier</h3>
+            <h3 className="text-2xl font-semibold text-gray-900">Order detail</h3>
             <p className="text-sm text-gray-500">{symbol}{Number(order.totalAmount).toLocaleString()} · {order.status}</p>
           </div>
           <Button variant="ghost" onClick={onClose}>
             Close
           </Button>
         </div>
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          <div className="rounded-2xl bg-gray-50 p-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Parties</p>
-            <div className="mt-3 space-y-3 text-sm">
-              <div>
-                <p className="text-gray-500">Buyer</p>
-                <p className="font-semibold text-gray-900">{profile.buyer}</p>
-              </div>
-              <div>
-                <p className="text-gray-500">Vendor</p>
-                <p className="font-semibold text-gray-900">{profile.vendor}</p>
-              </div>
-              <div>
-                <p className="text-gray-500">Ops contact</p>
-                <p className="font-semibold text-gray-900">{profile.contact}</p>
-              </div>
+        <div className="mt-6 space-y-4 text-sm">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="rounded-2xl bg-gray-50 p-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Buyer</p>
+              <p className="mt-1 font-semibold text-gray-900">{order.buyer?.name ?? "—"}</p>
+            </div>
+            <div className="rounded-2xl bg-gray-50 p-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Item</p>
+              <p className="mt-1 font-semibold text-gray-900">{order.request?.foodName ?? "—"}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="rounded-2xl bg-gray-50 p-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Request ID</p>
+              <p className="mt-1 font-semibold text-gray-900">{order.request?.id ?? "—"}</p>
+            </div>
+            <div className="rounded-2xl bg-gray-50 p-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Total amount</p>
+              <p className="mt-1 font-semibold text-gray-900">{symbol}{Number(order.totalAmount).toLocaleString()}</p>
             </div>
           </div>
           <div className="rounded-2xl bg-gray-50 p-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Timeline</p>
-            <div className="mt-3 space-y-3 text-sm">
-              {profile.timeline.map((event) => (
-                <div key={event.step} className="flex items-center justify-between">
-                  <p className="font-semibold text-gray-900">{event.step}</p>
-                  <span className="text-gray-500">{event.time}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-        <div className="mt-6 rounded-2xl border border-gray-100 p-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Actions</p>
-          <div className="mt-3 flex flex-wrap gap-3">
-            <Button variant="outline" className="border-gray-200 text-gray-700" onClick={() => showToast("Payouts paused for this order.")}>
-              Pause payouts
-            </Button>
-            <Button variant="outline" className="border-gray-200 text-gray-700" onClick={() => showToast("Messaging buyer — feature coming soon.")}>
-              Message buyer
-            </Button>
-            <Button
-              className="bg-orange-500 text-white"
-              disabled={isEscalating}
-              onClick={() => onCreateEscalation(order.id)}
-            >
-              {isEscalating ? "Creating..." : "Create escalation"}
-            </Button>
+            <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Created</p>
+            <p className="mt-1 text-gray-900">{new Date(order.createdAt).toLocaleString()}</p>
           </div>
         </div>
       </div>
@@ -648,14 +505,13 @@ function AdminOrderDetailModal({ order, profile, isEscalating, onCreateEscalatio
 
 interface VendorDossierModalProps {
   vendor: { id: string; name: string; email: string; kycStatus: string; kitchenName: string; streetAddress: string; city: string; state: string; landmark: string; rating: number; totalOrders: number } | null;
-  dossier: { documents: Array<{ type: string; status: string }>; notes: string } | null;
   onClose: () => void;
 }
 
-function VendorDossierModal({ vendor, dossier, onClose }: VendorDossierModalProps) {
+function VendorDossierModal({ vendor, onClose }: VendorDossierModalProps) {
   const { showToast } = useToast();
   const [flagging, setFlagging] = useState(false);
-  if (!vendor || !dossier) return null;
+  if (!vendor) return null;
 
   const handleFlag = async () => {
     if (flagging) return;
@@ -676,35 +532,36 @@ function VendorDossierModal({ vendor, dossier, onClose }: VendorDossierModalProp
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{vendor.id}</p>
-            <h3 className="text-2xl font-semibold text-gray-900">Vendor dossier</h3>
-            <p className="text-sm text-gray-500">{vendor.name} • {vendor.totalOrders} orders</p>
+            <h3 className="text-2xl font-semibold text-gray-900">Vendor detail</h3>
+            <p className="text-sm text-gray-500">{vendor.name} · {vendor.kitchenName}</p>
           </div>
           <Button variant="ghost" onClick={onClose}>
             Close
           </Button>
         </div>
-        <div className="mt-6 rounded-2xl bg-gray-50 p-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Documents</p>
-          <div className="mt-3 space-y-3 text-sm">
-            {dossier.documents.map((doc) => (
-              <div key={doc.type} className="flex items-center justify-between">
-                <p className="font-semibold text-gray-900">{doc.type}</p>
-                <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-600">{doc.status}</span>
-              </div>
-            ))}
+        <div className="mt-6 space-y-4 text-sm">
+          <div className="rounded-2xl bg-gray-50 p-4">
+            <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Contact</p>
+            <p className="mt-1 font-semibold text-gray-900">{vendor.email}</p>
+          </div>
+          <div className="rounded-2xl bg-gray-50 p-4">
+            <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Address</p>
+            <p className="mt-1 text-gray-900">{vendor.streetAddress || "—"}</p>
+            <p className="text-gray-500">{vendor.city}{vendor.city && vendor.state ? ", " : ""}{vendor.state}</p>
+            <p className="text-gray-500">{vendor.landmark}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="rounded-2xl bg-gray-50 p-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-gray-400">KYC status</p>
+              <p className={`mt-1 font-semibold ${vendor.kycStatus === "Approved" ? "text-emerald-700" : "text-amber-700"}`}>{vendor.kycStatus}</p>
+            </div>
+            <div className="rounded-2xl bg-gray-50 p-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Orders</p>
+              <p className="mt-1 font-semibold text-gray-900">{vendor.totalOrders}</p>
+            </div>
           </div>
         </div>
-        <div className="mt-6 rounded-2xl border border-gray-100 p-4 text-sm text-gray-600">
-          <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Notes</p>
-          <p className="mt-2 text-gray-700">{dossier.notes}</p>
-        </div>
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Button variant="outline" className="border-gray-200 text-gray-700" onClick={() => showToast("Kitchen visit requested — ops will schedule.")}>
-            Request kitchen visit
-          </Button>
-          <Button variant="outline" className="border-gray-200 text-gray-700" onClick={() => showToast("Messaging vendor — feature coming soon.")}>
-            Message vendor
-          </Button>
+        <div className="mt-6">
           <Button className="bg-red-500 text-white" disabled={flagging} onClick={handleFlag}>
             {flagging ? "Flagging..." : "Flag account"}
           </Button>
