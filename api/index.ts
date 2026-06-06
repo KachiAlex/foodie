@@ -1,13 +1,12 @@
+import "dotenv/config";
 import express, { Request, Response } from "express";
-import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
 import { setupCors } from "./middleware/cors";
 import { errorHandler } from "./middleware/errorHandler";
 import routes from "./routes";
 
-dotenv.config();
-
 const app = express();
+app.set("trust proxy", 1);
 const PORT = process.env.PORT || 3000;
 
 const authLimiter = rateLimit({
