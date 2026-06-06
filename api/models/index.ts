@@ -106,9 +106,9 @@ export interface User {
 export interface VendorProfile {
   userId: string;
   kitchenName: string;
-  streetAddress: string;
-  city: string;
-  state: string;
+  streetAddress?: string | null;
+  city?: string | null;
+  state?: string | null;
   landmark: string;
   specialty: string[];
   rating: number;

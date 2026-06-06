@@ -49,9 +49,9 @@ model VendorProfile {
   userId      String   @unique
   user        User     @relation(fields: [userId], references: [id])
   kitchenName   String
-  streetAddress String
-  city          String
-  state         String
+  streetAddress String?
+  city          String?
+  state         String?
   landmark      String
   specialties String[]
   rating      Float    @default(0)

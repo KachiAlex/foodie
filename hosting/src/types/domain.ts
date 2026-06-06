@@ -75,8 +75,8 @@ export interface AdminVendorRecord {
   rating: number;
   totalOrders: number;
   kitchenName?: string;
-  streetAddress?: string;
-  city?: string;
-  state?: string;
+  streetAddress?: string | null;
+  city?: string | null;
+  state?: string | null;
   landmark?: string;
 }

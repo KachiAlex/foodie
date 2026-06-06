@@ -87,9 +87,9 @@ export interface FeaturedVendor {
   id: string;
   name: string;
   kitchenName: string;
-  streetAddress: string;
-  city: string;
-  state: string;
+  streetAddress?: string | null;
+  city?: string | null;
+  state?: string | null;
   specialties: string[];
   menuItems: { name: string; price: number }[];
 }
@@ -98,9 +98,9 @@ interface BackendVendorProfile {
   id: string;
   userId: string;
   kitchenName: string;
-  streetAddress: string;
-  city: string;
-  state: string;
+  streetAddress?: string | null;
+  city?: string | null;
+  state?: string | null;
   specialties: string[];
   user: { id: string; name: string };
   menuItems: { name: string; price: number }[];

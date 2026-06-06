@@ -237,9 +237,9 @@ export type VendorProfileGroupByOutputType = {
   id: string
   userId: string
   kitchenName: string
-  streetAddress: string
-  city: string
-  state: string
+  streetAddress: string | null
+  city: string | null
+  state: string | null
   landmark: string
   specialties: string[]
   rating: number
@@ -277,9 +277,9 @@ export type VendorProfileWhereInput = {
   id?: Prisma.StringFilter<"VendorProfile"> | string
   userId?: Prisma.StringFilter<"VendorProfile"> | string
   kitchenName?: Prisma.StringFilter<"VendorProfile"> | string
-  streetAddress?: Prisma.StringFilter<"VendorProfile"> | string
-  city?: Prisma.StringFilter<"VendorProfile"> | string
-  state?: Prisma.StringFilter<"VendorProfile"> | string
+  streetAddress?: Prisma.StringNullableFilter<"VendorProfile"> | string | null
+  city?: Prisma.StringNullableFilter<"VendorProfile"> | string | null
+  state?: Prisma.StringNullableFilter<"VendorProfile"> | string | null
   landmark?: Prisma.StringFilter<"VendorProfile"> | string
   specialties?: Prisma.StringNullableListFilter<"VendorProfile">
   rating?: Prisma.FloatFilter<"VendorProfile"> | number
@@ -296,9 +296,9 @@ export type VendorProfileOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   kitchenName?: Prisma.SortOrder
-  streetAddress?: Prisma.SortOrder
-  city?: Prisma.SortOrder
-  state?: Prisma.SortOrder
+  streetAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  city?: Prisma.SortOrderInput | Prisma.SortOrder
+  state?: Prisma.SortOrderInput | Prisma.SortOrder
   landmark?: Prisma.SortOrder
   specialties?: Prisma.SortOrder
   rating?: Prisma.SortOrder
@@ -318,9 +318,9 @@ export type VendorProfileWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.VendorProfileWhereInput[]
   NOT?: Prisma.VendorProfileWhereInput | Prisma.VendorProfileWhereInput[]
   kitchenName?: Prisma.StringFilter<"VendorProfile"> | string
-  streetAddress?: Prisma.StringFilter<"VendorProfile"> | string
-  city?: Prisma.StringFilter<"VendorProfile"> | string
-  state?: Prisma.StringFilter<"VendorProfile"> | string
+  streetAddress?: Prisma.StringNullableFilter<"VendorProfile"> | string | null
+  city?: Prisma.StringNullableFilter<"VendorProfile"> | string | null
+  state?: Prisma.StringNullableFilter<"VendorProfile"> | string | null
   landmark?: Prisma.StringFilter<"VendorProfile"> | string
   specialties?: Prisma.StringNullableListFilter<"VendorProfile">
   rating?: Prisma.FloatFilter<"VendorProfile"> | number
@@ -337,9 +337,9 @@ export type VendorProfileOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   kitchenName?: Prisma.SortOrder
-  streetAddress?: Prisma.SortOrder
-  city?: Prisma.SortOrder
-  state?: Prisma.SortOrder
+  streetAddress?: Prisma.SortOrderInput | Prisma.SortOrder
+  city?: Prisma.SortOrderInput | Prisma.SortOrder
+  state?: Prisma.SortOrderInput | Prisma.SortOrder
   landmark?: Prisma.SortOrder
   specialties?: Prisma.SortOrder
   rating?: Prisma.SortOrder
@@ -362,9 +362,9 @@ export type VendorProfileScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"VendorProfile"> | string
   userId?: Prisma.StringWithAggregatesFilter<"VendorProfile"> | string
   kitchenName?: Prisma.StringWithAggregatesFilter<"VendorProfile"> | string
-  streetAddress?: Prisma.StringWithAggregatesFilter<"VendorProfile"> | string
-  city?: Prisma.StringWithAggregatesFilter<"VendorProfile"> | string
-  state?: Prisma.StringWithAggregatesFilter<"VendorProfile"> | string
+  streetAddress?: Prisma.StringNullableWithAggregatesFilter<"VendorProfile"> | string | null
+  city?: Prisma.StringNullableWithAggregatesFilter<"VendorProfile"> | string | null
+  state?: Prisma.StringNullableWithAggregatesFilter<"VendorProfile"> | string | null
   landmark?: Prisma.StringWithAggregatesFilter<"VendorProfile"> | string
   specialties?: Prisma.StringNullableListFilter<"VendorProfile">
   rating?: Prisma.FloatWithAggregatesFilter<"VendorProfile"> | number
@@ -378,9 +378,9 @@ export type VendorProfileScalarWhereWithAggregatesInput = {
 export type VendorProfileCreateInput = {
   id?: string
   kitchenName: string
-  streetAddress: string
-  city: string
-  state: string
+  streetAddress?: string | null
+  city?: string | null
+  state?: string | null
   landmark: string
   specialties?: Prisma.VendorProfileCreatespecialtiesInput | string[]
   rating?: number
@@ -397,9 +397,9 @@ export type VendorProfileUncheckedCreateInput = {
   id?: string
   userId: string
   kitchenName: string
-  streetAddress: string
-  city: string
-  state: string
+  streetAddress?: string | null
+  city?: string | null
+  state?: string | null
   landmark: string
   specialties?: Prisma.VendorProfileCreatespecialtiesInput | string[]
   rating?: number
@@ -414,9 +414,9 @@ export type VendorProfileUncheckedCreateInput = {
 export type VendorProfileUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   kitchenName?: Prisma.StringFieldUpdateOperationsInput | string
-  streetAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  city?: Prisma.StringFieldUpdateOperationsInput | string
-  state?: Prisma.StringFieldUpdateOperationsInput | string
+  streetAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   landmark?: Prisma.StringFieldUpdateOperationsInput | string
   specialties?: Prisma.VendorProfileUpdatespecialtiesInput | string[]
   rating?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -433,9 +433,9 @@ export type VendorProfileUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   kitchenName?: Prisma.StringFieldUpdateOperationsInput | string
-  streetAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  city?: Prisma.StringFieldUpdateOperationsInput | string
-  state?: Prisma.StringFieldUpdateOperationsInput | string
+  streetAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   landmark?: Prisma.StringFieldUpdateOperationsInput | string
   specialties?: Prisma.VendorProfileUpdatespecialtiesInput | string[]
   rating?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -451,9 +451,9 @@ export type VendorProfileCreateManyInput = {
   id?: string
   userId: string
   kitchenName: string
-  streetAddress: string
-  city: string
-  state: string
+  streetAddress?: string | null
+  city?: string | null
+  state?: string | null
   landmark: string
   specialties?: Prisma.VendorProfileCreatespecialtiesInput | string[]
   rating?: number
@@ -467,9 +467,9 @@ export type VendorProfileCreateManyInput = {
 export type VendorProfileUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   kitchenName?: Prisma.StringFieldUpdateOperationsInput | string
-  streetAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  city?: Prisma.StringFieldUpdateOperationsInput | string
-  state?: Prisma.StringFieldUpdateOperationsInput | string
+  streetAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   landmark?: Prisma.StringFieldUpdateOperationsInput | string
   specialties?: Prisma.VendorProfileUpdatespecialtiesInput | string[]
   rating?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -484,9 +484,9 @@ export type VendorProfileUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   kitchenName?: Prisma.StringFieldUpdateOperationsInput | string
-  streetAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  city?: Prisma.StringFieldUpdateOperationsInput | string
-  state?: Prisma.StringFieldUpdateOperationsInput | string
+  streetAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   landmark?: Prisma.StringFieldUpdateOperationsInput | string
   specialties?: Prisma.VendorProfileUpdatespecialtiesInput | string[]
   rating?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -610,6 +610,10 @@ export type VendorProfileCreatespecialtiesInput = {
   set: string[]
 }
 
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
 export type VendorProfileUpdatespecialtiesInput = {
   set?: string[]
   push?: string | string[]
@@ -652,9 +656,9 @@ export type VendorProfileUpdateOneRequiredWithoutMenuItemsNestedInput = {
 export type VendorProfileCreateWithoutUserInput = {
   id?: string
   kitchenName: string
-  streetAddress: string
-  city: string
-  state: string
+  streetAddress?: string | null
+  city?: string | null
+  state?: string | null
   landmark: string
   specialties?: Prisma.VendorProfileCreatespecialtiesInput | string[]
   rating?: number
@@ -669,9 +673,9 @@ export type VendorProfileCreateWithoutUserInput = {
 export type VendorProfileUncheckedCreateWithoutUserInput = {
   id?: string
   kitchenName: string
-  streetAddress: string
-  city: string
-  state: string
+  streetAddress?: string | null
+  city?: string | null
+  state?: string | null
   landmark: string
   specialties?: Prisma.VendorProfileCreatespecialtiesInput | string[]
   rating?: number
@@ -702,9 +706,9 @@ export type VendorProfileUpdateToOneWithWhereWithoutUserInput = {
 export type VendorProfileUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   kitchenName?: Prisma.StringFieldUpdateOperationsInput | string
-  streetAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  city?: Prisma.StringFieldUpdateOperationsInput | string
-  state?: Prisma.StringFieldUpdateOperationsInput | string
+  streetAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   landmark?: Prisma.StringFieldUpdateOperationsInput | string
   specialties?: Prisma.VendorProfileUpdatespecialtiesInput | string[]
   rating?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -719,9 +723,9 @@ export type VendorProfileUpdateWithoutUserInput = {
 export type VendorProfileUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   kitchenName?: Prisma.StringFieldUpdateOperationsInput | string
-  streetAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  city?: Prisma.StringFieldUpdateOperationsInput | string
-  state?: Prisma.StringFieldUpdateOperationsInput | string
+  streetAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   landmark?: Prisma.StringFieldUpdateOperationsInput | string
   specialties?: Prisma.VendorProfileUpdatespecialtiesInput | string[]
   rating?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -736,9 +740,9 @@ export type VendorProfileUncheckedUpdateWithoutUserInput = {
 export type VendorProfileCreateWithoutMenuItemsInput = {
   id?: string
   kitchenName: string
-  streetAddress: string
-  city: string
-  state: string
+  streetAddress?: string | null
+  city?: string | null
+  state?: string | null
   landmark: string
   specialties?: Prisma.VendorProfileCreatespecialtiesInput | string[]
   rating?: number
@@ -754,9 +758,9 @@ export type VendorProfileUncheckedCreateWithoutMenuItemsInput = {
   id?: string
   userId: string
   kitchenName: string
-  streetAddress: string
-  city: string
-  state: string
+  streetAddress?: string | null
+  city?: string | null
+  state?: string | null
   landmark: string
   specialties?: Prisma.VendorProfileCreatespecialtiesInput | string[]
   rating?: number
@@ -786,9 +790,9 @@ export type VendorProfileUpdateToOneWithWhereWithoutMenuItemsInput = {
 export type VendorProfileUpdateWithoutMenuItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   kitchenName?: Prisma.StringFieldUpdateOperationsInput | string
-  streetAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  city?: Prisma.StringFieldUpdateOperationsInput | string
-  state?: Prisma.StringFieldUpdateOperationsInput | string
+  streetAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   landmark?: Prisma.StringFieldUpdateOperationsInput | string
   specialties?: Prisma.VendorProfileUpdatespecialtiesInput | string[]
   rating?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -804,9 +808,9 @@ export type VendorProfileUncheckedUpdateWithoutMenuItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   kitchenName?: Prisma.StringFieldUpdateOperationsInput | string
-  streetAddress?: Prisma.StringFieldUpdateOperationsInput | string
-  city?: Prisma.StringFieldUpdateOperationsInput | string
-  state?: Prisma.StringFieldUpdateOperationsInput | string
+  streetAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   landmark?: Prisma.StringFieldUpdateOperationsInput | string
   specialties?: Prisma.VendorProfileUpdatespecialtiesInput | string[]
   rating?: Prisma.FloatFieldUpdateOperationsInput | number
@@ -944,9 +948,9 @@ export type $VendorProfilePayload<ExtArgs extends runtime.Types.Extensions.Inter
     id: string
     userId: string
     kitchenName: string
-    streetAddress: string
-    city: string
-    state: string
+    streetAddress: string | null
+    city: string | null
+    state: string | null
     landmark: string
     specialties: string[]
     rating: number
