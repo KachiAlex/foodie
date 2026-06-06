@@ -1,6 +1,6 @@
 import { PrismaClient } from "../generated/prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
-import { Pool } from "@neondatabase/serverless";
+import { neonConfig, Pool } from "@neondatabase/serverless";
 
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
@@ -16,7 +16,8 @@ function createPrismaClient(): PrismaClient {
       "Please configure it in your Vercel project settings (Environment Variables)."
     );
   }
-  const pool = new Pool({ connectionString: url });
+  neonConfig.connectionString = url;
+  const pool = new Pool();
   const adapter = new PrismaNeon(pool as unknown as ConstructorParameters<typeof PrismaNeon>[0]);
   return new PrismaClient({ adapter });
 }
