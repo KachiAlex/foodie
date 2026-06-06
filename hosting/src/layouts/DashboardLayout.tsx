@@ -80,7 +80,7 @@ export function DashboardLayout({ sidebar, title, description, actions, children
                 {description && <p className="text-sm text-gray-500">{description}</p>}
               </div>
             </div>
-            <div className="flex flex-1 flex-wrap items-center justify-end gap-3">
+            <div className="flex flex-1 items-center justify-end gap-3">
               <RoleToggle
                 onRoleChange={(nextRole) => {
                   setRole(nextRole);
@@ -94,7 +94,7 @@ export function DashboardLayout({ sidebar, title, description, actions, children
                 }}
                 className="hidden md:flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-500 shadow-sm focus-within:ring-2 focus-within:ring-orange-500"
               >
-                <Search className="h-4 w-4 text-gray-400" />
+                <Search className="h-4 w-4 shrink-0 text-gray-400" />
                 <input
                   type="search"
                   value={dashSearch}
@@ -104,7 +104,7 @@ export function DashboardLayout({ sidebar, title, description, actions, children
                 />
               </form>
               <button
-                className="relative rounded-full border border-gray-200 p-2 text-gray-600 transition hover:border-orange-200 hover:text-orange-500"
+                className="relative shrink-0 rounded-full border border-gray-200 p-2 text-gray-600 transition hover:border-orange-200 hover:text-orange-500"
                 aria-label="Notifications"
                 onClick={() => showToast("Notifications — coming soon.")}
               >
