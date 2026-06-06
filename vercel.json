@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npx prisma migrate deploy && npx prisma generate && cd hosting && npm run build",
+  "buildCommand": "npx prisma db push --accept-data-loss && npx prisma generate && cd hosting && npm run build",
   "outputDirectory": "hosting/dist",
   "installCommand": "npm install && cd hosting && npm install",
   "rewrites": [
