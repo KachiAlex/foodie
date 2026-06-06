@@ -1,10 +1,18 @@
 ﻿import { motion } from "framer-motion";
-import { AlertTriangle, ClipboardList, Leaf, Settings, Sparkles } from "lucide-react";
+import { AlertTriangle, ClipboardList, Leaf, LogOut, Settings, Sparkles, User } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useApp } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -33,8 +41,9 @@ const SIDEBAR = {
 
 export function VendorDashboard() {
   const { vendorOpenRequests, vendorOrders, menuItems, vendorMetrics, addBid, changeVendorOrderStatus, addMenuItem, isLoading } = useApp();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") ?? "overview";
   const isPendingVerification = user?.verificationStatus === "pending";
@@ -158,13 +167,48 @@ export function VendorDashboard() {
       title="Chef Command Hub"
       description="Bid on custom requests, manage orders, and showcase your menu."
       actions={
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleTogglePause} disabled={togglingPause}>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={handleTogglePause}
+            disabled={togglingPause || isPendingVerification}
+            title={isPendingVerification ? "Verification required to go online" : undefined}
+          >
             {isPaused ? "Resume Orders" : "Pause Orders"}
           </Button>
           <Button className="bg-orange-500 text-white" onClick={() => setShowMenuModal(true)}>
             Add Menu Item
           </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-500 text-sm font-semibold text-white hover:bg-orange-600 transition-colors">
+                {user?.name?.charAt(0).toUpperCase() ?? "V"}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold">{user?.name ?? "Vendor"}</span>
+                  <span className="text-xs text-gray-500">{user?.email ?? ""}</span>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate("/dashboard/vendor?tab=settings")}>
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => {
+                  signOut();
+                  navigate("/sign-in");
+                }}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       }
     >
