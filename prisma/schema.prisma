@@ -26,6 +26,7 @@ model User {
   escrowWallet   EscrowWallet?
   transactions   EscrowTransaction[]
   disputesOpened Dispute[]      @relation("DisputeOpener")
+  notifications  Notification[] @relation("UserNotifications")
 
   @@map("users")
 }
@@ -280,4 +281,19 @@ model AuditLog {
   timestamp DateTime @default(now())
 
   @@map("audit_logs")
+}
+
+// ===================== NOTIFICATIONS =====================
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  body        String
+  type        String   // bid_received | bid_selected | order_update | payment | dispute | general
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@map("notifications")
 }

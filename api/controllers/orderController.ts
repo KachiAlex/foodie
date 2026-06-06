@@ -2,6 +2,16 @@ import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
 import { prisma } from "../lib/prisma";
 
+async function notify(userId: string, title: string, body: string, type: string) {
+  try {
+    await prisma.notification.create({
+      data: { userId, title, body, type },
+    });
+  } catch {
+    // silent fail
+  }
+}
+
 export const listOrders = asyncHandler(async (req: Request, res: Response) => {
   const { buyerId, vendorId } = req.query as Record<string, string | undefined>;
   const data = await prisma.order.findMany({
@@ -112,6 +122,14 @@ export const updateStatus = asyncHandler(async (req: Request, res: Response) => 
     where: { id: req.params.id },
     data: { status },
   });
+
+  await notify(
+    existing.buyerId,
+    "Order update",
+    `Your order status changed to "${status}"`,
+    "order_update"
+  );
+
   res.json({ success: true, data: order });
 });
 

@@ -72,3 +72,8 @@ export type Dispute = Prisma.DisputeModel
  * 
  */
 export type AuditLog = Prisma.AuditLogModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel

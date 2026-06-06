@@ -3,6 +3,16 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { prisma } from "../lib/prisma";
 import type { AuthUser } from "../middleware/auth";
 
+async function notify(userId: string, title: string, body: string, type: string) {
+  try {
+    await prisma.notification.create({
+      data: { userId, title, body, type },
+    });
+  } catch {
+    // silent fail — notifications should not break business logic
+  }
+}
+
 export const listBids = asyncHandler(async (req: Request, res: Response) => {
   const requestId = req.query.requestId as string | undefined;
   const data = await prisma.bid.findMany({
@@ -45,6 +55,13 @@ export const createBid = asyncHandler(async (req: Request, res: Response) => {
       request: { select: { id: true, foodName: true } },
     },
   });
+
+  await notify(
+    request.buyerId,
+    "New bid received",
+    `${authUser.name} placed a ₦${Number(bidAmount).toLocaleString()} bid on "${request.foodName}"`,
+    "bid_received"
+  );
 
   res.status(201).json({ success: true, data: bid });
 });
@@ -91,6 +108,13 @@ export const selectBid = asyncHandler(async (req: Request, res: Response) => {
     where: { id: selected.requestId },
     data: { status: "bid_selected", selectedBidId: selected.id },
   });
+
+  await notify(
+    selected.vendorId,
+    "Bid accepted",
+    `Your bid for "${selected.request.foodName}" was selected. Get ready to cook!`,
+    "bid_selected"
+  );
 
   res.json({ success: true, data: selected });
 });

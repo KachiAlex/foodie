@@ -213,6 +213,7 @@ export type UserWhereInput = {
   escrowWallet?: Prisma.XOR<Prisma.EscrowWalletNullableScalarRelationFilter, Prisma.EscrowWalletWhereInput> | null
   transactions?: Prisma.EscrowTransactionListRelationFilter
   disputesOpened?: Prisma.DisputeListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -231,6 +232,7 @@ export type UserOrderByWithRelationInput = {
   escrowWallet?: Prisma.EscrowWalletOrderByWithRelationInput
   transactions?: Prisma.EscrowTransactionOrderByRelationAggregateInput
   disputesOpened?: Prisma.DisputeOrderByRelationAggregateInput
+  notifications?: Prisma.NotificationOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -252,6 +254,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   escrowWallet?: Prisma.XOR<Prisma.EscrowWalletNullableScalarRelationFilter, Prisma.EscrowWalletWhereInput> | null
   transactions?: Prisma.EscrowTransactionListRelationFilter
   disputesOpened?: Prisma.DisputeListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -298,6 +301,7 @@ export type UserCreateInput = {
   escrowWallet?: Prisma.EscrowWalletCreateNestedOneWithoutVendorInput
   transactions?: Prisma.EscrowTransactionCreateNestedManyWithoutVendorInput
   disputesOpened?: Prisma.DisputeCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -316,6 +320,7 @@ export type UserUncheckedCreateInput = {
   escrowWallet?: Prisma.EscrowWalletUncheckedCreateNestedOneWithoutVendorInput
   transactions?: Prisma.EscrowTransactionUncheckedCreateNestedManyWithoutVendorInput
   disputesOpened?: Prisma.DisputeUncheckedCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -334,6 +339,7 @@ export type UserUpdateInput = {
   escrowWallet?: Prisma.EscrowWalletUpdateOneWithoutVendorNestedInput
   transactions?: Prisma.EscrowTransactionUpdateManyWithoutVendorNestedInput
   disputesOpened?: Prisma.DisputeUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -352,6 +358,7 @@ export type UserUncheckedUpdateInput = {
   escrowWallet?: Prisma.EscrowWalletUncheckedUpdateOneWithoutVendorNestedInput
   transactions?: Prisma.EscrowTransactionUncheckedUpdateManyWithoutVendorNestedInput
   disputesOpened?: Prisma.DisputeUncheckedUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -539,6 +546,20 @@ export type UserUpdateOneRequiredWithoutDisputesOpenedNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDisputesOpenedInput, Prisma.UserUpdateWithoutDisputesOpenedInput>, Prisma.UserUncheckedUpdateWithoutDisputesOpenedInput>
 }
 
+export type UserCreateNestedOneWithoutNotificationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput
+  upsert?: Prisma.UserUpsertWithoutNotificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationsInput, Prisma.UserUpdateWithoutNotificationsInput>, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+}
+
 export type UserCreateWithoutVendorProfileInput = {
   id?: string
   email: string
@@ -554,6 +575,7 @@ export type UserCreateWithoutVendorProfileInput = {
   escrowWallet?: Prisma.EscrowWalletCreateNestedOneWithoutVendorInput
   transactions?: Prisma.EscrowTransactionCreateNestedManyWithoutVendorInput
   disputesOpened?: Prisma.DisputeCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutVendorProfileInput = {
@@ -571,6 +593,7 @@ export type UserUncheckedCreateWithoutVendorProfileInput = {
   escrowWallet?: Prisma.EscrowWalletUncheckedCreateNestedOneWithoutVendorInput
   transactions?: Prisma.EscrowTransactionUncheckedCreateNestedManyWithoutVendorInput
   disputesOpened?: Prisma.DisputeUncheckedCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutVendorProfileInput = {
@@ -604,6 +627,7 @@ export type UserUpdateWithoutVendorProfileInput = {
   escrowWallet?: Prisma.EscrowWalletUpdateOneWithoutVendorNestedInput
   transactions?: Prisma.EscrowTransactionUpdateManyWithoutVendorNestedInput
   disputesOpened?: Prisma.DisputeUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutVendorProfileInput = {
@@ -621,6 +645,7 @@ export type UserUncheckedUpdateWithoutVendorProfileInput = {
   escrowWallet?: Prisma.EscrowWalletUncheckedUpdateOneWithoutVendorNestedInput
   transactions?: Prisma.EscrowTransactionUncheckedUpdateManyWithoutVendorNestedInput
   disputesOpened?: Prisma.DisputeUncheckedUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutBuyerRequestsInput = {
@@ -638,6 +663,7 @@ export type UserCreateWithoutBuyerRequestsInput = {
   escrowWallet?: Prisma.EscrowWalletCreateNestedOneWithoutVendorInput
   transactions?: Prisma.EscrowTransactionCreateNestedManyWithoutVendorInput
   disputesOpened?: Prisma.DisputeCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutBuyerRequestsInput = {
@@ -655,6 +681,7 @@ export type UserUncheckedCreateWithoutBuyerRequestsInput = {
   escrowWallet?: Prisma.EscrowWalletUncheckedCreateNestedOneWithoutVendorInput
   transactions?: Prisma.EscrowTransactionUncheckedCreateNestedManyWithoutVendorInput
   disputesOpened?: Prisma.DisputeUncheckedCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutBuyerRequestsInput = {
@@ -688,6 +715,7 @@ export type UserUpdateWithoutBuyerRequestsInput = {
   escrowWallet?: Prisma.EscrowWalletUpdateOneWithoutVendorNestedInput
   transactions?: Prisma.EscrowTransactionUpdateManyWithoutVendorNestedInput
   disputesOpened?: Prisma.DisputeUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBuyerRequestsInput = {
@@ -705,6 +733,7 @@ export type UserUncheckedUpdateWithoutBuyerRequestsInput = {
   escrowWallet?: Prisma.EscrowWalletUncheckedUpdateOneWithoutVendorNestedInput
   transactions?: Prisma.EscrowTransactionUncheckedUpdateManyWithoutVendorNestedInput
   disputesOpened?: Prisma.DisputeUncheckedUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutBidsInput = {
@@ -722,6 +751,7 @@ export type UserCreateWithoutBidsInput = {
   escrowWallet?: Prisma.EscrowWalletCreateNestedOneWithoutVendorInput
   transactions?: Prisma.EscrowTransactionCreateNestedManyWithoutVendorInput
   disputesOpened?: Prisma.DisputeCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutBidsInput = {
@@ -739,6 +769,7 @@ export type UserUncheckedCreateWithoutBidsInput = {
   escrowWallet?: Prisma.EscrowWalletUncheckedCreateNestedOneWithoutVendorInput
   transactions?: Prisma.EscrowTransactionUncheckedCreateNestedManyWithoutVendorInput
   disputesOpened?: Prisma.DisputeUncheckedCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutBidsInput = {
@@ -772,6 +803,7 @@ export type UserUpdateWithoutBidsInput = {
   escrowWallet?: Prisma.EscrowWalletUpdateOneWithoutVendorNestedInput
   transactions?: Prisma.EscrowTransactionUpdateManyWithoutVendorNestedInput
   disputesOpened?: Prisma.DisputeUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBidsInput = {
@@ -789,6 +821,7 @@ export type UserUncheckedUpdateWithoutBidsInput = {
   escrowWallet?: Prisma.EscrowWalletUncheckedUpdateOneWithoutVendorNestedInput
   transactions?: Prisma.EscrowTransactionUncheckedUpdateManyWithoutVendorNestedInput
   disputesOpened?: Prisma.DisputeUncheckedUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOrdersAsBuyerInput = {
@@ -806,6 +839,7 @@ export type UserCreateWithoutOrdersAsBuyerInput = {
   escrowWallet?: Prisma.EscrowWalletCreateNestedOneWithoutVendorInput
   transactions?: Prisma.EscrowTransactionCreateNestedManyWithoutVendorInput
   disputesOpened?: Prisma.DisputeCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOrdersAsBuyerInput = {
@@ -823,6 +857,7 @@ export type UserUncheckedCreateWithoutOrdersAsBuyerInput = {
   escrowWallet?: Prisma.EscrowWalletUncheckedCreateNestedOneWithoutVendorInput
   transactions?: Prisma.EscrowTransactionUncheckedCreateNestedManyWithoutVendorInput
   disputesOpened?: Prisma.DisputeUncheckedCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOrdersAsBuyerInput = {
@@ -856,6 +891,7 @@ export type UserUpdateWithoutOrdersAsBuyerInput = {
   escrowWallet?: Prisma.EscrowWalletUpdateOneWithoutVendorNestedInput
   transactions?: Prisma.EscrowTransactionUpdateManyWithoutVendorNestedInput
   disputesOpened?: Prisma.DisputeUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOrdersAsBuyerInput = {
@@ -873,6 +909,7 @@ export type UserUncheckedUpdateWithoutOrdersAsBuyerInput = {
   escrowWallet?: Prisma.EscrowWalletUncheckedUpdateOneWithoutVendorNestedInput
   transactions?: Prisma.EscrowTransactionUncheckedUpdateManyWithoutVendorNestedInput
   disputesOpened?: Prisma.DisputeUncheckedUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEscrowWalletInput = {
@@ -890,6 +927,7 @@ export type UserCreateWithoutEscrowWalletInput = {
   vendorProfile?: Prisma.VendorProfileCreateNestedOneWithoutUserInput
   transactions?: Prisma.EscrowTransactionCreateNestedManyWithoutVendorInput
   disputesOpened?: Prisma.DisputeCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEscrowWalletInput = {
@@ -907,6 +945,7 @@ export type UserUncheckedCreateWithoutEscrowWalletInput = {
   vendorProfile?: Prisma.VendorProfileUncheckedCreateNestedOneWithoutUserInput
   transactions?: Prisma.EscrowTransactionUncheckedCreateNestedManyWithoutVendorInput
   disputesOpened?: Prisma.DisputeUncheckedCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEscrowWalletInput = {
@@ -940,6 +979,7 @@ export type UserUpdateWithoutEscrowWalletInput = {
   vendorProfile?: Prisma.VendorProfileUpdateOneWithoutUserNestedInput
   transactions?: Prisma.EscrowTransactionUpdateManyWithoutVendorNestedInput
   disputesOpened?: Prisma.DisputeUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEscrowWalletInput = {
@@ -957,6 +997,7 @@ export type UserUncheckedUpdateWithoutEscrowWalletInput = {
   vendorProfile?: Prisma.VendorProfileUncheckedUpdateOneWithoutUserNestedInput
   transactions?: Prisma.EscrowTransactionUncheckedUpdateManyWithoutVendorNestedInput
   disputesOpened?: Prisma.DisputeUncheckedUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTransactionsInput = {
@@ -974,6 +1015,7 @@ export type UserCreateWithoutTransactionsInput = {
   vendorProfile?: Prisma.VendorProfileCreateNestedOneWithoutUserInput
   escrowWallet?: Prisma.EscrowWalletCreateNestedOneWithoutVendorInput
   disputesOpened?: Prisma.DisputeCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTransactionsInput = {
@@ -991,6 +1033,7 @@ export type UserUncheckedCreateWithoutTransactionsInput = {
   vendorProfile?: Prisma.VendorProfileUncheckedCreateNestedOneWithoutUserInput
   escrowWallet?: Prisma.EscrowWalletUncheckedCreateNestedOneWithoutVendorInput
   disputesOpened?: Prisma.DisputeUncheckedCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTransactionsInput = {
@@ -1024,6 +1067,7 @@ export type UserUpdateWithoutTransactionsInput = {
   vendorProfile?: Prisma.VendorProfileUpdateOneWithoutUserNestedInput
   escrowWallet?: Prisma.EscrowWalletUpdateOneWithoutVendorNestedInput
   disputesOpened?: Prisma.DisputeUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTransactionsInput = {
@@ -1041,6 +1085,7 @@ export type UserUncheckedUpdateWithoutTransactionsInput = {
   vendorProfile?: Prisma.VendorProfileUncheckedUpdateOneWithoutUserNestedInput
   escrowWallet?: Prisma.EscrowWalletUncheckedUpdateOneWithoutVendorNestedInput
   disputesOpened?: Prisma.DisputeUncheckedUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutDisputesOpenedInput = {
@@ -1058,6 +1103,7 @@ export type UserCreateWithoutDisputesOpenedInput = {
   vendorProfile?: Prisma.VendorProfileCreateNestedOneWithoutUserInput
   escrowWallet?: Prisma.EscrowWalletCreateNestedOneWithoutVendorInput
   transactions?: Prisma.EscrowTransactionCreateNestedManyWithoutVendorInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDisputesOpenedInput = {
@@ -1075,6 +1121,7 @@ export type UserUncheckedCreateWithoutDisputesOpenedInput = {
   vendorProfile?: Prisma.VendorProfileUncheckedCreateNestedOneWithoutUserInput
   escrowWallet?: Prisma.EscrowWalletUncheckedCreateNestedOneWithoutVendorInput
   transactions?: Prisma.EscrowTransactionUncheckedCreateNestedManyWithoutVendorInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDisputesOpenedInput = {
@@ -1108,6 +1155,7 @@ export type UserUpdateWithoutDisputesOpenedInput = {
   vendorProfile?: Prisma.VendorProfileUpdateOneWithoutUserNestedInput
   escrowWallet?: Prisma.EscrowWalletUpdateOneWithoutVendorNestedInput
   transactions?: Prisma.EscrowTransactionUpdateManyWithoutVendorNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDisputesOpenedInput = {
@@ -1125,6 +1173,95 @@ export type UserUncheckedUpdateWithoutDisputesOpenedInput = {
   vendorProfile?: Prisma.VendorProfileUncheckedUpdateOneWithoutUserNestedInput
   escrowWallet?: Prisma.EscrowWalletUncheckedUpdateOneWithoutVendorNestedInput
   transactions?: Prisma.EscrowTransactionUncheckedUpdateManyWithoutVendorNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutNotificationsInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  role: $Enums.Role
+  verificationStatus?: $Enums.VerificationStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  buyerRequests?: Prisma.FoodRequestCreateNestedManyWithoutBuyerInput
+  ordersAsBuyer?: Prisma.OrderCreateNestedManyWithoutBuyerInput
+  bids?: Prisma.BidCreateNestedManyWithoutVendorInput
+  vendorProfile?: Prisma.VendorProfileCreateNestedOneWithoutUserInput
+  escrowWallet?: Prisma.EscrowWalletCreateNestedOneWithoutVendorInput
+  transactions?: Prisma.EscrowTransactionCreateNestedManyWithoutVendorInput
+  disputesOpened?: Prisma.DisputeCreateNestedManyWithoutOpenedByInput
+}
+
+export type UserUncheckedCreateWithoutNotificationsInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  role: $Enums.Role
+  verificationStatus?: $Enums.VerificationStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  buyerRequests?: Prisma.FoodRequestUncheckedCreateNestedManyWithoutBuyerInput
+  ordersAsBuyer?: Prisma.OrderUncheckedCreateNestedManyWithoutBuyerInput
+  bids?: Prisma.BidUncheckedCreateNestedManyWithoutVendorInput
+  vendorProfile?: Prisma.VendorProfileUncheckedCreateNestedOneWithoutUserInput
+  escrowWallet?: Prisma.EscrowWalletUncheckedCreateNestedOneWithoutVendorInput
+  transactions?: Prisma.EscrowTransactionUncheckedCreateNestedManyWithoutVendorInput
+  disputesOpened?: Prisma.DisputeUncheckedCreateNestedManyWithoutOpenedByInput
+}
+
+export type UserCreateOrConnectWithoutNotificationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+}
+
+export type UserUpsertWithoutNotificationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsInput, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutNotificationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsInput, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type UserUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  buyerRequests?: Prisma.FoodRequestUpdateManyWithoutBuyerNestedInput
+  ordersAsBuyer?: Prisma.OrderUpdateManyWithoutBuyerNestedInput
+  bids?: Prisma.BidUpdateManyWithoutVendorNestedInput
+  vendorProfile?: Prisma.VendorProfileUpdateOneWithoutUserNestedInput
+  escrowWallet?: Prisma.EscrowWalletUpdateOneWithoutVendorNestedInput
+  transactions?: Prisma.EscrowTransactionUpdateManyWithoutVendorNestedInput
+  disputesOpened?: Prisma.DisputeUpdateManyWithoutOpenedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  buyerRequests?: Prisma.FoodRequestUncheckedUpdateManyWithoutBuyerNestedInput
+  ordersAsBuyer?: Prisma.OrderUncheckedUpdateManyWithoutBuyerNestedInput
+  bids?: Prisma.BidUncheckedUpdateManyWithoutVendorNestedInput
+  vendorProfile?: Prisma.VendorProfileUncheckedUpdateOneWithoutUserNestedInput
+  escrowWallet?: Prisma.EscrowWalletUncheckedUpdateOneWithoutVendorNestedInput
+  transactions?: Prisma.EscrowTransactionUncheckedUpdateManyWithoutVendorNestedInput
+  disputesOpened?: Prisma.DisputeUncheckedUpdateManyWithoutOpenedByNestedInput
 }
 
 
@@ -1138,6 +1275,7 @@ export type UserCountOutputType = {
   bids: number
   transactions: number
   disputesOpened: number
+  notifications: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1146,6 +1284,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   bids?: boolean | UserCountOutputTypeCountBidsArgs
   transactions?: boolean | UserCountOutputTypeCountTransactionsArgs
   disputesOpened?: boolean | UserCountOutputTypeCountDisputesOpenedArgs
+  notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
 }
 
 /**
@@ -1193,6 +1332,13 @@ export type UserCountOutputTypeCountDisputesOpenedArgs<ExtArgs extends runtime.T
   where?: Prisma.DisputeWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NotificationWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1210,6 +1356,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   escrowWallet?: boolean | Prisma.User$escrowWalletArgs<ExtArgs>
   transactions?: boolean | Prisma.User$transactionsArgs<ExtArgs>
   disputesOpened?: boolean | Prisma.User$disputesOpenedArgs<ExtArgs>
+  notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1255,6 +1402,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   escrowWallet?: boolean | Prisma.User$escrowWalletArgs<ExtArgs>
   transactions?: boolean | Prisma.User$transactionsArgs<ExtArgs>
   disputesOpened?: boolean | Prisma.User$disputesOpenedArgs<ExtArgs>
+  notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1270,6 +1418,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     escrowWallet: Prisma.$EscrowWalletPayload<ExtArgs> | null
     transactions: Prisma.$EscrowTransactionPayload<ExtArgs>[]
     disputesOpened: Prisma.$DisputePayload<ExtArgs>[]
+    notifications: Prisma.$NotificationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1681,6 +1830,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   escrowWallet<T extends Prisma.User$escrowWalletArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$escrowWalletArgs<ExtArgs>>): Prisma.Prisma__EscrowWalletClient<runtime.Types.Result.GetResult<Prisma.$EscrowWalletPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   transactions<T extends Prisma.User$transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EscrowTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   disputesOpened<T extends Prisma.User$disputesOpenedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$disputesOpenedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DisputePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2266,6 +2416,30 @@ export type User$disputesOpenedArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.DisputeScalarFieldEnum | Prisma.DisputeScalarFieldEnum[]
+}
+
+/**
+ * User.notifications
+ */
+export type User$notificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Notification
+   */
+  select?: Prisma.NotificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Notification
+   */
+  omit?: Prisma.NotificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationInclude<ExtArgs> | null
+  where?: Prisma.NotificationWhereInput
+  orderBy?: Prisma.NotificationOrderByWithRelationInput | Prisma.NotificationOrderByWithRelationInput[]
+  cursor?: Prisma.NotificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[]
 }
 
 /**
