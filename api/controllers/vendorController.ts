@@ -60,13 +60,17 @@ export const updateProfile = asyncHandler(async (req: Request, res: Response) =>
 
 export const getWallet = asyncHandler(async (req: Request, res: Response) => {
   const vendorId = (req.params.id || (req as Request & { user?: { id: string } }).user?.id) as string;
-  const wallet = await prisma.escrowWallet.findUnique({
+  const wallet = await prisma.escrowWallet.upsert({
     where: { vendorId },
+    update: {},
+    create: {
+      vendorId,
+      available: 0,
+      pending: 0,
+      totalEarned: 0,
+      currency: "NGN",
+    },
   });
-  if (!wallet) {
-    res.status(404).json({ success: false, error: { message: "Wallet not found" } });
-    return;
-  }
   res.json({ success: true, data: wallet });
 });
 

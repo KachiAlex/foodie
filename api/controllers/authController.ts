@@ -51,6 +51,18 @@ export const signUp = asyncHandler(async (req: Request, res: Response) => {
     },
   });
 
+  if (user.role === "vendor") {
+    await prisma.escrowWallet.create({
+      data: {
+        vendorId: user.id,
+        available: 0,
+        pending: 0,
+        totalEarned: 0,
+        currency: "NGN",
+      },
+    });
+  }
+
   res.status(201).json({
     success: true,
     data: {
