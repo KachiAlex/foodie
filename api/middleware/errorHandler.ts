@@ -30,7 +30,6 @@ function isDbConnectionError(err: ApiError): boolean {
     err instanceof Prisma.PrismaClientInitializationError ||
     (code && CONNECTION_ERROR_CODES.has(code)) ||
     msg.includes("No database host") ||
-    msg.includes("connection string") ||
     msg.includes("ECONNREFUSED") ||
     msg.includes("Connection refused")
   );
