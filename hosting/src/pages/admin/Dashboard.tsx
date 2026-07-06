@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Activity,
@@ -35,6 +36,8 @@ export function AdminDashboard() {
   const [escrowTxns, setEscrowTxns] = useState<EscrowTransaction[]>([]);
   const [adminDisputes, setAdminDisputes] = useState<AdminDispute[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") ?? "overview";
 
   useEffect(() => {
     setIsLoading(true);
@@ -198,17 +201,25 @@ export function AdminDashboard() {
     );
   }
 
+  const TAB_META: Record<string, { title: string; description: string }> = {
+    overview:   { title: "Marketplace Control",  description: "Monitor fulfillment health, vendor trust, and escalations." },
+    orders:     { title: "Orders",               description: "Review all marketplace orders and approve payouts." },
+    vendors:    { title: "Vendor KYC",           description: "Approve or flag vendor accounts and review kitchen documents." },
+    compliance: { title: "Compliance",           description: "Resolve open disputes and review compliance alerts." },
+  };
+  const { title: pageTitle, description: pageDesc } = TAB_META[activeTab] ?? TAB_META.overview;
+
   return (
     <DashboardLayout
       sidebar={SIDEBAR}
-      title="Marketplace Control"
-      description="Monitor fulfillment health, vendor trust, and escalations."
+      title={pageTitle}
+      description={pageDesc}
     >
       <section className="space-y-6">
 
-        {/* ── 1. Priority alert bar ──────────────────────────────────────── */}
+        {/* ── 1. Priority alert bar (overview + compliance) ─────────────── */}
         <AnimatePresence>
-          {priorityAlerts.length > 0 && (
+          {(activeTab === "overview" || activeTab === "compliance") && priorityAlerts.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -233,8 +244,8 @@ export function AdminDashboard() {
           )}
         </AnimatePresence>
 
-        {/* ── 2. Color-coded KPI strip ───────────────────────────────────── */}
-        <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        {/* ── 2. Color-coded KPI strip (overview only) ──────────────────── */}
+        {activeTab === "overview" && <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {[
             { label: "Total Requests", value: metrics?.totalRequests ?? "—", prefix: "", bg: "bg-gradient-to-br from-orange-500 to-amber-500" },
             { label: "Active Bids", value: metrics?.activeBids ?? "—", prefix: "", bg: "bg-gradient-to-br from-violet-600 to-purple-700" },
@@ -247,10 +258,10 @@ export function AdminDashboard() {
               <h3 className="mt-3 text-3xl font-extrabold text-white">{metric.prefix}{metric.value}</h3>
             </motion.div>
           ))}
-        </div>
+        </div>}
 
-        {/* ── 3. Orders table + Payout queue ────────────────────────────── */}
-        <div className="grid gap-4 lg:grid-cols-[1.4fr_0.9fr]">
+        {/* ── 3. Orders table + Payout queue (orders tab) ───────────────── */}
+        {(activeTab === "orders" || activeTab === "overview") && <div className="grid gap-4 lg:grid-cols-[1.4fr_0.9fr]">
           <div className="rounded-2xl bg-[#1a1d27] border border-white/8 p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -343,10 +354,10 @@ export function AdminDashboard() {
               ))}
             </div>
           </div>
-        </div>
+        </div>}
 
-        {/* ── 4. Open disputes + Vendor KYC queue ───────────────────────── */}
-        <div className="grid gap-6 lg:grid-cols-2">
+        {/* ── 4a. Open disputes (compliance tab) ────────────────────────── */}
+        {(activeTab === "compliance" || activeTab === "overview") && <div className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-2xl bg-[#1a1d27] border border-white/8 p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -389,6 +400,7 @@ export function AdminDashboard() {
             </div>
           </div>
 
+          {/* ── 4b. Vendor KYC queue (vendors tab) ──────────────────────── */}
           <div className="rounded-2xl bg-[#1a1d27] border border-white/8 p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -439,7 +451,108 @@ export function AdminDashboard() {
               )}
             </div>
           </div>
-        </div>
+        </div>}
+
+        {/* ── 5. Vendors-only full-width KYC panel ──────────────────────── */}
+        {activeTab === "vendors" && (
+          <div className="rounded-2xl bg-[#1a1d27] border border-white/8 p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Vendor management</p>
+                <h2 className="text-2xl font-extrabold text-white">KYC Queue</h2>
+                <p className="text-sm text-gray-400">{pendingVendors.length} pending · {adminVendors.length} total</p>
+              </div>
+              <div className="rounded-xl bg-orange-500/15 p-2.5"><Shield className="h-5 w-5 text-orange-400" /></div>
+            </div>
+            <div className="mt-4 flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+              <Search className="h-4 w-4 text-gray-400" />
+              <input value={vendorSearch} onChange={(e) => setVendorSearch(e.target.value)}
+                placeholder="Search vendor or ID"
+                className="w-full bg-transparent text-sm text-gray-200 outline-none placeholder:text-gray-500" />
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredVendors.map((vendor) => (
+                <div key={vendor.id} className="rounded-xl border border-white/8 bg-white/5 p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">{vendor.name}</h4>
+                      <p className="text-xs text-gray-400">{vendor.kitchenName || `${vendor.streetAddress}, ${vendor.city}` || vendor.id}</p>
+                    </div>
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${vendor.kycStatus === "Approved" ? "bg-emerald-500/20 text-emerald-400" : vendor.kycStatus === "Pending" ? "bg-amber-500/20 text-amber-400" : "bg-red-500/20 text-red-400"}`}>
+                      <CheckCircle2 className="mr-1 inline h-3 w-3" />{vendor.kycStatus}
+                    </span>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Button variant="outline" size="sm" className="border-white/20 text-gray-300 hover:bg-white/10" onClick={() => setActiveVendorId(vendor.id)}>
+                      View dossier
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-orange-400"
+                      disabled={isSchedulingAudit === vendor.id}
+                      onClick={() => handleTriggerAudit(vendor.id)}>
+                      {isSchedulingAudit === vendor.id ? "Scheduling..." : recentAudits[vendor.id] ? "Audit scheduled ✓" : "Trigger audit"}
+                    </Button>
+                    {vendor.kycStatus !== "Approved" && (
+                      <Button size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700" onClick={() => handleVerifyVendor(vendor.id)}>
+                        Approve KYC
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {filteredVendors.length === 0 && (
+                <div className="col-span-full rounded-xl border border-dashed border-white/10 p-6 text-center text-sm text-gray-500">
+                  No vendors match &quot;{vendorSearch}&quot;
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── 6. Compliance-only disputes full panel ────────────────────── */}
+        {activeTab === "compliance" && (
+          <div className="rounded-2xl bg-[#1a1d27] border border-white/8 p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Compliance</p>
+                <h2 className="text-2xl font-extrabold text-white">All Disputes</h2>
+                <p className="text-sm text-gray-400">{adminDisputes.length} total · {openDisputes.length} open</p>
+              </div>
+              <div className={`rounded-xl p-2.5 ${openDisputes.length > 3 ? "bg-red-500/15" : "bg-amber-500/15"}`}>
+                <AlertTriangle className={`h-5 w-5 ${openDisputes.length > 3 ? "text-red-400" : "text-amber-400"}`} />
+              </div>
+            </div>
+            <div className="mt-4 space-y-3">
+              {adminDisputes.length === 0 && <p className="text-sm text-gray-500">No disputes found.</p>}
+              {adminDisputes.map((dispute) => (
+                <div key={dispute.id} className={`rounded-xl border p-4 ${dispute.status === "open" ? "border-amber-500/30 bg-amber-500/5" : "border-white/8 bg-white/5"}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-white">{dispute.reason}</p>
+                      <p className="text-xs text-gray-400">By {dispute.openedBy?.name ?? "Unknown"} · Order {dispute.order?.id?.slice(-8).toUpperCase() ?? "—"}</p>
+                      <p className="text-xs text-gray-500">{new Date(dispute.openedAt).toLocaleDateString()}</p>
+                    </div>
+                    <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${dispute.status === "open" ? "bg-amber-500/20 text-amber-400" : "bg-emerald-500/20 text-emerald-400"}`}>
+                      {dispute.status}
+                    </span>
+                  </div>
+                  {dispute.status === "open" && (
+                    <div className="mt-3 flex gap-2">
+                      <Button size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700"
+                        disabled={resolvingDisputeId === dispute.id}
+                        onClick={() => handleResolveDispute(dispute.id)}>
+                        {resolvingDisputeId === dispute.id ? "Resolving..." : "Resolve"}
+                      </Button>
+                      <Button size="sm" variant="outline" className="border-white/20 text-gray-300 hover:bg-white/10"
+                        onClick={() => { const o = adminOrders.find((ord) => ord.id === dispute.order?.id); if (o) setActiveOrderId(o.id); }}>
+                        View order
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <AdminOrderDetailModal
           order={activeOrderId ? adminOrders.find((o) => o.id === activeOrderId) ?? null : null}
