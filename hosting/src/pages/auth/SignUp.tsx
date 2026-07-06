@@ -1,0 +1,638 @@
+import type { ChangeEvent, FormEvent } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import { ChefHat, Loader2, MapPin, Camera, ShieldCheck, Video as VideoIcon, X, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { publicRoleOptions, type Role } from "@/context/RoleContext";
+import { useToast } from "@/context/ToastContext";
+import { uploadVendorDocument } from "@/services/vendorApi";
+import { compressImageFile } from "@/utils/fileHelpers";
+
+type VendorRequirementFields = {
+  streetAddress: string;
+  city: string;
+  state: string;
+  landmark: string;
+  kitchenMedia: File[];
+  idCardCapture: File | null;
+  utilityBill: File | null;
+};
+
+const initialVendorState: VendorRequirementFields = {
+  streetAddress: "",
+  city: "",
+  state: "",
+  landmark: "",
+  kitchenMedia: [],
+  idCardCapture: null,
+  utilityBill: null,
+};
+
+type MediaPreview = {
+  url: string;
+  name: string;
+  type: string;
+  sizeKb: number;
+};
+
+function validateVendorRequirements(details: VendorRequirementFields) {
+  if (!details.streetAddress.trim()) {
+    return "Vendors must provide a house number and street.";
+  }
+  if (!details.city.trim()) {
+    return "Vendors must provide a city.";
+  }
+  if (!details.state.trim()) {
+    return "Vendors must provide a state.";
+  }
+  if (!details.landmark.trim()) {
+    return "Add a landmark so riders can find your kitchen.";
+  }
+  if (details.kitchenMedia.length === 0) {
+    return "Upload at least one kitchen image or video.";
+  }
+  if (!details.idCardCapture) {
+    return "Capture your government-issued ID to continue.";
+  }
+  if (!details.utilityBill) {
+    return "Attach a recent utility bill for address verification.";
+  }
+  return null;
+}
+
+export function SignUpPage() {
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const initialRole = (params.get("role") as Role | null) ?? publicRoleOptions[0].value;
+  const { signUp, user } = useAuth();
+  const { showToast } = useToast();
+  const [form, setForm] = useState({ name: "", email: "", password: "", role: initialRole });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [vendorDetails, setVendorDetails] = useState<VendorRequirementFields>(initialVendorState);
+  const [mediaPreviews, setMediaPreviews] = useState<MediaPreview[]>([]);
+  const [compressingMedia, setCompressingMedia] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [touched, setTouched] = useState({ name: false, email: false, password: false });
+  const skipAutoRedirect = useRef(false);
+
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
+  const passwordValid = form.password.length >= 8;
+  const nameValid = form.name.trim().length >= 2;
+
+  const vendorSteps = [
+    {
+      label: "Address & landmark",
+      complete: Boolean(
+        vendorDetails.streetAddress.trim() &&
+        vendorDetails.city.trim() &&
+        vendorDetails.state.trim() &&
+        vendorDetails.landmark.trim()
+      ),
+      Icon: MapPin,
+    },
+    {
+      label: "Kitchen media",
+      complete: vendorDetails.kitchenMedia.length > 0,
+      Icon: Camera,
+    },
+    {
+      label: "Identity & utility",
+      complete: Boolean(vendorDetails.idCardCapture && vendorDetails.utilityBill),
+      Icon: ShieldCheck,
+    },
+  ];
+  const completedSteps = vendorSteps.filter((step) => step.complete).length;
+  const vendorProgress = Math.round((completedSteps / vendorSteps.length) * 100);
+
+  useEffect(() => {
+    if (user && !skipAutoRedirect.current) {
+      navigate(`/dashboard/${user.role}`, { replace: true });
+    }
+  }, [navigate, user]);
+
+  useEffect(() => {
+    if (vendorDetails.kitchenMedia.length === 0) {
+      setMediaPreviews([]);
+      return;
+    }
+    const nextPreviews = vendorDetails.kitchenMedia.map((file) => ({
+      url: URL.createObjectURL(file),
+      name: file.name,
+      type: file.type,
+      sizeKb: Math.max(1, Math.round(file.size / 1024)),
+    }));
+    setMediaPreviews(nextPreviews);
+    return () => {
+      nextPreviews.forEach((preview) => URL.revokeObjectURL(preview.url));
+    };
+  }, [vendorDetails.kitchenMedia]);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      let vendorVerification;
+      if (form.role === "vendor") {
+        const vendorError = validateVendorRequirements(vendorDetails);
+        if (vendorError) {
+          throw new Error(vendorError);
+        }
+        vendorVerification = {
+          streetAddress: vendorDetails.streetAddress.trim(),
+          city: vendorDetails.city.trim(),
+          state: vendorDetails.state.trim(),
+          landmark: vendorDetails.landmark.trim(),
+          kitchenMediaCount: vendorDetails.kitchenMedia.length,
+          idCardProvided: Boolean(vendorDetails.idCardCapture),
+          utilityBillProvided: Boolean(vendorDetails.utilityBill),
+        } as const;
+      }
+
+      skipAutoRedirect.current = true;
+      const registered = await signUp({ ...form, vendorVerification });
+
+      if (registered.role === "vendor") {
+        const uploads: Promise<unknown>[] = [];
+        vendorDetails.kitchenMedia.forEach((file, index) => {
+          uploads.push(uploadVendorDocument(`kitchen_media_${index + 1}`, file));
+        });
+        if (vendorDetails.idCardCapture) {
+          uploads.push(uploadVendorDocument("id_card", vendorDetails.idCardCapture));
+        }
+        if (vendorDetails.utilityBill) {
+          uploads.push(uploadVendorDocument("utility_bill", vendorDetails.utilityBill));
+        }
+        try {
+          await Promise.all(uploads);
+          showToast("Verification documents uploaded successfully.");
+        } catch (uploadErr) {
+          showToast(
+            uploadErr instanceof Error
+              ? uploadErr.message
+              : "Some verification documents could not be uploaded. You can retry from your vendor dashboard."
+          );
+        }
+      }
+
+      showToast(`Welcome aboard! Redirecting to your ${registered.role} hub.`);
+      navigate(`/dashboard/${registered.role}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to sign up");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleTextChange = (field: "name" | "email" | "password") => (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleVendorTextChange = (field: "streetAddress" | "city" | "state" | "landmark") =>
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const value = event.target.value;
+      setVendorDetails((prev) => ({ ...prev, [field]: value }));
+    };
+
+  const handleKitchenMediaChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files ? Array.from(event.target.files).slice(0, 6) : [];
+    event.target.value = "";
+    if (files.length === 0) return;
+    const maxBytes = 10 * 1024 * 1024; // 10 MB
+    const oversized = files.filter((f) => f.size > maxBytes);
+    if (oversized.length > 0) {
+      setError(`${oversized.length} file(s) exceed 10MB limit.`);
+      return;
+    }
+    setError(null);
+    setCompressingMedia(true);
+    try {
+      const processed = await Promise.all(
+        files.map((file) => (file.type.startsWith("image/") ? compressImageFile(file) : file)),
+      );
+      setVendorDetails((prev) => ({
+        ...prev,
+        kitchenMedia: [...prev.kitchenMedia, ...processed].slice(0, 6),
+      }));
+    } catch (compressionError) {
+      console.error("Kitchen media compression failed", compressionError);
+      setVendorDetails((prev) => ({
+        ...prev,
+        kitchenMedia: [...prev.kitchenMedia, ...files].slice(0, 6),
+      }));
+    } finally {
+      setCompressingMedia(false);
+    }
+  };
+
+  const removeMediaAt = (index: number) => {
+    setVendorDetails((prev) => {
+      const nextMedia = [...prev.kitchenMedia];
+      nextMedia.splice(index, 1);
+      return { ...prev, kitchenMedia: nextMedia };
+    });
+  };
+
+  const handleSingleFileChange = (field: "idCardCapture" | "utilityBill") => (event: ChangeEvent<HTMLInputElement>) => {
+    const [file] = event.target.files ? Array.from(event.target.files) : [];
+    setVendorDetails((prev) => ({ ...prev, [field]: file ?? null }));
+  };
+
+  return (
+    <div className="flex min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
+      <div className="m-auto w-full max-w-5xl rounded-3xl bg-white shadow-2xl">
+        <div className="grid gap-0 md:grid-cols-2">
+          <div className="hidden rounded-l-3xl bg-gradient-to-br from-orange-500 to-rose-500 p-12 text-white md:flex md:flex-col md:justify-between">
+            <div>
+              <div className="flex items-center gap-3 text-2xl font-semibold">
+                <ChefHat className="h-8 w-8" />
+                Foodie Market
+              </div>
+              <p className="mt-6 text-lg text-white/80">
+                Join a vibrant marketplace connecting home chefs with local food lovers. Choose your role to unlock curated tools.
+              </p>
+            </div>
+            <div className="space-y-4">
+              <p className="text-sm uppercase tracking-[0.3em] text-white/70">What you unlock</p>
+              <ul className="space-y-2 text-white/90">
+                <li>• Buyer concierge for bespoke orders</li>
+                <li>• Vendor bidding and command hub</li>
+                <li>• Real-time order tracking & analytics</li>
+              </ul>
+            </div>
+          </div>
+
+          <motion.div
+            className="p-10"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="mb-8 space-y-3">
+              <p className="text-sm uppercase tracking-[0.3em] text-gray-400">Get started</p>
+              <h1 className="text-3xl font-semibold text-gray-900">Create your Foodie Market account</h1>
+              <p className="text-sm text-gray-500">Pick a role now—you can add more roles later.</p>
+            </div>
+
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700" htmlFor="name">
+                  Full Name
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  autoComplete="name"
+                  required
+                  minLength={2}
+                  value={form.name}
+                  onChange={handleTextChange("name")}
+                  onBlur={() => setTouched((p) => ({ ...p, name: true }))}
+                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                  placeholder="Adaeze Emmanuel"
+                />
+                {touched.name && !nameValid && (
+                  <p className="text-xs text-red-500">Name must be at least 2 characters.</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700" htmlFor="email">
+                  Email Address
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  autoComplete="email"
+                  type="email"
+                  required
+                  value={form.email}
+                  onChange={handleTextChange("email")}
+                  onBlur={() => setTouched((p) => ({ ...p, email: true }))}
+                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                  placeholder="you@foodie.market"
+                />
+                {touched.email && !emailValid && (
+                  <p className="text-xs text-red-500">Enter a valid email address.</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700" htmlFor="password">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    name="password"
+                    autoComplete="new-password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    minLength={8}
+                    value={form.password}
+                    onChange={handleTextChange("password")}
+                    onBlur={() => setTouched((p) => ({ ...p, password: true }))}
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 pr-10 text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                    placeholder="Min 8 characters"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+                {touched.password && !passwordValid && (
+                  <p className="text-xs text-red-500">Password must be at least 8 characters.</p>
+                )}
+                {form.password && (
+                  <div className="flex items-center gap-2">
+                    <div className="flex flex-1 gap-1">
+                      {[1, 2, 3].map((i) => (
+                        <div
+                          key={i}
+                          className={`h-1 flex-1 rounded-full ${
+                            i <= (form.password.length >= 12 ? 3 : form.password.length >= 10 ? 2 : 1)
+                              ? "bg-emerald-400" : "bg-gray-200"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-[10px] font-medium text-gray-500">
+                      {form.password.length >= 12 ? "Strong" : form.password.length >= 10 ? "Fair" : "Weak"}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Choose your role</label>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {publicRoleOptions.map((option) => {
+                    const isActive = form.role === option.value;
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setForm((prev) => ({ ...prev, role: option.value }))}
+                        className={`rounded-2xl border px-4 py-3 text-left transition ${
+                          isActive ? "border-orange-500 bg-orange-50" : "border-gray-200 hover:border-gray-300"
+                        }`}
+                      >
+                        <p className="text-sm font-semibold text-gray-900">{option.label}</p>
+                        <p className="text-xs text-gray-500">
+                          {option.value === "vendor"
+                            ? "Bid on custom requests with verified kitchen"
+                            : "Post bespoke meal briefs"}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {form.role === "vendor" && (
+                <div className="space-y-5 rounded-2xl border border-dashed border-orange-200 bg-orange-50/60 p-5">
+                  <div>
+                    <p className="text-sm font-semibold text-orange-600">Vendor verification</p>
+                    <p className="text-xs text-orange-500">We need a precise kitchen location, visual proof, and identity documents before activating your stall.</p>
+                  </div>
+
+                  <div className="space-y-3 rounded-2xl bg-white/70 p-4 text-sm">
+                    <div className="flex items-center justify-between text-xs font-medium text-gray-600">
+                      <span className="uppercase tracking-[0.2em] text-gray-500">Progress</span>
+                      <span>
+                        {completedSteps}/{vendorSteps.length} steps
+                      </span>
+                    </div>
+                    <div className="h-2 rounded-full bg-orange-100">
+                      <div
+                        className="h-2 rounded-full bg-orange-500 transition-all"
+                        style={{ width: `${vendorProgress}%` }}
+                      />
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      {vendorSteps.map(({ label, complete, Icon }) => (
+                        <div
+                          key={label}
+                          className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold ${
+                            complete ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-gray-200 bg-white text-gray-500"
+                          }`}
+                        >
+                          <span
+                            className={`inline-flex h-7 w-7 items-center justify-center rounded-full ${
+                              complete ? "bg-emerald-500 text-white" : "bg-gray-100 text-gray-500"
+                            }`}
+                          >
+                            <Icon className="h-4 w-4" />
+                          </span>
+                          <span>{label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <p className="text-sm font-semibold text-gray-700">Kitchen location</p>
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-gray-600" htmlFor="vendor-street">
+                        House no. & street
+                      </label>
+                      <input
+                        id="vendor-street"
+                        name="streetAddress"
+                        autoComplete="address-line1"
+                        required
+                        maxLength={120}
+                        value={vendorDetails.streetAddress}
+                        onChange={handleVendorTextChange("streetAddress")}
+                        className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                        placeholder="12 Palm Avenue, Lekki Phase 1"
+                        aria-describedby="street-hint"
+                      />
+                      <p id="street-hint" className="text-xs text-gray-500">{vendorDetails.streetAddress.length}/120</p>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-gray-600" htmlFor="vendor-city">
+                          City
+                        </label>
+                        <input
+                          id="vendor-city"
+                          name="city"
+                          autoComplete="address-level2"
+                          required
+                          maxLength={60}
+                          value={vendorDetails.city}
+                          onChange={handleVendorTextChange("city")}
+                          className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                          placeholder="Lekki"
+                          aria-describedby="city-hint"
+                        />
+                        <p id="city-hint" className="text-xs text-gray-500">{vendorDetails.city.length}/60</p>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-gray-600" htmlFor="vendor-state">
+                          State
+                        </label>
+                        <input
+                          id="vendor-state"
+                          name="state"
+                          autoComplete="address-level1"
+                          required
+                          maxLength={60}
+                          value={vendorDetails.state}
+                          onChange={handleVendorTextChange("state")}
+                          className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                          placeholder="Lagos"
+                          aria-describedby="state-hint"
+                        />
+                        <p id="state-hint" className="text-xs text-gray-500">{vendorDetails.state.length}/60</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700" htmlFor="vendor-landmark">
+                      Nearest landmark (helps riders find you)
+                    </label>
+                    <input
+                      id="vendor-landmark"
+                      name="landmark"
+                      required
+                      maxLength={100}
+                      value={vendorDetails.landmark}
+                      onChange={handleVendorTextChange("landmark")}
+                      className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                      placeholder="Opposite Palm View Hotel"
+                      aria-describedby="landmark-hint"
+                    />
+                    <p id="landmark-hint" className="text-xs text-gray-500">{vendorDetails.landmark.length}/100</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700" htmlFor="kitchen-media">
+                      Kitchen images or walkthrough video
+                    </label>
+                    <input
+                      id="kitchen-media"
+                      type="file"
+                      accept="image/*,video/*"
+                      multiple
+                      onChange={handleKitchenMediaChange}
+                      className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm text-gray-600"
+                    />
+                    <div className="space-y-2">
+                      <p className="text-xs text-gray-500">Upload up to 6 files. At least one clear photo or video of your prep area is required.</p>
+                      {compressingMedia && <p className="text-xs text-orange-500">Optimizing uploads...</p>}
+                      {mediaPreviews.length > 0 && (
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {mediaPreviews.map((preview, index) => (
+                            <div key={preview.url} className="relative rounded-2xl border border-gray-200 bg-white p-3">
+                              <button
+                                type="button"
+                                className="absolute right-2 top-2 rounded-full bg-white/80 p-1 text-gray-500 hover:text-red-500"
+                                aria-label={`Remove ${preview.name}`}
+                                onClick={() => removeMediaAt(index)}
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                              <div className="flex items-center gap-3">
+                                {preview.type.startsWith("image/") ? (
+                                  <img
+                                    src={preview.url}
+                                    alt={preview.name}
+                                    className="h-16 w-16 rounded-xl object-cover"
+                                  />
+                                ) : (
+                                  <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-orange-100 text-orange-600">
+                                    <VideoIcon className="h-6 w-6" />
+                                  </div>
+                                )}
+                                <div>
+                                  <p className="text-sm font-semibold text-gray-800 truncate">{preview.name}</p>
+                                  <p className="text-xs text-gray-500">{preview.sizeKb} KB · {preview.type || "unknown"}</p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-700" htmlFor="id-card">
+                        Capture government ID (front)
+                      </label>
+                      <input
+                        id="id-card"
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        onChange={handleSingleFileChange("idCardCapture")}
+                        className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm text-gray-600"
+                      />
+                      <p className="text-xs text-gray-500">Use your device camera to capture the ID directly. No uploads from gallery.</p>
+                      {vendorDetails.idCardCapture && (
+                        <p className="text-xs text-gray-600">Captured: {vendorDetails.idCardCapture.name}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-700" htmlFor="utility-bill">
+                        Latest utility bill (PDF or image)
+                      </label>
+                      <input
+                        id="utility-bill"
+                        type="file"
+                        accept="application/pdf,image/*"
+                        onChange={handleSingleFileChange("utilityBill")}
+                        className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm text-gray-600"
+                      />
+                      <p className="text-xs text-gray-500">Upload a bill from the last 3 months showing this address.</p>
+                      {vendorDetails.utilityBill && (
+                        <p className="text-xs text-gray-600">Attached: {vendorDetails.utilityBill.name}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {error && (
+                <div className="flex items-start gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <Button type="submit" className="w-full bg-orange-500 text-white" disabled={loading}>
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Creating account...
+                  </span>
+                ) : (
+                  "Create account"
+                )}
+              </Button>
+            </form>
+
+            <p className="mt-6 text-sm text-gray-500">
+              Already have an account?{" "}
+              <Link to="/auth/sign-in" className="text-orange-500">
+                Sign in
+              </Link>
+            </p>
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+}
