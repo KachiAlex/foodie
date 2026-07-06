@@ -173,7 +173,7 @@ export function BuyerDashboard() {
       actions={
         <div className="flex gap-2">
           <Button variant="outline" className="gap-2" asChild>
-            <Link to="/dashboard/buyer">Find Vendors</Link>
+            <Link to="/community/vendor-market">Find Vendors</Link>
           </Button>
           <Button className="gap-2 bg-orange-500 text-white" onClick={() => setShowNewRequest(true)}>
             <Plus className="h-4 w-4" /> New Request
@@ -181,7 +181,7 @@ export function BuyerDashboard() {
         </div>
       }
     >
-      <div className="space-y-8">
+      <div className="space-y-6">
 
         {/* ── 1. Needs Action strip ─────────────────────────────────────── */}
         <AnimatePresence>
@@ -190,9 +190,9 @@ export function BuyerDashboard() {
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="rounded-3xl border border-amber-200 bg-amber-50 p-5"
+              className="rounded-2xl border border-orange-500/30 bg-gradient-to-r from-orange-500/10 to-amber-500/10 p-5"
             >
-              <div className="flex items-center gap-2 text-amber-700">
+              <div className="flex items-center gap-2 text-orange-400">
                 <Zap className="h-4 w-4 fill-amber-500 text-amber-500" />
                 <p className="text-sm font-semibold">
                   {actionableRequests.length} {actionableRequests.length === 1 ? "request needs" : "requests need"} your decision
@@ -203,10 +203,10 @@ export function BuyerDashboard() {
                   const reqBids = bidsByRequest[req.id] ?? [];
                   const lowestBid = reqBids.reduce((min, b) => b.price < min.price ? b : min, reqBids[0]);
                   return (
-                    <div key={req.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm">
+                    <div key={req.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white/10 px-4 py-3">
                       <div>
-                        <p className="text-sm font-semibold text-gray-900">{req.title}</p>
-                        <p className="text-xs text-gray-500">{reqBids.length} bids · lowest {symbol}{lowestBid.price.toLocaleString()} · budget {symbol}{req.budget.toLocaleString()}</p>
+                        <p className="text-sm font-semibold text-white">{req.title}</p>
+                        <p className="text-xs text-orange-300">{reqBids.length} bids · lowest {symbol}{lowestBid.price.toLocaleString()} · budget {symbol}{req.budget.toLocaleString()}</p>
                       </div>
                       <Button
                         size="sm"
@@ -229,21 +229,20 @@ export function BuyerDashboard() {
         {/* ── 2. KPI strip ──────────────────────────────────────────────── */}
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { label: "Active briefs", value: activeRequestCount, meta: "open for bidding", icon: Flame, bar: "bg-orange-500", accent: "bg-orange-500/10 text-orange-600" },
-            { label: "Active orders", value: activeOrders.length, meta: "in progress", icon: CalendarClock, bar: "bg-amber-500", accent: "bg-amber-500/10 text-amber-600" },
-            { label: "Total spent", value: `${symbol}${totalSpendAll.toLocaleString()}`, meta: "all time", icon: CheckCircle2, bar: "bg-emerald-500", accent: "bg-emerald-500/10 text-emerald-600" },
-            { label: "On-time rate", value: `${onTimeRate}%`, meta: `${orders.length} deliveries`, icon: BadgeCheck, bar: "bg-blue-500", accent: "bg-blue-500/10 text-blue-600" },
+            { label: "Active briefs", value: activeRequestCount, meta: "open for bidding", icon: Flame, bg: "bg-gradient-to-br from-orange-500 to-amber-500", iconBg: "bg-white/20", text: "text-white" },
+            { label: "Active orders", value: activeOrders.length, meta: "in progress", icon: CalendarClock, bg: "bg-gradient-to-br from-violet-600 to-purple-700", iconBg: "bg-white/20", text: "text-white" },
+            { label: "Total spent", value: `${symbol}${totalSpendAll.toLocaleString()}`, meta: "all time", icon: CheckCircle2, bg: "bg-gradient-to-br from-emerald-500 to-teal-600", iconBg: "bg-white/20", text: "text-white" },
+            { label: "On-time rate", value: `${onTimeRate}%`, meta: `${orders.length} deliveries`, icon: BadgeCheck, bg: "bg-gradient-to-br from-blue-500 to-cyan-600", iconBg: "bg-white/20", text: "text-white" },
           ].map((card) => (
-            <div key={card.label} className="relative overflow-hidden rounded-2xl bg-white p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              <div className={`absolute left-0 top-0 bottom-0 w-1 ${card.bar} rounded-l-2xl`} />
-              <div className="flex items-start justify-between pl-2">
+            <div key={card.label} className={`relative overflow-hidden rounded-2xl p-5 shadow-lg hover:-translate-y-0.5 transition-all duration-200 ${card.bg}`}>
+              <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">{card.label}</p>
-                  <p className="mt-2 text-3xl font-extrabold text-gray-900">{card.value}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{card.meta}</p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-white/60">{card.label}</p>
+                  <p className={`mt-2 text-3xl font-extrabold ${card.text}`}>{card.value}</p>
+                  <p className="text-xs text-white/70 mt-0.5">{card.meta}</p>
                 </div>
-                <span className={`rounded-xl p-2.5 ${card.accent}`}>
-                  <card.icon className="h-5 w-5" />
+                <span className={`rounded-xl p-2.5 ${card.iconBg}`}>
+                  <card.icon className="h-5 w-5 text-white" />
                 </span>
               </div>
             </div>
@@ -252,17 +251,17 @@ export function BuyerDashboard() {
 
         {/* ── 3. Next delivery + spend chart ────────────────────────────── */}
         <section className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
-          <div className="rounded-2xl bg-white border border-gray-100 p-6 shadow-sm">
+          <div className="rounded-2xl bg-[#1a1d27] border border-white/8 p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Spend</p>
-                <h3 className="text-2xl font-extrabold text-gray-900">{symbol}{totalSpendPeriod.toLocaleString()}</h3>
-                <p className="text-xs text-gray-500">Avg ticket {symbol}{avgTicket.toLocaleString()}</p>
+                <h3 className="text-2xl font-extrabold text-white">{symbol}{totalSpendPeriod.toLocaleString()}</h3>
+                <p className="text-xs text-gray-400">Avg ticket {symbol}{avgTicket.toLocaleString()}</p>
               </div>
               <div className="flex gap-2">
                 {(["7d", "30d"] as const).map((r) => (
                   <button key={r} type="button" onClick={() => setSpendRange(r)}
-                    className={`rounded-full px-3 py-1 text-xs font-semibold transition ${spendRange === r ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+                    className={`rounded-full px-3 py-1 text-xs font-semibold transition ${spendRange === r ? "bg-orange-500 text-white" : "bg-white/10 text-gray-400 hover:bg-white/20"}`}>
                     {r}
                   </button>
                 ))}
@@ -275,19 +274,19 @@ export function BuyerDashboard() {
                   onFocus={() => setHoveredSpend(day)} onBlur={() => setHoveredSpend(null)}
                   onKeyDown={handleSpendKeyNavigation}
                   className="flex-1" aria-label={`${day.label}: ${symbol}${day.value}`}>
-                  <div className="relative h-28 rounded-2xl bg-gray-50">
+                  <div className="relative h-28 rounded-2xl bg-white/5">
                     <div className={`absolute bottom-2 left-2 right-2 rounded-2xl bg-gradient-to-t from-orange-500 to-amber-400 transition-shadow ${hoveredSpend?.label === day.label ? "shadow-lg" : ""}`}
                       style={{ height: `${(day.value / maxSpendValue) * 100}%` }} />
                   </div>
-                  <p className="mt-2 text-center text-xs text-gray-500">{day.label}</p>
+                  <p className="mt-2 text-center text-xs text-gray-400">{day.label}</p>
                 </button>
               ))}
             </div>
-            <div className="mt-4 rounded-2xl bg-gray-50 p-3 text-sm">
+            <div className="mt-4 rounded-2xl bg-white/5 p-3 text-sm">
               {hoveredSpend ? (
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-900">{hoveredSpend.label}</span>
-                  <span className="font-semibold text-gray-900">{symbol}{hoveredSpend.value.toLocaleString()}</span>
+                  <span className="font-semibold text-white">{hoveredSpend.label}</span>
+                  <span className="font-semibold text-orange-400">{symbol}{hoveredSpend.value.toLocaleString()}</span>
                 </div>
               ) : (
                 <p className="text-gray-500">Hover a bar to inspect spend</p>
@@ -296,6 +295,7 @@ export function BuyerDashboard() {
           </div>
 
           <div className="space-y-4">
+            {/* Empty state dashed box update */}
             {nextDelivery ? (
               <div className="rounded-2xl bg-gray-950 p-6 text-white relative overflow-hidden">
                 <div className="pointer-events-none absolute top-0 right-0 h-32 w-32 rounded-full bg-orange-500/10 blur-2xl" />
@@ -315,26 +315,26 @@ export function BuyerDashboard() {
                 <span className="mt-4 inline-flex items-center rounded-xl bg-orange-500/20 px-3 py-1.5 text-xs font-bold text-orange-300">ETA {nextDelivery.eta}</span>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-200 p-8 text-center">
-                <CalendarClock className="h-8 w-8 text-gray-300" />
-                <p className="mt-3 text-sm font-semibold text-gray-500">No active deliveries</p>
+              <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-white/15 p-8 text-center">
+                <CalendarClock className="h-8 w-8 text-gray-600" />
+                <p className="mt-3 text-sm font-semibold text-gray-400">No active deliveries</p>
                 <Button size="sm" className="mt-4 bg-orange-500 text-white" onClick={() => setShowNewRequest(true)}>
                   Place a request
                 </Button>
               </div>
             )}
 
-            <div className="rounded-2xl bg-white border border-gray-100 p-5 shadow-sm">
+            <div className="rounded-2xl bg-[#1a1d27] border border-white/8 p-5 shadow-sm">
               <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Fulfillment</p>
-              <p className="mt-1 text-2xl font-semibold text-gray-900">{onTimeRate}% delivered</p>
+              <p className="mt-1 text-2xl font-semibold text-white">{onTimeRate}% delivered</p>
               <div className="mt-4 space-y-3">
                 {fulfillmentBreakdown.map((e) => (
                   <div key={e.label} className="space-y-1">
-                    <div className="flex justify-between text-xs text-gray-500">
+                    <div className="flex justify-between text-xs text-gray-400">
                       <span className="flex items-center gap-1.5"><span className={`h-2 w-2 rounded-full ${e.color}`} />{e.label}</span>
                       <span>{e.value}%</span>
                     </div>
-                    <div className="h-1.5 rounded-full bg-gray-100">
+                    <div className="h-1.5 rounded-full bg-white/10">
                       <div className={`h-1.5 rounded-full ${e.color}`} style={{ width: `${e.value}%` }} />
                     </div>
                   </div>
@@ -349,8 +349,8 @@ export function BuyerDashboard() {
           <div className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Your requests</h2>
-                <p className="text-sm text-gray-500">{requests.length} total · {activeRequestCount} active</p>
+                <h2 className="text-xl font-semibold text-white">Your requests</h2>
+                <p className="text-sm text-gray-400">{requests.length} total · {activeRequestCount} active</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {[
@@ -361,7 +361,7 @@ export function BuyerDashboard() {
                 ].map((opt) => (
                   <button key={opt.value} type="button"
                     onClick={() => setBidFilter(opt.value as typeof bidFilter)}
-                    className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${bidFilter === opt.value ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 text-gray-600 hover:border-gray-400"}`}>
+                    className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${bidFilter === opt.value ? "border-orange-500 bg-orange-500 text-white" : "border-white/15 text-gray-400 hover:border-orange-500/50 hover:text-orange-400"}`}>
                     {opt.label}
                   </button>
                 ))}
@@ -369,9 +369,9 @@ export function BuyerDashboard() {
             </div>
 
             {filteredRequests.length === 0 && (
-              <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-200 py-12 text-center">
-                <Filter className="h-8 w-8 text-gray-300" />
-                <p className="mt-3 text-sm font-semibold text-gray-500">No requests match this filter</p>
+              <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-white/15 py-12 text-center">
+                <Filter className="h-8 w-8 text-gray-600" />
+                <p className="mt-3 text-sm font-semibold text-gray-400">No requests match this filter</p>
                 <Button size="sm" variant="ghost" className="mt-2 text-orange-600" onClick={() => setBidFilter("all")}>Clear filter</Button>
               </div>
             )}
@@ -384,7 +384,7 @@ export function BuyerDashboard() {
                 <motion.div
                   key={request.id}
                   id={`request-${request.id}`}
-                  className={`rounded-2xl border bg-white p-5 shadow-sm transition-all hover:shadow-md ${hasActionable ? "border-amber-300 ring-1 ring-amber-200" : "border-gray-100"}`}
+                  className={`rounded-2xl border p-5 shadow-sm transition-all ${hasActionable ? "border-orange-500/40 bg-orange-500/5 ring-1 ring-orange-500/20" : "border-white/8 bg-[#1a1d27]"}`}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
@@ -401,12 +401,12 @@ export function BuyerDashboard() {
                         </span>
                         {hasActionable && <span className="flex items-center gap-1 rounded-full bg-orange-50 px-2 py-0.5 text-xs font-semibold text-orange-600"><Zap className="h-3 w-3" /> Action needed</span>}
                       </div>
-                      <h3 className="mt-2 text-lg font-semibold text-gray-900">{request.title}</h3>
-                      <p className="text-sm text-gray-500">{request.cuisine} · {request.portionType} · {request.servings} servings · {request.deliveryWindow}</p>
+                      <h3 className="mt-2 text-lg font-semibold text-white">{request.title}</h3>
+                      <p className="text-sm text-gray-400">{request.cuisine} · {request.portionType} · {request.servings} servings · {request.deliveryWindow}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-gray-400">Budget</p>
-                      <p className="text-2xl font-bold text-gray-900">{symbol}{request.budget.toLocaleString()}</p>
+                      <p className="text-2xl font-bold text-orange-400">{symbol}{request.budget.toLocaleString()}</p>
                       <p className="text-xs text-gray-500">{reqBids.length} bid{reqBids.length !== 1 ? "s" : ""}</p>
                     </div>
                   </div>
@@ -414,7 +414,7 @@ export function BuyerDashboard() {
                   {reqBids.length > 0 && (
                     <button
                       type="button"
-                      className="mt-4 flex w-full items-center justify-between rounded-2xl bg-gray-50 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100"
+                      className="mt-4 flex w-full items-center justify-between rounded-xl bg-white/5 px-4 py-2 text-sm font-medium text-gray-400 hover:bg-white/10"
                       onClick={() => toggleExpand(request.id)}
                     >
                       <span>{isExpanded ? "Hide" : "Show"} {reqBids.length} bid{reqBids.length !== 1 ? "s" : ""}</span>
@@ -432,13 +432,13 @@ export function BuyerDashboard() {
                       >
                         <div className="mt-3 grid gap-3 sm:grid-cols-2">
                           {reqBids.map((bid) => (
-                            <div key={bid.id} className="rounded-2xl border border-gray-100 p-4">
+                            <div key={bid.id} className="rounded-xl border border-white/8 bg-white/5 p-4">
                               <div className="flex items-center justify-between">
-                                <p className="font-semibold text-gray-900">{bid.chef}</p>
-                                <span className="text-xs text-emerald-600">{bid.confidence}% match</span>
+                                <p className="font-semibold text-white">{bid.chef}</p>
+                                <span className="text-xs text-emerald-400">{bid.confidence}% match</span>
                               </div>
-                              <div className="mt-2 flex items-center justify-between text-sm text-gray-600">
-                                <span className="text-base font-bold text-gray-900">{symbol}{bid.price.toLocaleString()}</span>
+                              <div className="mt-2 flex items-center justify-between text-sm text-gray-400">
+                                <span className="text-base font-bold text-orange-400">{symbol}{bid.price.toLocaleString()}</span>
                                 <span>{bid.eta}</span>
                               </div>
                               {request.status === "collecting_bids" && (
@@ -475,46 +475,46 @@ export function BuyerDashboard() {
 
           {/* ── Sidebar: vendors + active orders ────────────────────────── */}
           <div className="space-y-6">
-            <div className="rounded-2xl bg-white border border-gray-100 p-6 shadow-sm">
+            <div className="rounded-2xl bg-[#1a1d27] border border-white/8 p-6 shadow-sm">
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold text-gray-900">Active orders</h3>
-                <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-semibold text-orange-600">{activeOrders.length}</span>
+                <h3 className="text-base font-bold text-white">Active orders</h3>
+                <span className="rounded-full bg-orange-500/20 px-2 py-0.5 text-xs font-semibold text-orange-400">{activeOrders.length}</span>
               </div>
               <div className="mt-4 space-y-3">
-                {activeOrders.length === 0 && <p className="text-sm text-gray-400">No active orders.</p>}
+                {activeOrders.length === 0 && <p className="text-sm text-gray-500">No active orders.</p>}
                 {activeOrders.map((order) => (
-                  <div key={order.id} className="rounded-2xl border border-gray-100 p-3">
+                  <div key={order.id} className="rounded-xl border border-white/8 bg-white/5 p-3">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold text-gray-900">{order.chef}</p>
-                      <span className="rounded-full bg-orange-50 px-2 py-0.5 text-xs font-semibold text-orange-600">{order.status}</span>
+                      <p className="text-sm font-semibold text-white">{order.chef}</p>
+                      <span className="rounded-full bg-orange-500/20 px-2 py-0.5 text-xs font-semibold text-orange-400">{order.status}</span>
                     </div>
-                    <div className="mt-1 flex items-center justify-between text-xs text-gray-500">
+                    <div className="mt-1 flex items-center justify-between text-xs text-gray-400">
                       <span>ETA: {order.eta}</span>
-                      <span className="font-semibold text-gray-900">{symbol}{order.amount.toLocaleString()}</span>
+                      <span className="font-semibold text-emerald-400">{symbol}{order.amount.toLocaleString()}</span>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-2xl bg-white border border-gray-100 p-6 shadow-sm">
+            <div className="rounded-2xl bg-[#1a1d27] border border-white/8 p-6 shadow-sm">
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold text-gray-900">Verified chefs</h3>
+                <h3 className="text-base font-bold text-white">Verified chefs</h3>
                 <Button variant="ghost" size="sm" className="text-xs text-orange-600" asChild>
                   <Link to="/dashboard/buyer">View all</Link>
                 </Button>
               </div>
               <div className="mt-4 space-y-3">
-                {vendors.length === 0 && <p className="text-sm text-gray-400">No verified chefs yet.</p>}
+                {vendors.length === 0 && <p className="text-sm text-gray-500">No verified chefs yet.</p>}
                 {vendors.slice(0, 4).map((vendor) => (
-                  <div key={vendor.id} className="flex items-center justify-between rounded-2xl border border-gray-100 p-3">
+                  <div key={vendor.id} className="flex items-center justify-between rounded-xl border border-white/8 bg-white/5 p-3">
                     <div>
-                      <p className="text-sm font-semibold text-gray-900">{vendor.name}</p>
-                      <p className="text-xs text-gray-500 flex items-center gap-1">
+                      <p className="text-sm font-semibold text-white">{vendor.name}</p>
+                      <p className="text-xs text-gray-400 flex items-center gap-1">
                         <MapPin className="h-3 w-3" /> {vendor.city || "Lagos"}
                       </p>
                     </div>
-                    <BadgeCheck className="h-4 w-4 text-orange-500" />
+                    <BadgeCheck className="h-4 w-4 text-orange-400" />
                   </div>
                 ))}
               </div>

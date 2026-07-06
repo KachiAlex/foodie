@@ -15,7 +15,7 @@ export function VendorMetricsGrid({ metrics }: VendorMetricsGridProps) {
       {metrics.map((metric, i) => (
         <motion.div
           key={metric.label}
-          className="relative overflow-hidden rounded-2xl bg-white border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow"
+          className="relative overflow-hidden rounded-2xl bg-[#1a1d27] border border-white/8 p-5 shadow-sm hover:shadow-md transition-shadow"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.05 }}
@@ -23,8 +23,8 @@ export function VendorMetricsGrid({ metrics }: VendorMetricsGridProps) {
           <div className={`absolute left-0 top-0 bottom-0 w-1 ${ACCENT_BARS[i % ACCENT_BARS.length]} rounded-l-2xl`} />
           <div className="pl-2">
             <p className="text-xs font-bold uppercase tracking-widest text-gray-400">{metric.label}</p>
-            <h3 className="mt-2 text-3xl font-extrabold text-gray-900">{symbol}{metric.value}</h3>
-            <p className={`mt-1 text-sm font-semibold ${metric.trend === "up" ? "text-emerald-600" : "text-red-500"}`}>
+            <h3 className="mt-2 text-3xl font-extrabold text-white">{symbol}{metric.value}</h3>
+            <p className={`mt-1 text-sm font-semibold ${metric.trend === "up" ? "text-emerald-400" : "text-red-400"}`}>
               {metric.change}
             </p>
           </div>

@@ -204,7 +204,7 @@ export function AdminDashboard() {
       title="Marketplace Control"
       description="Monitor fulfillment health, vendor trust, and escalations."
     >
-      <section className="space-y-8">
+      <section className="space-y-6">
 
         {/* ── 1. Priority alert bar ──────────────────────────────────────── */}
         <AnimatePresence>
@@ -216,15 +216,15 @@ export function AdminDashboard() {
               className="space-y-2"
             >
               {priorityAlerts.map((alert) => (
-                <div key={alert.id} className={`flex items-center justify-between rounded-2xl px-5 py-3 ${alert.severity === "High" ? "border border-red-200 bg-red-50" : "border border-amber-200 bg-amber-50"}`}>
+                <div key={alert.id} className={`flex items-center justify-between rounded-2xl px-5 py-3 ${alert.severity === "High" ? "border border-red-500/30 bg-red-500/10" : "border border-amber-500/30 bg-amber-500/10"}`}>
                   <div className="flex items-center gap-3">
-                    <AlertTriangle className={`h-4 w-4 shrink-0 ${alert.severity === "High" ? "text-red-500" : "text-amber-500"}`} />
+                    <AlertTriangle className={`h-4 w-4 shrink-0 ${alert.severity === "High" ? "text-red-400" : "text-amber-400"}`} />
                     <div>
-                      <p className={`text-sm font-semibold ${alert.severity === "High" ? "text-red-800" : "text-amber-800"}`}>{alert.label}</p>
-                      <p className={`text-xs ${alert.severity === "High" ? "text-red-600" : "text-amber-600"}`}>{alert.detail}</p>
+                      <p className={`text-sm font-semibold ${alert.severity === "High" ? "text-red-300" : "text-amber-300"}`}>{alert.label}</p>
+                      <p className={`text-xs ${alert.severity === "High" ? "text-red-400/70" : "text-amber-400/70"}`}>{alert.detail}</p>
                     </div>
                   </div>
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${alert.severity === "High" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${alert.severity === "High" ? "bg-red-500/20 text-red-300" : "bg-amber-500/20 text-amber-300"}`}>
                     {alert.severity}
                   </span>
                 </div>
@@ -236,40 +236,40 @@ export function AdminDashboard() {
         {/* ── 2. Color-coded KPI strip ───────────────────────────────────── */}
         <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {[
-            { label: "Total Requests", value: metrics?.totalRequests ?? "—", prefix: "", accent: "text-gray-900", bg: "bg-white" },
-            { label: "Active Bids", value: metrics?.activeBids ?? "—", prefix: "", accent: "text-gray-900", bg: "bg-white" },
-            { label: "Escrow Held", value: metrics ? Number(metrics.escrowHeld).toLocaleString() : "—", prefix: symbol, accent: "text-amber-600", bg: "bg-amber-50" },
-            { label: "Open Disputes", value: metrics?.pendingDisputes ?? "—", prefix: "", accent: (metrics?.pendingDisputes ?? 0) > 3 ? "text-red-600" : "text-gray-900", bg: (metrics?.pendingDisputes ?? 0) > 3 ? "bg-red-50" : "bg-white" },
-            { label: "Pending Vendors", value: metrics?.newVendors ?? "—", prefix: "", accent: (metrics?.newVendors ?? 0) > 0 ? "text-amber-600" : "text-gray-900", bg: (metrics?.newVendors ?? 0) > 0 ? "bg-amber-50" : "bg-white" },
+            { label: "Total Requests", value: metrics?.totalRequests ?? "—", prefix: "", bg: "bg-gradient-to-br from-orange-500 to-amber-500" },
+            { label: "Active Bids", value: metrics?.activeBids ?? "—", prefix: "", bg: "bg-gradient-to-br from-violet-600 to-purple-700" },
+            { label: "Escrow Held", value: metrics ? Number(metrics.escrowHeld).toLocaleString() : "—", prefix: symbol, bg: "bg-gradient-to-br from-emerald-500 to-teal-600" },
+            { label: "Open Disputes", value: metrics?.pendingDisputes ?? "—", prefix: "", bg: (metrics?.pendingDisputes ?? 0) > 3 ? "bg-gradient-to-br from-red-600 to-rose-700" : "bg-gradient-to-br from-blue-500 to-cyan-600" },
+            { label: "Pending Vendors", value: metrics?.newVendors ?? "—", prefix: "", bg: (metrics?.newVendors ?? 0) > 0 ? "bg-gradient-to-br from-amber-500 to-orange-600" : "bg-gradient-to-br from-slate-600 to-slate-700" },
           ].map((metric) => (
-            <motion.div key={metric.label} className={`rounded-3xl p-6 shadow-sm ${metric.bg}`} whileHover={{ y: -3 }}>
-              <p className="text-sm text-gray-500">{metric.label}</p>
-              <h3 className={`mt-3 text-3xl font-semibold ${metric.accent}`}>{metric.prefix}{metric.value}</h3>
+            <motion.div key={metric.label} className={`rounded-2xl p-5 shadow-lg ${metric.bg}`} whileHover={{ y: -3, scale: 1.01 }}>
+              <p className="text-xs font-bold uppercase tracking-widest text-white/60">{metric.label}</p>
+              <h3 className="mt-3 text-3xl font-extrabold text-white">{metric.prefix}{metric.value}</h3>
             </motion.div>
           ))}
         </div>
 
         {/* ── 3. Orders table + Payout queue ────────────────────────────── */}
         <div className="grid gap-4 lg:grid-cols-[1.4fr_0.9fr]">
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="rounded-2xl bg-[#1a1d27] border border-white/8 p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Orders</p>
-                <h2 className="text-2xl font-semibold text-gray-900">Network performance</h2>
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Orders</p>
+                <h2 className="text-2xl font-extrabold text-white">Network performance</h2>
               </div>
             </div>
-            <div className="mt-4 flex items-center gap-2 rounded-2xl border border-gray-100 px-3 py-2">
+            <div className="mt-4 flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
               <Search className="h-4 w-4 text-gray-400" />
               <input
                 value={orderSearch}
                 onChange={(e) => setOrderSearch(e.target.value)}
                 placeholder="Search order, buyer, vendor"
-                className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
+                className="w-full bg-transparent text-sm text-gray-200 outline-none placeholder:text-gray-500"
               />
             </div>
             <div className="mt-6 overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead className="text-xs uppercase tracking-wider text-gray-400">
+                <thead className="text-xs uppercase tracking-wider text-gray-500">
                   <tr>
                     <th className="pb-3">Order</th>
                     <th className="pb-3">Buyer</th>
@@ -279,15 +279,15 @@ export function AdminDashboard() {
                     <th className="pb-3 text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-white/5">
                   {filteredOrders.map((order) => (
-                    <tr key={order.id} className="text-gray-700">
-                      <td className="py-3 font-semibold text-gray-900">{order.id.slice(-8).toUpperCase()}</td>
-                      <td className="py-3">{order.buyer?.name ?? "—"}</td>
-                      <td className="py-3">{order.request?.foodName ?? "—"}</td>
-                      <td className="py-3 font-semibold">{symbol}{Number(order.totalAmount).toLocaleString()}</td>
+                    <tr key={order.id} className="text-gray-300">
+                      <td className="py-3 font-semibold text-orange-400">{order.id.slice(-8).toUpperCase()}</td>
+                      <td className="py-3 text-gray-300">{order.buyer?.name ?? "—"}</td>
+                      <td className="py-3 text-gray-300">{order.request?.foodName ?? "—"}</td>
+                      <td className="py-3 font-semibold text-emerald-400">{symbol}{Number(order.totalAmount).toLocaleString()}</td>
                       <td className="py-3">
-                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${order.status === "completed" ? "bg-emerald-50 text-emerald-700" : order.status === "dispute" ? "bg-red-50 text-red-700" : "bg-gray-100 text-gray-600"}`}>
+                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${order.status === "completed" ? "bg-emerald-500/20 text-emerald-400" : order.status === "dispute" ? "bg-red-500/20 text-red-400" : "bg-white/10 text-gray-400"}`}>
                           {order.status}
                         </span>
                       </td>
@@ -299,36 +299,36 @@ export function AdminDashboard() {
                     </tr>
                   ))}
                   {filteredOrders.length === 0 && (
-                    <tr><td colSpan={6} className="py-6 text-center text-sm text-gray-500">No orders match "{orderSearch}"</td></tr>
+                    <tr><td colSpan={6} className="py-6 text-center text-sm text-gray-500">No orders match &quot;{orderSearch}&quot;</td></tr>
                   )}
                 </tbody>
               </table>
             </div>
           </div>
 
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="rounded-2xl bg-[#1a1d27] border border-white/8 p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Payout queue</p>
-                <h3 className="text-2xl font-semibold text-gray-900">{symbol}{payoutTotal.toLocaleString()}</h3>
-                <p className="text-xs text-gray-500">{payoutQueue.length} pending · awaiting release</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Payout queue</p>
+                <h3 className="text-2xl font-extrabold text-white">{symbol}{payoutTotal.toLocaleString()}</h3>
+                <p className="text-xs text-gray-400">{payoutQueue.length} pending · awaiting release</p>
               </div>
-              <DollarSign className="h-5 w-5 text-emerald-500" />
+              <div className="rounded-xl bg-emerald-500/15 p-2.5"><DollarSign className="h-5 w-5 text-emerald-400" /></div>
             </div>
             <div className="mt-4 space-y-3">
               {payoutQueue.length === 0 && (
-                <p className="rounded-2xl border border-dashed border-gray-200 p-4 text-center text-sm text-gray-500">No pending payouts.</p>
+                <p className="rounded-xl border border-dashed border-white/10 p-4 text-center text-sm text-gray-500">No pending payouts.</p>
               )}
               {payoutQueue.map((payout) => (
-                <div key={payout.id} className="rounded-2xl border border-gray-100 p-4">
+                <div key={payout.id} className="rounded-xl border border-white/8 bg-white/5 p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-gray-900">{payout.vendor}</p>
-                      <p className="text-xs text-gray-500">Age {payout.age}</p>
+                      <p className="text-sm font-semibold text-white">{payout.vendor}</p>
+                      <p className="text-xs text-gray-400">Age {payout.age}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-base font-semibold text-gray-900">{symbol}{payout.amount.toLocaleString()}</p>
-                      <span className="text-xs font-semibold text-amber-600">{payout.status}</span>
+                      <p className="text-base font-semibold text-emerald-400">{symbol}{payout.amount.toLocaleString()}</p>
+                      <span className="text-xs font-semibold text-amber-400">{payout.status}</span>
                     </div>
                   </div>
                   <Button
@@ -347,25 +347,27 @@ export function AdminDashboard() {
 
         {/* ── 4. Open disputes + Vendor KYC queue ───────────────────────── */}
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="rounded-2xl bg-[#1a1d27] border border-white/8 p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Open disputes</h3>
-                <p className="text-sm text-gray-500">{openDisputes.length} requiring resolution</p>
+                <h3 className="text-lg font-bold text-white">Open disputes</h3>
+                <p className="text-sm text-gray-400">{openDisputes.length} requiring resolution</p>
               </div>
-              <AlertTriangle className={`h-5 w-5 ${openDisputes.length > 3 ? "text-red-500" : "text-amber-500"}`} />
+              <div className={`rounded-xl p-2.5 ${openDisputes.length > 3 ? "bg-red-500/15" : "bg-amber-500/15"}`}>
+                <AlertTriangle className={`h-5 w-5 ${openDisputes.length > 3 ? "text-red-400" : "text-amber-400"}`} />
+              </div>
             </div>
             <div className="mt-4 space-y-3">
-              {adminDisputes.length === 0 && <p className="text-sm text-gray-400">No disputes found.</p>}
+              {adminDisputes.length === 0 && <p className="text-sm text-gray-500">No disputes found.</p>}
               {adminDisputes.map((dispute) => (
-                <div key={dispute.id} className={`rounded-2xl border p-4 ${dispute.status === "open" ? "border-amber-100 bg-amber-50/40" : "border-gray-100"}`}>
+                <div key={dispute.id} className={`rounded-xl border p-4 ${dispute.status === "open" ? "border-amber-500/30 bg-amber-500/5" : "border-white/8 bg-white/3"}`}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-gray-900">{dispute.reason}</p>
-                      <p className="text-xs text-gray-500">By {dispute.openedBy?.name ?? "Unknown"} · Order {dispute.order?.id?.slice(-8).toUpperCase() ?? "—"}</p>
-                      <p className="text-xs text-gray-400">{new Date(dispute.openedAt).toLocaleDateString()}</p>
+                      <p className="text-sm font-semibold text-white">{dispute.reason}</p>
+                      <p className="text-xs text-gray-400">By {dispute.openedBy?.name ?? "Unknown"} · Order {dispute.order?.id?.slice(-8).toUpperCase() ?? "—"}</p>
+                      <p className="text-xs text-gray-500">{new Date(dispute.openedAt).toLocaleDateString()}</p>
                     </div>
-                    <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${dispute.status === "open" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"}`}>
+                    <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${dispute.status === "open" ? "bg-amber-500/20 text-amber-400" : "bg-emerald-500/20 text-emerald-400"}`}>
                       {dispute.status}
                     </span>
                   </div>
@@ -387,29 +389,29 @@ export function AdminDashboard() {
             </div>
           </div>
 
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <div className="rounded-2xl bg-[#1a1d27] border border-white/8 p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Vendor KYC queue</h3>
-                <p className="text-sm text-gray-500">{pendingVendors.length} pending · {adminVendors.length} total</p>
+                <h3 className="text-lg font-bold text-white">Vendor KYC queue</h3>
+                <p className="text-sm text-gray-400">{pendingVendors.length} pending · {adminVendors.length} total</p>
               </div>
-              <Shield className="h-5 w-5 text-orange-500" />
+              <div className="rounded-xl bg-orange-500/15 p-2.5"><Shield className="h-5 w-5 text-orange-400" /></div>
             </div>
-            <div className="mt-4 flex items-center gap-2 rounded-2xl border border-gray-100 px-3 py-2">
+            <div className="mt-4 flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
               <Search className="h-4 w-4 text-gray-400" />
               <input value={vendorSearch} onChange={(e) => setVendorSearch(e.target.value)}
                 placeholder="Search vendor or ID"
-                className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400" />
+                className="w-full bg-transparent text-sm text-gray-200 outline-none placeholder:text-gray-500" />
             </div>
             <div className="mt-4 space-y-3">
               {filteredVendors.map((vendor) => (
-                <div key={vendor.id} className="rounded-2xl border border-gray-100 p-4">
+                <div key={vendor.id} className="rounded-xl border border-white/8 bg-white/5 p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-sm font-semibold text-gray-900">{vendor.name}</h4>
-                      <p className="text-xs text-gray-500">{vendor.kitchenName || `${vendor.streetAddress}, ${vendor.city}` || vendor.id}</p>
+                      <h4 className="text-sm font-semibold text-white">{vendor.name}</h4>
+                      <p className="text-xs text-gray-400">{vendor.kitchenName || `${vendor.streetAddress}, ${vendor.city}` || vendor.id}</p>
                     </div>
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${vendor.kycStatus === "Approved" ? "bg-emerald-50 text-emerald-700" : vendor.kycStatus === "Pending" ? "bg-amber-50 text-amber-700" : "bg-red-50 text-red-700"}`}>
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${vendor.kycStatus === "Approved" ? "bg-emerald-500/20 text-emerald-400" : vendor.kycStatus === "Pending" ? "bg-amber-500/20 text-amber-400" : "bg-red-500/20 text-red-400"}`}>
                       <CheckCircle2 className="mr-1 inline h-3 w-3" />{vendor.kycStatus}
                     </span>
                   </div>
@@ -431,8 +433,8 @@ export function AdminDashboard() {
                 </div>
               ))}
               {filteredVendors.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-gray-200 p-6 text-center text-sm text-gray-500">
-                  No vendors match "{vendorSearch}"
+                <div className="rounded-xl border border-dashed border-white/10 p-6 text-center text-sm text-gray-500">
+                  No vendors match &quot;{vendorSearch}&quot;
                 </div>
               )}
             </div>
@@ -461,42 +463,42 @@ function AdminOrderDetailModal({ order, onClose }: AdminOrderDetailModalProps) {
   const { symbol } = useCurrency();
   if (!order) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-2xl rounded-2xl bg-[#1a1d27] border border-white/10 p-6 shadow-2xl">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{order.id}</p>
-            <h3 className="text-2xl font-semibold text-gray-900">Order detail</h3>
-            <p className="text-sm text-gray-500">{symbol}{Number(order.totalAmount).toLocaleString()} · {order.status}</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-orange-400">{order.id}</p>
+            <h3 className="text-2xl font-bold text-white">Order detail</h3>
+            <p className="text-sm text-gray-400">{symbol}{Number(order.totalAmount).toLocaleString()} · {order.status}</p>
           </div>
           <Button variant="ghost" onClick={onClose}>
             Close
           </Button>
         </div>
-        <div className="mt-6 space-y-4 text-sm">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-2xl bg-gray-50 p-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Buyer</p>
-              <p className="mt-1 font-semibold text-gray-900">{order.buyer?.name ?? "—"}</p>
+        <div className="mt-6 space-y-3 text-sm">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl bg-white/5 border border-white/8 p-4">
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Buyer</p>
+              <p className="mt-1 font-semibold text-white">{order.buyer?.name ?? "—"}</p>
             </div>
-            <div className="rounded-2xl bg-gray-50 p-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Item</p>
-              <p className="mt-1 font-semibold text-gray-900">{order.request?.foodName ?? "—"}</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-2xl bg-gray-50 p-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Request ID</p>
-              <p className="mt-1 font-semibold text-gray-900">{order.request?.id ?? "—"}</p>
-            </div>
-            <div className="rounded-2xl bg-gray-50 p-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Total amount</p>
-              <p className="mt-1 font-semibold text-gray-900">{symbol}{Number(order.totalAmount).toLocaleString()}</p>
+            <div className="rounded-xl bg-white/5 border border-white/8 p-4">
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Item</p>
+              <p className="mt-1 font-semibold text-white">{order.request?.foodName ?? "—"}</p>
             </div>
           </div>
-          <div className="rounded-2xl bg-gray-50 p-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Created</p>
-            <p className="mt-1 text-gray-900">{new Date(order.createdAt).toLocaleString()}</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl bg-white/5 border border-white/8 p-4">
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Request ID</p>
+              <p className="mt-1 font-semibold text-orange-400">{order.request?.id ?? "—"}</p>
+            </div>
+            <div className="rounded-xl bg-white/5 border border-white/8 p-4">
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Total amount</p>
+              <p className="mt-1 font-semibold text-emerald-400">{symbol}{Number(order.totalAmount).toLocaleString()}</p>
+            </div>
+          </div>
+          <div className="rounded-xl bg-white/5 border border-white/8 p-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Created</p>
+            <p className="mt-1 text-gray-300">{new Date(order.createdAt).toLocaleString()}</p>
           </div>
         </div>
       </div>
@@ -558,41 +560,41 @@ function VendorDossierModal({ vendor, onClose }: VendorDossierModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-xl rounded-2xl bg-[#1a1d27] border border-white/10 p-6 shadow-2xl">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-gray-400">{vendor.id}</p>
-            <h3 className="text-2xl font-semibold text-gray-900">Vendor detail</h3>
-            <p className="text-sm text-gray-500">{vendor.name} · {vendor.kitchenName}</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-orange-400">{vendor.id}</p>
+            <h3 className="text-2xl font-bold text-white">Vendor detail</h3>
+            <p className="text-sm text-gray-400">{vendor.name} · {vendor.kitchenName}</p>
           </div>
           <Button variant="ghost" onClick={onClose}>
             Close
           </Button>
         </div>
-        <div className="mt-6 space-y-4 text-sm">
-          <div className="rounded-2xl bg-gray-50 p-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Contact</p>
-            <p className="mt-1 font-semibold text-gray-900">{vendor.email}</p>
+        <div className="mt-6 space-y-3 text-sm">
+          <div className="rounded-xl bg-white/5 border border-white/8 p-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Contact</p>
+            <p className="mt-1 font-semibold text-white">{vendor.email}</p>
           </div>
-          <div className="rounded-2xl bg-gray-50 p-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Address</p>
-            <p className="mt-1 text-gray-900">{vendor.streetAddress || "—"}</p>
-            <p className="text-gray-500">{vendor.city}{vendor.city && vendor.state ? ", " : ""}{vendor.state}</p>
+          <div className="rounded-xl bg-white/5 border border-white/8 p-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Address</p>
+            <p className="mt-1 text-gray-200">{vendor.streetAddress || "—"}</p>
+            <p className="text-gray-400">{vendor.city}{vendor.city && vendor.state ? ", " : ""}{vendor.state}</p>
             <p className="text-gray-500">{vendor.landmark}</p>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-2xl bg-gray-50 p-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-gray-400">KYC status</p>
-              <p className={`mt-1 font-semibold ${vendor.kycStatus === "Approved" ? "text-emerald-700" : "text-amber-700"}`}>{vendor.kycStatus}</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl bg-white/5 border border-white/8 p-4">
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">KYC status</p>
+              <p className={`mt-1 font-bold ${vendor.kycStatus === "Approved" ? "text-emerald-400" : "text-amber-400"}`}>{vendor.kycStatus}</p>
             </div>
-            <div className="rounded-2xl bg-gray-50 p-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Orders</p>
-              <p className="mt-1 font-semibold text-gray-900">{vendor.totalOrders}</p>
+            <div className="rounded-xl bg-white/5 border border-white/8 p-4">
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Orders</p>
+              <p className="mt-1 font-semibold text-white">{vendor.totalOrders}</p>
             </div>
           </div>
-          <div className="rounded-2xl bg-gray-50 p-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Documents ({documents.length})</p>
+          <div className="rounded-xl bg-white/5 border border-white/8 p-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Documents ({documents.length})</p>
             {documents.length === 0 && (
               <p className="mt-2 text-gray-500">No documents submitted.</p>
             )}
@@ -600,7 +602,7 @@ function VendorDossierModal({ vendor, onClose }: VendorDossierModalProps) {
               {documents.map((doc) => (
                 <div
                   key={doc.id}
-                  className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-3"
+                  className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-3"
                 >
                   <a
                     href={doc.url}
@@ -608,11 +610,11 @@ function VendorDossierModal({ vendor, onClose }: VendorDossierModalProps) {
                     rel="noopener noreferrer"
                     className="flex-1 hover:opacity-80"
                   >
-                    <p className="font-semibold text-gray-900 capitalize">{doc.type.replace("_", " ")}</p>
-                    <p className="text-xs text-gray-500">{new Date(doc.uploadedAt).toLocaleDateString()}</p>
+                    <p className="font-semibold text-white capitalize">{doc.type.replace("_", " ")}</p>
+                    <p className="text-xs text-gray-400">{new Date(doc.uploadedAt).toLocaleDateString()}</p>
                   </a>
                   <div className="flex items-center gap-2">
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${doc.status === "approved" ? "bg-emerald-50 text-emerald-600" : doc.status === "rejected" ? "bg-red-50 text-red-600" : "bg-amber-50 text-amber-600"}`}>
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${doc.status === "approved" ? "bg-emerald-500/20 text-emerald-400" : doc.status === "rejected" ? "bg-red-500/20 text-red-400" : "bg-amber-500/20 text-amber-400"}`}>
                       {doc.status}
                     </span>
                     {doc.status === "pending" && (

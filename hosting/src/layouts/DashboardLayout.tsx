@@ -122,7 +122,7 @@ export function DashboardLayout({ sidebar, title, description, actions, children
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0f1117]">
       <div className="lg:grid lg:grid-cols-[240px_1fr]">
         {/* Desktop sidebar — dark */}
         <aside className="hidden lg:flex flex-col bg-gray-950 px-5 py-6 min-h-screen sticky top-0">
@@ -154,15 +154,15 @@ export function DashboardLayout({ sidebar, title, description, actions, children
 
         <div className="flex flex-col min-h-screen">
           {/* Header */}
-          <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-gray-200 bg-white/80 backdrop-blur-md px-4 py-3 shadow-sm lg:px-8">
+          <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-white/10 bg-[#0f1117]/90 backdrop-blur-md px-4 py-3 shadow-sm lg:px-8">
             <div className="flex items-center gap-3">
-              <button className="lg:hidden rounded-xl border border-gray-200 p-2 text-gray-600 hover:bg-gray-50" onClick={() => setOpen(true)}>
+              <button className="lg:hidden rounded-xl border border-white/20 p-2 text-gray-300 hover:bg-white/10" onClick={() => setOpen(true)}>
                 <Menu className="h-5 w-5" />
               </button>
               <div>
-                <p className="text-[11px] uppercase tracking-widest text-gray-400 font-semibold">{sidebar.title}</p>
-                <h1 className="text-lg font-bold text-gray-900 leading-tight">{title}</h1>
-                {description && <p className="hidden lg:block text-xs text-gray-500 mt-0.5">{description}</p>}
+                <p className="text-[11px] uppercase tracking-widest text-orange-400 font-semibold">{sidebar.title}</p>
+                <h1 className="text-lg font-bold text-white leading-tight">{title}</h1>
+                {description && <p className="hidden lg:block text-xs text-gray-400 mt-0.5">{description}</p>}
               </div>
             </div>
 
@@ -178,7 +178,7 @@ export function DashboardLayout({ sidebar, title, description, actions, children
                   e.preventDefault();
                   if (dashSearch.trim()) navigate(`/dashboard/buyer?search=${encodeURIComponent(dashSearch.trim())}`);
                 }}
-                className="hidden md:flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-500/20 transition"
+                className="hidden md:flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm focus-within:border-orange-500/60 focus-within:ring-2 focus-within:ring-orange-500/20 transition"
               >
                 <Search className="h-4 w-4 shrink-0 text-gray-400" />
                 <input
@@ -186,14 +186,14 @@ export function DashboardLayout({ sidebar, title, description, actions, children
                   value={dashSearch}
                   onChange={(e) => setDashSearch(e.target.value)}
                   placeholder="Search..."
-                  className="w-40 bg-transparent text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none"
+                  className="w-40 bg-transparent text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none"
                 />
               </form>
 
               {/* Notification bell */}
               <div className="relative" ref={notifRef}>
                 <button
-                  className="relative rounded-xl border border-gray-200 p-2 text-gray-600 hover:border-orange-300 hover:text-orange-500 transition"
+                  className="relative rounded-xl border border-white/15 p-2 text-gray-400 hover:border-orange-500/50 hover:text-orange-400 transition"
                   aria-label="Notifications"
                   onClick={() => setNotifOpen((v) => !v)}
                 >
@@ -284,7 +284,7 @@ export function DashboardLayout({ sidebar, title, description, actions, children
             </div>
           </header>
 
-          <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8 space-y-6">{children}</main>
+          <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8 space-y-6 bg-[#0f1117]">{children}</main>
         </div>
       </div>
     </div>

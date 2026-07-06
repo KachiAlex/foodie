@@ -214,19 +214,19 @@ export function VendorDashboard() {
         </div>
       }
     >
-      <section className="space-y-8">
+      <section className="space-y-6">
         {isPendingVerification && (
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-start gap-4 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-5 py-4 shadow-sm"
+            className="flex items-start gap-4 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/10 px-5 py-4 shadow-sm"
           >
-            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100">
-              <AlertTriangle className="h-5 w-5 text-amber-600" />
+            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/20">
+              <AlertTriangle className="h-5 w-5 text-amber-400" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-bold text-amber-900">Account pending verification</p>
-              <p className="mt-0.5 text-sm text-amber-700">
+              <p className="text-sm font-bold text-amber-300">Account pending verification</p>
+              <p className="mt-0.5 text-sm text-amber-400/80">
                 An admin is reviewing your kitchen documents. You can browse open requests but cannot place bids or add menu items until verified.
               </p>
             </div>
@@ -252,26 +252,26 @@ export function VendorDashboard() {
         )}
 
         {activeTab === "settings" && (
-          <div className="rounded-2xl bg-white border border-gray-100 p-6 shadow-sm">
+          <div className="rounded-2xl bg-[#1a1d27] border border-white/8 p-6 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Settings</p>
-            <h2 className="mt-1 text-2xl font-bold text-gray-900">Account &amp; Kitchen</h2>
+            <h2 className="mt-1 text-2xl font-bold text-white">Account &amp; Kitchen</h2>
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {[
                 { label: "Display name", value: user?.name ?? "—" },
                 { label: "Email", value: user?.email ?? "—" },
               ].map((field) => (
-                <div key={field.label} className="rounded-2xl border border-gray-100 bg-gray-50 p-5">
+                <div key={field.label} className="rounded-2xl border border-white/8 bg-white/5 p-5">
                   <p className="text-xs font-bold uppercase tracking-widest text-gray-400">{field.label}</p>
-                  <p className="mt-2 text-base font-semibold text-gray-900 truncate">{field.value}</p>
+                  <p className="mt-2 text-base font-semibold text-white truncate">{field.value}</p>
                 </div>
               ))}
-              <div className="rounded-2xl border p-5 flex items-center gap-3 col-span-full sm:col-span-1 lg:col-span-1"
-                style={{ borderColor: user?.verificationStatus === "verified" ? "#d1fae5" : "#fde68a",
-                         background: user?.verificationStatus === "verified" ? "#f0fdf4" : "#fffbeb" }}>
-                <div className={`h-3 w-3 rounded-full flex-shrink-0 ${user?.verificationStatus === "verified" ? "bg-emerald-500" : "bg-amber-400 animate-pulse"}`} />
+              <div className={`rounded-2xl border p-5 flex items-center gap-3 col-span-full sm:col-span-1 lg:col-span-1 ${
+                user?.verificationStatus === "verified" ? "border-emerald-500/30 bg-emerald-500/10" : "border-amber-500/30 bg-amber-500/10"
+              }`}>
+                <div className={`h-3 w-3 rounded-full flex-shrink-0 ${user?.verificationStatus === "verified" ? "bg-emerald-400" : "bg-amber-400 animate-pulse"}`} />
                 <div>
                   <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Verification</p>
-                  <p className={`mt-1 text-sm font-bold ${user?.verificationStatus === "verified" ? "text-emerald-700" : "text-amber-700"}`}>
+                  <p className={`mt-1 text-sm font-bold ${user?.verificationStatus === "verified" ? "text-emerald-400" : "text-amber-400"}`}>
                     {user?.verificationStatus === "verified" ? "Verified ✓" : "Pending review"}
                   </p>
                 </div>
