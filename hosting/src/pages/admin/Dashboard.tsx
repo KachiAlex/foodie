@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -35,36 +35,94 @@ export function AdminDashboard() {
   const [adminOrders, setAdminOrders] = useState<AdminOrder[]>([]);
   const [escrowTxns, setEscrowTxns] = useState<EscrowTransaction[]>([]);
   const [adminDisputes, setAdminDisputes] = useState<AdminDispute[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+
+  // Per-tab loading states
+  const [loadingOverview, setLoadingOverview] = useState(false);
+  const [loadingOrders, setLoadingOrders]     = useState(false);
+  const [loadingVendors, setLoadingVendors]   = useState(false);
+  const [loadingCompliance, setLoadingCompliance] = useState(false);
+
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const activeTab = searchParams.get("tab") ?? "overview";
 
+  // Track which tabs have already been fetched so we don't re-fetch on revisit
+  const fetchedTabs = useRef<Set<string>>(new Set());
+
+  const mapVendor = (v: any) => ({
+    id: v.user.id,
+    name: v.user.name,
+    email: v.user.email,
+    kycStatus: v.verified ? "Approved" : "Pending",
+    kitchenName: v.kitchenName,
+    streetAddress: v.streetAddress,
+    city: v.city,
+    state: v.state,
+    landmark: v.landmark,
+    rating: 0,
+    totalOrders: 0,
+    documents: v.documents || [],
+  });
+
+  // Overview: metrics only (lightweight)
   useEffect(() => {
-    setIsLoading(true);
+    if (activeTab !== "overview" || fetchedTabs.current.has("overview")) return;
+    fetchedTabs.current.add("overview");
+    setLoadingOverview(true);
+    getDashboardMetrics()
+      .then(setMetrics)
+      .catch(() => showToast("Failed to load metrics"))
+      .finally(() => setLoadingOverview(false));
+  }, [activeTab]);
+
+  // Orders & Payouts: orders + escrow
+  useEffect(() => {
+    if (activeTab !== "orders" || fetchedTabs.current.has("orders")) return;
+    fetchedTabs.current.add("orders");
+    setLoadingOrders(true);
     Promise.allSettled([
-      getPendingVendors().then((vendors) =>
-        setAdminVendors(vendors.map((v) => ({
-          id: v.user.id,
-          name: v.user.name,
-          email: v.user.email,
-          kycStatus: v.verified ? "Approved" : "Pending",
-          kitchenName: v.kitchenName,
-          streetAddress: v.streetAddress,
-          city: v.city,
-          state: v.state,
-          landmark: v.landmark,
-          rating: 0,
-          totalOrders: 0,
-          documents: v.documents || [],
-        })))
-      ),
-      getDashboardMetrics().then(setMetrics),
       getAdminOrders().then(setAdminOrders),
       getEscrowTransactions().then(setEscrowTxns),
+    ])
+      .catch(() => showToast("Failed to load orders data"))
+      .finally(() => setLoadingOrders(false));
+  }, [activeTab]);
+
+  // Vendors: pending vendors list
+  useEffect(() => {
+    if (activeTab !== "vendors" || fetchedTabs.current.has("vendors")) return;
+    fetchedTabs.current.add("vendors");
+    setLoadingVendors(true);
+    getPendingVendors()
+      .then((vendors) => setAdminVendors(vendors.map(mapVendor)))
+      .catch(() => showToast("Failed to load vendors"))
+      .finally(() => setLoadingVendors(false));
+  }, [activeTab]);
+
+  // Compliance: disputes + escrow (escrow may already be loaded, still safe to re-fetch)
+  useEffect(() => {
+    if (activeTab !== "compliance" || fetchedTabs.current.has("compliance")) return;
+    fetchedTabs.current.add("compliance");
+    setLoadingCompliance(true);
+    Promise.allSettled([
       getAdminDisputes().then(setAdminDisputes),
-    ]).finally(() => setIsLoading(false));
-  }, []);
+      escrowTxns.length === 0 ? getEscrowTransactions().then(setEscrowTxns) : Promise.resolve(),
+    ])
+      .catch(() => showToast("Failed to load compliance data"))
+      .finally(() => setLoadingCompliance(false));
+  }, [activeTab]);
+
+  // Overview also needs a snapshot of recent orders and pending vendors —
+  // fetch them lazily alongside metrics if not already loaded
+  useEffect(() => {
+    if (activeTab !== "overview") return;
+    if (adminOrders.length === 0) {
+      getAdminOrders().then(setAdminOrders).catch(() => {});
+    }
+    if (adminVendors.length === 0) {
+      getPendingVendors().then((v) => setAdminVendors(v.map(mapVendor))).catch(() => {});
+    }
+  }, [activeTab]);
 
   const payoutQueue = useMemo(
     () =>
@@ -182,22 +240,6 @@ export function AdminDashboard() {
     ],
   };
 
-  if (isLoading) {
-    return (
-      <DashboardLayout sidebar={SIDEBAR} title="Marketplace Control" description="Monitor fulfillment health, vendor trust, and escalations.">
-        <div className="space-y-6 animate-pulse">
-          <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
-            {[1,2,3,4,5].map((i) => <div key={i} className="h-28 rounded-2xl bg-white/5" />)}
-          </div>
-          <div className="grid gap-4 lg:grid-cols-3">
-            {[1,2,3].map((i) => <div key={i} className="h-24 rounded-2xl bg-white/5" />)}
-          </div>
-          <div className="h-64 rounded-2xl bg-white/5" />
-        </div>
-      </DashboardLayout>
-    );
-  }
-
   const TAB_META: Record<string, { title: string; description: string }> = {
     overview:   { title: "Marketplace Control",  description: "Monitor fulfillment health, vendor trust, and escalations." },
     orders:     { title: "Orders & Payouts",     description: "Manage all marketplace orders and release vendor payouts." },
@@ -219,6 +261,18 @@ export function AdminDashboard() {
         ════════════════════════════════════════════════════════════════ */}
         {activeTab === "overview" && (
           <>
+            {loadingOverview && (
+              <div className="space-y-4 animate-pulse">
+                <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
+                  {[1,2,3,4,5].map((i) => <div key={i} className="h-28 rounded-2xl bg-white/5" />)}
+                </div>
+                <div className="grid gap-4 lg:grid-cols-[1.4fr_0.9fr]">
+                  <div className="h-64 rounded-2xl bg-white/5" />
+                  <div className="h-64 rounded-2xl bg-white/5" />
+                </div>
+              </div>
+            )}
+            {!loadingOverview && <>
             {/* Clickable KPI cards */}
             <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
               {[
@@ -349,6 +403,7 @@ export function AdminDashboard() {
                 </div>
               </div>
             </div>
+            </>}
           </>
         )}
 
@@ -357,6 +412,16 @@ export function AdminDashboard() {
         ════════════════════════════════════════════════════════════════ */}
         {activeTab === "orders" && (
           <div className="space-y-4">
+            {loadingOrders && (
+              <div className="space-y-4 animate-pulse">
+                <div className="grid gap-4 sm:grid-cols-3">{[1,2,3].map((i) => <div key={i} className="h-28 rounded-2xl bg-white/5" />)}</div>
+                <div className="grid gap-4 lg:grid-cols-[1.4fr_0.9fr]">
+                  <div className="h-72 rounded-2xl bg-white/5" />
+                  <div className="h-72 rounded-2xl bg-white/5" />
+                </div>
+              </div>
+            )}
+            {!loadingOrders && <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-3">
               {[
                 { label: "Total orders", value: adminOrders.length, bg: "bg-gradient-to-br from-orange-500 to-amber-500" },
@@ -456,6 +521,7 @@ export function AdminDashboard() {
                 </div>
               </div>
             </div>
+            </div>}
           </div>
         )}
 
@@ -464,6 +530,13 @@ export function AdminDashboard() {
         ════════════════════════════════════════════════════════════════ */}
         {activeTab === "vendors" && (
           <div className="space-y-4">
+            {loadingVendors && (
+              <div className="space-y-4 animate-pulse">
+                <div className="grid gap-4 sm:grid-cols-3">{[1,2,3].map((i) => <div key={i} className="h-28 rounded-2xl bg-white/5" />)}</div>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[1,2,3,4,5,6].map((i) => <div key={i} className="h-44 rounded-2xl bg-white/5" />)}</div>
+              </div>
+            )}
+            {!loadingVendors && <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-3">
               {[
                 { label: "Total vendors",   value: adminVendors.length,   bg: "bg-gradient-to-br from-orange-500 to-amber-500" },
@@ -528,6 +601,7 @@ export function AdminDashboard() {
                 )}
               </div>
             </div>
+            </div>}
           </div>
         )}
 
@@ -536,6 +610,13 @@ export function AdminDashboard() {
         ════════════════════════════════════════════════════════════════ */}
         {activeTab === "compliance" && (
           <div className="space-y-4">
+            {loadingCompliance && (
+              <div className="space-y-4 animate-pulse">
+                <div className="grid gap-4 sm:grid-cols-3">{[1,2,3].map((i) => <div key={i} className="h-28 rounded-2xl bg-white/5" />)}</div>
+                <div className="h-96 rounded-2xl bg-white/5" />
+              </div>
+            )}
+            {!loadingCompliance && <div className="space-y-4">
             {/* Compliance KPI strip */}
             <div className="grid gap-4 sm:grid-cols-3">
               {[
@@ -615,6 +696,7 @@ export function AdminDashboard() {
                 ))}
               </div>
             </div>
+            </div>}
           </div>
         )}
 
