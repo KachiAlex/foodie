@@ -610,30 +610,41 @@ export function AdminDashboard() {
               </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredVendors.map((vendor) => (
-                  <div key={vendor.id} className="rounded-xl border border-white/8 bg-white/5 p-4 flex flex-col gap-3">
+                  <div key={vendor.userId} className="rounded-xl border border-white/8 bg-white/5 p-4 flex flex-col gap-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <h4 className="text-sm font-semibold text-white truncate">{vendor.user.name}</h4>
                         <p className="text-xs text-gray-400 truncate">{vendor.kitchenName || [vendor.streetAddress, vendor.city].filter(Boolean).join(", ") || vendor.userId}</p>
                         <p className="text-xs text-gray-500">{vendor.user.email}</p>
                       </div>
-                      <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${vendor.verified ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}`}>
-                        {vendor.verified ? "Approved" : "Pending"}
+                      <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                        vendor.noProfile ? "bg-slate-500/20 text-slate-400" :
+                        vendor.verified ? "bg-emerald-500/20 text-emerald-400" :
+                        "bg-amber-500/20 text-amber-400"
+                      }`}>
+                        {vendor.noProfile ? "No Profile" : vendor.verified ? "Approved" : "Pending"}
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <Button variant="outline" size="sm" className="border-white/20 text-gray-300 hover:bg-white/10 h-7 text-xs" onClick={() => setActiveVendorId(vendor.userId)}>
-                        View dossier
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-orange-400 hover:text-orange-300 h-7 text-xs"
-                        disabled={isSchedulingAudit === vendor.userId}
-                        onClick={() => handleTriggerAudit(vendor.userId)}>
-                        {isSchedulingAudit === vendor.userId ? "Scheduling…" : recentAudits[vendor.userId] ? "Audit ✓" : "Trigger audit"}
-                      </Button>
-                      {!vendor.verified && (
+                      {!vendor.noProfile && (
+                        <Button variant="outline" size="sm" className="border-white/20 text-gray-300 hover:bg-white/10 h-7 text-xs" onClick={() => setActiveVendorId(vendor.userId)}>
+                          View dossier
+                        </Button>
+                      )}
+                      {!vendor.noProfile && (
+                        <Button variant="ghost" size="sm" className="text-orange-400 hover:text-orange-300 h-7 text-xs"
+                          disabled={isSchedulingAudit === vendor.userId}
+                          onClick={() => handleTriggerAudit(vendor.userId)}>
+                          {isSchedulingAudit === vendor.userId ? "Scheduling…" : recentAudits[vendor.userId] ? "Audit ✓" : "Trigger audit"}
+                        </Button>
+                      )}
+                      {!vendor.verified && !vendor.noProfile && (
                         <Button size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700 h-7 text-xs" onClick={() => handleVerifyVendor(vendor.userId)}>
                           Approve KYC
                         </Button>
+                      )}
+                      {vendor.noProfile && (
+                        <span className="text-xs text-gray-500 italic">Vendor hasn&apos;t completed setup</span>
                       )}
                     </div>
                   </div>

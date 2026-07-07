@@ -63,8 +63,9 @@ interface PendingVendor {
 }
 
 export interface AdminVendor {
-  id: string;
+  id: string | null;
   userId: string;
+  noProfile?: boolean;
   user: { id: string; name: string; email: string };
   kitchenName: string;
   streetAddress?: string | null;

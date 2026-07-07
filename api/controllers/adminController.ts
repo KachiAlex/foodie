@@ -154,14 +154,26 @@ export const listPendingVendors = asyncHandler(async (_req: Request, res: Respon
 export const verifyVendor = asyncHandler(async (req: Request, res: Response) => {
   const existing = await prisma.vendorProfile.findUnique({ where: { userId: req.params.id } });
   if (!existing) {
-    res.status(404).json({ success: false, error: { message: "Vendor not found" } });
+    res.status(404).json({ success: false, error: { message: "Vendor profile not found" } });
     return;
   }
-  const profile = await prisma.vendorProfile.update({
-    where: { userId: req.params.id },
-    data: { verified: true },
-    include: {
-      user: { select: { id: true, name: true, email: true } },
+  const [profile] = await prisma.$transaction([
+    prisma.vendorProfile.update({
+      where: { userId: req.params.id },
+      data: { verified: true },
+      include: { user: { select: { id: true, name: true, email: true } } },
+    }),
+    prisma.user.update({
+      where: { id: req.params.id },
+      data: { verificationStatus: "verified" },
+    }),
+  ]);
+  await prisma.auditLog.create({
+    data: {
+      actor: "admin",
+      action: "VENDOR_VERIFY",
+      target: req.params.id,
+      metadata: JSON.stringify({ verifiedAt: new Date().toISOString() }),
     },
   });
   res.json({ success: true, data: profile });
@@ -186,13 +198,17 @@ export const flagVendor = asyncHandler(async (req: Request, res: Response) => {
     res.status(404).json({ success: false, error: { message: "Vendor not found" } });
     return;
   }
-  const profile = await prisma.vendorProfile.update({
-    where: { userId: req.params.id },
-    data: { verified: false },
-    include: {
-      user: { select: { id: true, name: true, email: true } },
-    },
-  });
+  const [profile] = await prisma.$transaction([
+    prisma.vendorProfile.update({
+      where: { userId: req.params.id },
+      data: { verified: false },
+      include: { user: { select: { id: true, name: true, email: true } } },
+    }),
+    prisma.user.update({
+      where: { id: req.params.id },
+      data: { verificationStatus: "pending" },
+    }),
+  ]);
   await prisma.auditLog.create({
     data: {
       actor: "admin",
@@ -259,14 +275,47 @@ export const rejectDocument = asyncHandler(async (req: Request, res: Response) =
 });
 
 export const getAllVendors = asyncHandler(async (_req: Request, res: Response) => {
-  const data = await prisma.vendorProfile.findMany({
+  // Vendors with a VendorProfile (registered fully)
+  const profiles = await prisma.vendorProfile.findMany({
     orderBy: { createdAt: "desc" },
     include: {
       user: { select: { id: true, name: true, email: true } },
       documents: { orderBy: { uploadedAt: "desc" } },
     },
   });
-  res.json({ success: true, data });
+
+  // Vendor-role users who never completed profile setup
+  const profileUserIds = profiles.map((p) => p.userId);
+  const profilelessVendors = await prisma.user.findMany({
+    where: {
+      role: "vendor",
+      id: { notIn: profileUserIds.length ? profileUserIds : ["__none__"] },
+    },
+    select: { id: true, name: true, email: true, createdAt: true },
+  });
+
+  // Shape profileless vendors to match the profile shape so the frontend handles them uniformly
+  const syntheticProfiles = profilelessVendors.map((u) => ({
+    id: null,
+    userId: u.id,
+    user: { id: u.id, name: u.name, email: u.email },
+    kitchenName: "(No profile yet)",
+    streetAddress: null,
+    city: null,
+    state: null,
+    landmark: "",
+    specialties: [],
+    rating: 0,
+    totalOrders: 0,
+    isOnline: false,
+    verified: false,
+    createdAt: u.createdAt,
+    updatedAt: u.createdAt,
+    documents: [],
+    noProfile: true,
+  }));
+
+  res.json({ success: true, data: [...profiles, ...syntheticProfiles] });
 });
 
 export const listAllUsers = asyncHandler(async (_req: Request, res: Response) => {
