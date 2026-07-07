@@ -47,14 +47,27 @@ export const listAllBids = asyncHandler(async (_req: Request, res: Response) => 
 });
 
 export const listAllOrders = asyncHandler(async (_req: Request, res: Response) => {
-  const data = await prisma.order.findMany({
+  const orders = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
     include: {
       buyer: { select: { id: true, name: true } },
-      request: true,
+      request: { select: { id: true, foodName: true } },
       dispute: true,
     },
   });
+  // vendorId is a bare FK — look up names in bulk
+  const vendorIds = [...new Set(orders.map((o) => o.vendorId))];
+  const vendors = vendorIds.length
+    ? await prisma.user.findMany({
+        where: { id: { in: vendorIds } },
+        select: { id: true, name: true },
+      })
+    : [];
+  const vendorMap = Object.fromEntries(vendors.map((v) => [v.id, v.name]));
+  const data = orders.map((o) => ({
+    ...o,
+    vendor: { id: o.vendorId, name: vendorMap[o.vendorId] ?? "Unknown" },
+  }));
   res.json({ success: true, data });
 });
 
@@ -243,4 +256,84 @@ export const rejectDocument = asyncHandler(async (req: Request, res: Response) =
     },
   });
   res.json({ success: true, data: doc });
+});
+
+export const getAllVendors = asyncHandler(async (_req: Request, res: Response) => {
+  const data = await prisma.vendorProfile.findMany({
+    orderBy: { createdAt: "desc" },
+    include: {
+      user: { select: { id: true, name: true, email: true } },
+      documents: { orderBy: { uploadedAt: "desc" } },
+    },
+  });
+  res.json({ success: true, data });
+});
+
+export const listAllUsers = asyncHandler(async (_req: Request, res: Response) => {
+  const data = await prisma.user.findMany({
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      verificationStatus: true,
+      createdAt: true,
+      _count: {
+        select: {
+          ordersAsBuyer: true,
+          bids: true,
+        },
+      },
+      vendorProfile: {
+        select: {
+          id: true,
+          kitchenName: true,
+          verified: true,
+          rating: true,
+          totalOrders: true,
+        },
+      },
+    },
+  });
+  res.json({ success: true, data });
+});
+
+export const suspendUser = asyncHandler(async (req: Request, res: Response) => {
+  const user = await prisma.user.findUnique({ where: { id: req.params.id } });
+  if (!user) {
+    res.status(404).json({ success: false, error: { message: "User not found" } });
+    return;
+  }
+  await prisma.user.update({
+    where: { id: req.params.id },
+    data: { verificationStatus: "rejected" },
+  });
+  await prisma.auditLog.create({
+    data: {
+      actor: "admin",
+      action: "USER_SUSPEND",
+      target: req.params.id,
+      metadata: JSON.stringify({ reason: req.body.reason || "Suspended by admin", suspendedAt: new Date().toISOString() }),
+    },
+  });
+  res.json({ success: true, message: "User suspended" });
+});
+
+export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
+  const user = await prisma.user.findUnique({ where: { id: req.params.id } });
+  if (!user) {
+    res.status(404).json({ success: false, error: { message: "User not found" } });
+    return;
+  }
+  await prisma.auditLog.create({
+    data: {
+      actor: "admin",
+      action: "USER_DELETE",
+      target: req.params.id,
+      metadata: JSON.stringify({ email: user.email, deletedAt: new Date().toISOString() }),
+    },
+  });
+  await prisma.user.delete({ where: { id: req.params.id } });
+  res.json({ success: true, message: "User deleted" });
 });

@@ -21,6 +21,7 @@ router.patch("/escrow/:id/release", adminController.releaseEscrow);
 router.patch("/escrow/:id/refund", adminController.processRefund);
 router.get("/disputes", adminController.listDisputes);
 router.patch("/disputes/:id/resolve", validate(resolveDisputeSchema), adminController.resolveDispute);
+router.get("/vendors", adminController.getAllVendors);
 router.get("/vendors/pending", adminController.listPendingVendors);
 router.get("/vendors/:id/documents", adminController.getVendorDocuments);
 router.patch("/vendors/:id/verify", adminController.verifyVendor);
@@ -28,5 +29,8 @@ router.post("/vendors/:id/audit", adminController.triggerVendorAudit);
 router.post("/vendors/:id/flag", validate(flagVendorSchema), adminController.flagVendor);
 router.patch("/documents/:id/approve", adminController.approveDocument);
 router.patch("/documents/:id/reject", validate(reviewDocumentSchema), adminController.rejectDocument);
+router.get("/users", adminController.listAllUsers);
+router.patch("/users/:id/suspend", adminController.suspendUser);
+router.delete("/users/:id", adminController.deleteUser);
 
 export default router;

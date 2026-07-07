@@ -62,6 +62,38 @@ interface PendingVendor {
   documents: VendorDocument[];
 }
 
+export interface AdminVendor {
+  id: string;
+  userId: string;
+  user: { id: string; name: string; email: string };
+  kitchenName: string;
+  streetAddress?: string | null;
+  city?: string | null;
+  state?: string | null;
+  landmark: string;
+  rating: number;
+  totalOrders: number;
+  verified: boolean;
+  documents: VendorDocument[];
+}
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  role: "buyer" | "vendor" | "admin";
+  verificationStatus: "pending" | "verified" | "rejected";
+  createdAt: string;
+  _count: { ordersAsBuyer: number; bids: number };
+  vendorProfile?: {
+    id: string;
+    kitchenName: string;
+    verified: boolean;
+    rating: number;
+    totalOrders: number;
+  } | null;
+}
+
 export async function getDashboardMetrics(): Promise<DashboardMetrics> {
   return api.get<DashboardMetrics>("/admin/dashboard");
 }
@@ -99,6 +131,22 @@ export async function triggerVendorAudit(vendorId: string): Promise<ActionRespon
 export async function getPendingVendors(): Promise<PendingVendor[]> {
   const data = await api.get<PendingVendor[]>("/admin/vendors/pending");
   return data;
+}
+
+export async function getAllVendors(): Promise<AdminVendor[]> {
+  return api.get<AdminVendor[]>("/admin/vendors");
+}
+
+export async function getAdminUsers(): Promise<AdminUser[]> {
+  return api.get<AdminUser[]>("/admin/users");
+}
+
+export async function suspendUser(userId: string, reason?: string): Promise<ActionResponse> {
+  return api.patch<ActionResponse>(`/admin/users/${userId}/suspend`, { reason });
+}
+
+export async function deleteUser(userId: string): Promise<ActionResponse> {
+  return api.del<ActionResponse>(`/admin/users/${userId}`);
 }
 
 export async function verifyVendor(vendorId: string): Promise<PendingVendor> {

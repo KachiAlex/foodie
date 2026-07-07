@@ -10,13 +10,16 @@ import {
   Search,
   Shield,
   Users,
+  UserCheck,
+  UserX,
+  Trash2,
 } from "lucide-react";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/context/ToastContext";
 import { useCurrency } from "@/context/CurrencyContext";
-import { approvePayoutRequest, triggerVendorAudit, getPendingVendors, verifyVendor, getDashboardMetrics, getAdminOrders, getEscrowTransactions, getAdminDisputes, resolveDispute, flagVendor, approveDocument, rejectDocument } from "@/services/adminApi";
-import type { DashboardMetrics, AdminOrder, EscrowTransaction, AdminDispute } from "@/services/adminApi";
+import { approvePayoutRequest, triggerVendorAudit, getAllVendors, verifyVendor, getDashboardMetrics, getAdminOrders, getEscrowTransactions, getAdminDisputes, resolveDispute, flagVendor, approveDocument, rejectDocument, getAdminUsers, suspendUser, deleteUser } from "@/services/adminApi";
+import type { DashboardMetrics, AdminOrder, EscrowTransaction, AdminDispute, AdminVendor, AdminUser } from "@/services/adminApi";
 
 export function AdminDashboard() {
   const { symbol } = useCurrency();
@@ -30,7 +33,13 @@ export function AdminDashboard() {
   const [orderSearch, setOrderSearch] = useState("");
   const [vendorSearch, setVendorSearch] = useState("");
   const [recentAudits, setRecentAudits] = useState<Record<string, string>>({});
-  const [adminVendors, setAdminVendors] = useState<any[]>([]);
+  const [adminVendors, setAdminVendors] = useState<AdminVendor[]>([]);
+  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
+  const [userSearch, setUserSearch] = useState("");
+  const [userRoleFilter, setUserRoleFilter] = useState<"all" | "buyer" | "vendor" | "admin">("all");
+  const [suspendingUserId, setSuspendingUserId] = useState<string | null>(null);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+  const [loadingUsers, setLoadingUsers] = useState(false);
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [adminOrders, setAdminOrders] = useState<AdminOrder[]>([]);
   const [escrowTxns, setEscrowTxns] = useState<EscrowTransaction[]>([]);
@@ -49,20 +58,6 @@ export function AdminDashboard() {
   // Track which tabs have already been fetched so we don't re-fetch on revisit
   const fetchedTabs = useRef<Set<string>>(new Set());
 
-  const mapVendor = (v: any) => ({
-    id: v.user.id,
-    name: v.user.name,
-    email: v.user.email,
-    kycStatus: v.verified ? "Approved" : "Pending",
-    kitchenName: v.kitchenName,
-    streetAddress: v.streetAddress,
-    city: v.city,
-    state: v.state,
-    landmark: v.landmark,
-    rating: 0,
-    totalOrders: 0,
-    documents: v.documents || [],
-  });
 
   // Overview: metrics only (lightweight)
   useEffect(() => {
@@ -88,15 +83,26 @@ export function AdminDashboard() {
       .finally(() => setLoadingOrders(false));
   }, [activeTab]);
 
-  // Vendors: pending vendors list
+  // Vendors: all vendors (verified + pending)
   useEffect(() => {
     if (activeTab !== "vendors" || fetchedTabs.current.has("vendors")) return;
     fetchedTabs.current.add("vendors");
     setLoadingVendors(true);
-    getPendingVendors()
-      .then((vendors) => setAdminVendors(vendors.map(mapVendor)))
+    getAllVendors()
+      .then(setAdminVendors)
       .catch(() => showToast("Failed to load vendors"))
       .finally(() => setLoadingVendors(false));
+  }, [activeTab]);
+
+  // Users tab
+  useEffect(() => {
+    if (activeTab !== "users" || fetchedTabs.current.has("users")) return;
+    fetchedTabs.current.add("users");
+    setLoadingUsers(true);
+    getAdminUsers()
+      .then(setAdminUsers)
+      .catch(() => showToast("Failed to load users"))
+      .finally(() => setLoadingUsers(false));
   }, [activeTab]);
 
   // Compliance: disputes + escrow (escrow may already be loaded, still safe to re-fetch)
@@ -112,16 +118,11 @@ export function AdminDashboard() {
       .finally(() => setLoadingCompliance(false));
   }, [activeTab]);
 
-  // Overview also needs a snapshot of recent orders and pending vendors —
-  // fetch them lazily alongside metrics if not already loaded
+  // Overview snapshot: recent orders + vendors if not yet loaded
   useEffect(() => {
     if (activeTab !== "overview") return;
-    if (adminOrders.length === 0) {
-      getAdminOrders().then(setAdminOrders).catch(() => {});
-    }
-    if (adminVendors.length === 0) {
-      getPendingVendors().then((v) => setAdminVendors(v.map(mapVendor))).catch(() => {});
-    }
+    if (adminOrders.length === 0) getAdminOrders().then(setAdminOrders).catch(() => {});
+    if (adminVendors.length === 0) getAllVendors().then(setAdminVendors).catch(() => {});
   }, [activeTab]);
 
   const payoutQueue = useMemo(
@@ -140,7 +141,7 @@ export function AdminDashboard() {
 
   const payoutTotal = useMemo(() => payoutQueue.reduce((s, p) => s + p.amount, 0), [payoutQueue]);
   const openDisputes = useMemo(() => adminDisputes.filter((d) => d.status === "open"), [adminDisputes]);
-  const pendingVendors = useMemo(() => adminVendors.filter((v) => v.kycStatus === "Pending"), [adminVendors]);
+  const pendingVendors = useMemo(() => adminVendors.filter((v) => !v.verified), [adminVendors]);
 
   const priorityAlerts = useMemo(() => {
     const alerts: { id: string; label: string; detail: string; severity: "High" | "Medium" }[] = [];
@@ -157,10 +158,20 @@ export function AdminDashboard() {
   const filteredVendors = useMemo(
     () =>
       adminVendors.filter((vendor) =>
-        [vendor.name, vendor.id].some((value) => value.toLowerCase().includes(vendorSearch.toLowerCase())),
+        [vendor.user.name, vendor.user.email, vendor.kitchenName, vendor.userId]
+          .some((v) => (v ?? "").toLowerCase().includes(vendorSearch.toLowerCase()))
       ),
     [adminVendors, vendorSearch],
   );
+
+  const filteredUsers = useMemo(() => {
+    return adminUsers.filter((u) => {
+      const matchRole = userRoleFilter === "all" || u.role === userRoleFilter;
+      const matchSearch = [u.name, u.email, u.id]
+        .some((v) => v.toLowerCase().includes(userSearch.toLowerCase()));
+      return matchRole && matchSearch;
+    });
+  }, [adminUsers, userSearch, userRoleFilter]);
 
   const filteredOrders = useMemo(
     () =>
@@ -218,15 +229,46 @@ export function AdminDashboard() {
     }
   };
 
-  const handleVerifyVendor = async (vendorId: string) => {
+  const handleVerifyVendor = async (vendorUserId: string) => {
     try {
-      const response = await verifyVendor(vendorId);
-      showToast(`Vendor ${response.user.name} verified successfully`);
+      await verifyVendor(vendorUserId);
+      showToast("Vendor approved successfully");
       setAdminVendors((prev) =>
-        prev.map((v) => (v.id === vendorId ? { ...v, kycStatus: "Approved" } : v))
+        prev.map((v) => v.userId === vendorUserId ? { ...v, verified: true } : v)
       );
     } catch {
       showToast("Error verifying vendor");
+    }
+  };
+
+  const handleSuspendUser = async (userId: string) => {
+    if (suspendingUserId) return;
+    setSuspendingUserId(userId);
+    try {
+      await suspendUser(userId, "Suspended by admin");
+      setAdminUsers((prev) =>
+        prev.map((u) => u.id === userId ? { ...u, verificationStatus: "rejected" } : u)
+      );
+      showToast("User suspended");
+    } catch {
+      showToast("Failed to suspend user");
+    } finally {
+      setSuspendingUserId(null);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (deletingUserId) return;
+    if (!window.confirm("Permanently delete this user? This cannot be undone.")) return;
+    setDeletingUserId(userId);
+    try {
+      await deleteUser(userId);
+      setAdminUsers((prev) => prev.filter((u) => u.id !== userId));
+      showToast("User deleted");
+    } catch {
+      showToast("Failed to delete user");
+    } finally {
+      setDeletingUserId(null);
     }
   };
 
@@ -235,7 +277,8 @@ export function AdminDashboard() {
     nav: [
       { label: "Overview",         to: "/dashboard/admin",                  icon: <Activity  className="h-4 w-4" /> },
       { label: "Orders & Payouts", to: "/dashboard/admin?tab=orders",       icon: <Briefcase className="h-4 w-4" /> },
-      { label: "Vendors",          to: "/dashboard/admin?tab=vendors",      icon: <Users     className="h-4 w-4" /> },
+      { label: "Vendors",          to: "/dashboard/admin?tab=vendors",      icon: <UserCheck className="h-4 w-4" /> },
+      { label: "Users",            to: "/dashboard/admin?tab=users",        icon: <Users     className="h-4 w-4" /> },
       { label: "Compliance",       to: "/dashboard/admin?tab=compliance",   icon: <Shield    className="h-4 w-4" /> },
     ],
   };
@@ -244,6 +287,7 @@ export function AdminDashboard() {
     overview:   { title: "Marketplace Control",  description: "Monitor fulfillment health, vendor trust, and escalations." },
     orders:     { title: "Orders & Payouts",     description: "Manage all marketplace orders and release vendor payouts." },
     vendors:    { title: "Vendor Management",    description: "Approve KYC, review documents, flag or audit vendor accounts." },
+    users:      { title: "User Management",      description: "View, filter, suspend or remove platform users." },
     compliance: { title: "Compliance",           description: "Resolve disputes and monitor escrow backlog alerts." },
   };
   const { title: pageTitle, description: pageDesc } = TAB_META[activeTab] ?? TAB_META.overview;
@@ -386,10 +430,10 @@ export function AdminDashboard() {
                   {pendingVendors.slice(0, 4).map((v) => (
                     <div key={v.id} className="flex items-center justify-between rounded-xl border border-white/8 bg-white/5 px-4 py-3">
                       <div>
-                        <p className="text-sm font-semibold text-white">{v.name}</p>
+                        <p className="text-sm font-semibold text-white">{v.user.name}</p>
                         <p className="text-xs text-gray-400">{v.kitchenName || v.city || "—"}</p>
                       </div>
-                      <Button size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700 h-7 text-xs px-3" onClick={() => handleVerifyVendor(v.id)}>
+                      <Button size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700 h-7 text-xs px-3" onClick={() => handleVerifyVendor(v.userId)}>
                         Approve
                       </Button>
                     </div>
@@ -541,7 +585,7 @@ export function AdminDashboard() {
               {[
                 { label: "Total vendors",   value: adminVendors.length,   bg: "bg-gradient-to-br from-orange-500 to-amber-500" },
                 { label: "Pending KYC",     value: pendingVendors.length, bg: "bg-gradient-to-br from-amber-500 to-orange-600" },
-                { label: "Approved",        value: adminVendors.filter((v) => v.kycStatus === "Approved").length, bg: "bg-gradient-to-br from-emerald-500 to-teal-600" },
+                { label: "Approved",        value: adminVendors.filter((v) => v.verified).length, bg: "bg-gradient-to-br from-emerald-500 to-teal-600" },
               ].map((s) => (
                 <div key={s.label} className={`rounded-2xl p-5 ${s.bg}`}>
                   <p className="text-xs font-bold uppercase tracking-widest text-white/60">{s.label}</p>
@@ -569,25 +613,25 @@ export function AdminDashboard() {
                   <div key={vendor.id} className="rounded-xl border border-white/8 bg-white/5 p-4 flex flex-col gap-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <h4 className="text-sm font-semibold text-white truncate">{vendor.name}</h4>
-                        <p className="text-xs text-gray-400 truncate">{vendor.kitchenName || `${vendor.streetAddress}, ${vendor.city}` || vendor.id}</p>
-                        <p className="text-xs text-gray-500">{vendor.email}</p>
+                        <h4 className="text-sm font-semibold text-white truncate">{vendor.user.name}</h4>
+                        <p className="text-xs text-gray-400 truncate">{vendor.kitchenName || [vendor.streetAddress, vendor.city].filter(Boolean).join(", ") || vendor.userId}</p>
+                        <p className="text-xs text-gray-500">{vendor.user.email}</p>
                       </div>
-                      <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${vendor.kycStatus === "Approved" ? "bg-emerald-500/20 text-emerald-400" : vendor.kycStatus === "Pending" ? "bg-amber-500/20 text-amber-400" : "bg-red-500/20 text-red-400"}`}>
-                        {vendor.kycStatus}
+                      <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${vendor.verified ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}`}>
+                        {vendor.verified ? "Approved" : "Pending"}
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <Button variant="outline" size="sm" className="border-white/20 text-gray-300 hover:bg-white/10 h-7 text-xs" onClick={() => setActiveVendorId(vendor.id)}>
+                      <Button variant="outline" size="sm" className="border-white/20 text-gray-300 hover:bg-white/10 h-7 text-xs" onClick={() => setActiveVendorId(vendor.userId)}>
                         View dossier
                       </Button>
                       <Button variant="ghost" size="sm" className="text-orange-400 hover:text-orange-300 h-7 text-xs"
-                        disabled={isSchedulingAudit === vendor.id}
-                        onClick={() => handleTriggerAudit(vendor.id)}>
-                        {isSchedulingAudit === vendor.id ? "Scheduling…" : recentAudits[vendor.id] ? "Audit ✓" : "Trigger audit"}
+                        disabled={isSchedulingAudit === vendor.userId}
+                        onClick={() => handleTriggerAudit(vendor.userId)}>
+                        {isSchedulingAudit === vendor.userId ? "Scheduling…" : recentAudits[vendor.userId] ? "Audit ✓" : "Trigger audit"}
                       </Button>
-                      {vendor.kycStatus !== "Approved" && (
-                        <Button size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700 h-7 text-xs" onClick={() => handleVerifyVendor(vendor.id)}>
+                      {!vendor.verified && (
+                        <Button size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700 h-7 text-xs" onClick={() => handleVerifyVendor(vendor.userId)}>
                           Approve KYC
                         </Button>
                       )}
@@ -596,12 +640,153 @@ export function AdminDashboard() {
                 ))}
                 {filteredVendors.length === 0 && (
                   <div className="col-span-full rounded-xl border border-dashed border-white/10 p-6 text-center text-sm text-gray-500">
-                    No vendors match &quot;{vendorSearch}&quot;
+                    {vendorSearch ? `No vendors match "${vendorSearch}"` : "No vendors registered yet."}
                   </div>
                 )}
               </div>
             </div>
             </div>}
+          </div>
+        )}
+
+        {/* ════════════════════════════════════════════════════════════════
+            USERS TAB
+        ════════════════════════════════════════════════════════════════ */}
+        {activeTab === "users" && (
+          <div className="space-y-4">
+            {loadingUsers && (
+              <div className="space-y-4 animate-pulse">
+                <div className="grid gap-4 sm:grid-cols-4">{[1,2,3,4].map((i) => <div key={i} className="h-24 rounded-2xl bg-white/5" />)}</div>
+                <div className="h-96 rounded-2xl bg-white/5" />
+              </div>
+            )}
+            {!loadingUsers && (
+              <div className="space-y-4">
+                {/* KPI strip */}
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {[
+                    { label: "Total users",   value: adminUsers.length,                                      bg: "bg-gradient-to-br from-orange-500 to-amber-500" },
+                    { label: "Buyers",        value: adminUsers.filter((u) => u.role === "buyer").length,   bg: "bg-gradient-to-br from-blue-500 to-cyan-600" },
+                    { label: "Vendors",       value: adminUsers.filter((u) => u.role === "vendor").length,  bg: "bg-gradient-to-br from-violet-600 to-purple-700" },
+                    { label: "Suspended",     value: adminUsers.filter((u) => u.verificationStatus === "rejected").length, bg: "bg-gradient-to-br from-red-600 to-rose-700" },
+                  ].map((s) => (
+                    <div key={s.label} className={`rounded-2xl p-5 ${s.bg}`}>
+                      <p className="text-xs font-bold uppercase tracking-widest text-white/60">{s.label}</p>
+                      <p className="mt-2 text-3xl font-extrabold text-white">{s.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Filter + search bar */}
+                <div className="rounded-2xl bg-[#1a1d27] border border-white/8 p-6 shadow-sm">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Platform users</p>
+                      <h2 className="text-2xl font-extrabold text-white">User Management</h2>
+                    </div>
+                    <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 sm:w-64">
+                      <Search className="h-4 w-4 text-gray-400" />
+                      <input value={userSearch} onChange={(e) => setUserSearch(e.target.value)}
+                        placeholder="Search name, email or ID"
+                        className="w-full bg-transparent text-sm text-gray-200 outline-none placeholder:text-gray-500" />
+                    </div>
+                  </div>
+                  {/* Role filter tabs */}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {(["all", "buyer", "vendor", "admin"] as const).map((r) => (
+                      <button key={r} onClick={() => setUserRoleFilter(r)}
+                        className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
+                          userRoleFilter === r
+                            ? "bg-orange-500 text-white"
+                            : "bg-white/5 text-gray-400 hover:bg-white/10"
+                        }`}>
+                        {r === "all" ? "All" : r.charAt(0).toUpperCase() + r.slice(1) + "s"}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Users table */}
+                  <div className="mt-4 overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead className="text-xs uppercase tracking-wider text-gray-500">
+                        <tr>
+                          <th className="pb-3 pr-4">User</th>
+                          <th className="pb-3 pr-4">Role</th>
+                          <th className="pb-3 pr-4">Status</th>
+                          <th className="pb-3 pr-4">Orders</th>
+                          <th className="pb-3 pr-4">Joined</th>
+                          <th className="pb-3">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {filteredUsers.map((user) => (
+                          <tr key={user.id} className="hover:bg-white/3">
+                            <td className="py-3 pr-4">
+                              <p className="font-semibold text-white">{user.name}</p>
+                              <p className="text-xs text-gray-400">{user.email}</p>
+                              {user.vendorProfile && (
+                                <p className="text-xs text-violet-400">{user.vendorProfile.kitchenName}</p>
+                              )}
+                            </td>
+                            <td className="py-3 pr-4">
+                              <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                                user.role === "admin" ? "bg-orange-500/20 text-orange-400" :
+                                user.role === "vendor" ? "bg-violet-500/20 text-violet-400" :
+                                "bg-blue-500/20 text-blue-400"
+                              }`}>{user.role}</span>
+                            </td>
+                            <td className="py-3 pr-4">
+                              <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                                user.verificationStatus === "verified" ? "bg-emerald-500/20 text-emerald-400" :
+                                user.verificationStatus === "rejected" ? "bg-red-500/20 text-red-400" :
+                                "bg-gray-500/20 text-gray-400"
+                              }`}>{user.verificationStatus}</span>
+                            </td>
+                            <td className="py-3 pr-4 text-gray-300">
+                              {user.role === "vendor" && user.vendorProfile
+                                ? user.vendorProfile.totalOrders
+                                : user._count.ordersAsBuyer}
+                            </td>
+                            <td className="py-3 pr-4 text-xs text-gray-400">
+                              {new Date(user.createdAt).toLocaleDateString()}
+                            </td>
+                            <td className="py-3">
+                              <div className="flex items-center gap-1">
+                                {user.verificationStatus !== "rejected" && user.role !== "admin" && (
+                                  <button
+                                    title="Suspend user"
+                                    disabled={suspendingUserId === user.id}
+                                    onClick={() => handleSuspendUser(user.id)}
+                                    className="rounded-lg p-1.5 text-amber-400 hover:bg-amber-500/15 disabled:opacity-50 transition-colors">
+                                    <UserX className="h-4 w-4" />
+                                  </button>
+                                )}
+                                {user.role !== "admin" && (
+                                  <button
+                                    title="Delete user"
+                                    disabled={deletingUserId === user.id}
+                                    onClick={() => handleDeleteUser(user.id)}
+                                    className="rounded-lg p-1.5 text-red-400 hover:bg-red-500/15 disabled:opacity-50 transition-colors">
+                                    <Trash2 className="h-4 w-4" />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                        {filteredUsers.length === 0 && (
+                          <tr>
+                            <td colSpan={6} className="py-10 text-center text-sm text-gray-500">
+                              {userSearch || userRoleFilter !== "all" ? "No users match current filters." : "No users found."}
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -705,7 +890,7 @@ export function AdminDashboard() {
           onClose={() => setActiveOrderId(null)}
         />
         <VendorDossierModal
-          vendor={activeVendorId ? adminVendors.find((v) => v.id === activeVendorId) ?? null : null}
+          vendor={activeVendorId ? adminVendors.find((v) => v.userId === activeVendorId) ?? null : null}
           onClose={() => setActiveVendorId(null)}
         />
       </section>
@@ -766,7 +951,7 @@ function AdminOrderDetailModal({ order, onClose }: AdminOrderDetailModalProps) {
 }
 
 interface VendorDossierModalProps {
-  vendor: { id: string; name: string; email: string; kycStatus: string; kitchenName: string; streetAddress: string; city: string; state: string; landmark: string; rating: number; totalOrders: number; documents: Array<{ id: string; type: string; url: string; status: string; uploadedAt: string }> } | null;
+  vendor: import("@/services/adminApi").AdminVendor | null;
   onClose: () => void;
 }
 
@@ -781,7 +966,7 @@ function VendorDossierModal({ vendor, onClose }: VendorDossierModalProps) {
     if (flagging) return;
     setFlagging(true);
     try {
-      await flagVendor(vendor.id, "Flagged from dossier review");
+      await flagVendor(vendor.userId, "Flagged from dossier review");
       showToast("Vendor flagged successfully.");
     } catch {
       showToast("Failed to flag vendor.");
@@ -823,9 +1008,9 @@ function VendorDossierModal({ vendor, onClose }: VendorDossierModalProps) {
       <div className="w-full max-w-xl rounded-2xl bg-[#1a1d27] border border-white/10 p-6 shadow-2xl">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-orange-400">{vendor.id}</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-orange-400">{vendor.userId}</p>
             <h3 className="text-2xl font-bold text-white">Vendor detail</h3>
-            <p className="text-sm text-gray-400">{vendor.name} · {vendor.kitchenName}</p>
+            <p className="text-sm text-gray-400">{vendor.user.name} · {vendor.kitchenName}</p>
           </div>
           <Button variant="ghost" onClick={onClose}>
             Close
@@ -834,7 +1019,7 @@ function VendorDossierModal({ vendor, onClose }: VendorDossierModalProps) {
         <div className="mt-6 space-y-3 text-sm">
           <div className="rounded-xl bg-white/5 border border-white/8 p-4">
             <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Contact</p>
-            <p className="mt-1 font-semibold text-white">{vendor.email}</p>
+            <p className="mt-1 font-semibold text-white">{vendor.user.email}</p>
           </div>
           <div className="rounded-xl bg-white/5 border border-white/8 p-4">
             <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Address</p>
@@ -845,7 +1030,7 @@ function VendorDossierModal({ vendor, onClose }: VendorDossierModalProps) {
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl bg-white/5 border border-white/8 p-4">
               <p className="text-xs font-bold uppercase tracking-widest text-gray-400">KYC status</p>
-              <p className={`mt-1 font-bold ${vendor.kycStatus === "Approved" ? "text-emerald-400" : "text-amber-400"}`}>{vendor.kycStatus}</p>
+              <p className={`mt-1 font-bold ${vendor.verified ? "text-emerald-400" : "text-amber-400"}`}>{vendor.verified ? "Approved" : "Pending"}</p>
             </div>
             <div className="rounded-xl bg-white/5 border border-white/8 p-4">
               <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Orders</p>
