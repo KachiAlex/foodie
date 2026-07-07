@@ -9,15 +9,15 @@ interface CurrencyContextValue {
 }
 
 const CurrencyContext = createContext<CurrencyContextValue>({
-  code: "USD",
-  symbol: "$",
+  code: "NGN",
+  symbol: "₦",
   isLoading: true,
 });
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrency] = useState<{ code: string; symbol: string }>({
-    code: "USD",
-    symbol: "$",
+    code: "NGN",
+    symbol: "₦",
   });
   const [isLoading, setIsLoading] = useState(true);
 

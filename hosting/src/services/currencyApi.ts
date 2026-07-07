@@ -55,7 +55,7 @@ const COUNTRY_CURRENCY_MAP: Record<string, { code: string; symbol: string }> = {
   RU: { code: "RUB", symbol: "₽" },
 };
 
-const DEFAULT_CURRENCY = { code: "USD", symbol: "$" };
+const DEFAULT_CURRENCY = { code: "NGN", symbol: "₦" };
 
 export async function detectCurrency(): Promise<{ code: string; symbol: string }> {
   try {

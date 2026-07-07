@@ -140,6 +140,36 @@ export async function listVendors(): Promise<FeaturedVendor[]> {
   }));
 }
 
+export interface CommunityMenuItem {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  category: string;
+  imageUrl: string | null;
+  isAvailable: boolean;
+}
+
+export interface CommunityVendor {
+  id: string;
+  userId: string;
+  kitchenName: string;
+  streetAddress?: string | null;
+  city?: string | null;
+  state?: string | null;
+  specialties: string[];
+  rating: number;
+  totalOrders: number;
+  isOnline: boolean;
+  verified: boolean;
+  user: { id: string; name: string; email: string };
+  menuItems: CommunityMenuItem[];
+}
+
+export async function fetchCommunityVendors(): Promise<CommunityVendor[]> {
+  return api.get<CommunityVendor[]>("/community/vendors");
+}
+
 export async function fetchVendorOpenRequests(): Promise<VendorOpenRequest[]> {
   const data = await api.get<BackendOpenRequest[]>("/vendors/open-requests");
   return data.map(mapOpenRequest);

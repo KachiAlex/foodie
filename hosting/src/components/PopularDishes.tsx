@@ -1,21 +1,24 @@
-import { useState } from "react";
-import { Heart, ArrowRight, Flame } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Heart, ArrowRight, Flame, Loader2 } from "lucide-react";
 import { useCurrency } from "@/context/CurrencyContext";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { fetchCommunityVendors } from "@/services/vendorApi";
 
-const ALL_DISHES = [
-  { id: 1, name: "Homemade Pasta Carbonara", chef: "Chef Isabella", price: 14.99, originalPrice: 18.99, image: "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=600&q=80&auto=format&fit=crop", category: "Italian", isVegetarian: true, hot: false },
-  { id: 2, name: "Chicken Tikka Masala", chef: "Chef Priya", price: 12.99, originalPrice: null, image: "https://images.unsplash.com/photo-1596797038530-2c107229654b?w=600&q=80&auto=format&fit=crop", category: "Indian", isVegetarian: false, hot: true },
-  { id: 3, name: "Fresh Poke Bowl", chef: "Chef Tony", price: 15.99, originalPrice: null, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80&auto=format&fit=crop", category: "Asian", isVegetarian: false, hot: true },
-  { id: 4, name: "Street-Style Tacos (3pc)", chef: "Chef Maria", price: 9.99, originalPrice: 12.99, image: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&q=80&auto=format&fit=crop", category: "Mexican", isVegetarian: false, hot: false },
-  { id: 5, name: "Mediterranean Quinoa Bowl", chef: "Chef Emma", price: 11.99, originalPrice: null, image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80&auto=format&fit=crop", category: "Healthy", isVegetarian: true, hot: false },
-  { id: 6, name: "Margherita Pizza", chef: "Chef Marco", price: 13.99, originalPrice: null, image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&q=80&auto=format&fit=crop", category: "Italian", isVegetarian: true, hot: true },
-];
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1664993101841-036f189719b6?w=600&q=80&auto=format&fit=crop";
 
-const TABS = ["All", "Italian", "Indian", "Asian", "Mexican", "Healthy"];
+interface Dish {
+  id: string;
+  name: string;
+  chef: string;
+  price: number;
+  image: string;
+  category: string;
+  isVegetarian: boolean;
+  hot: boolean;
+}
 
-function FavBtn({ dishId }: { dishId: number }) {
+function FavBtn({ dishId }: { dishId: string }) {
   const [fav, setFav] = useState(() => localStorage.getItem(`fav_${dishId}`) === "1");
   return (
     <button
@@ -30,37 +33,97 @@ function FavBtn({ dishId }: { dishId: number }) {
 
 export function PopularDishes() {
   const { symbol } = useCurrency();
+  const [dishes, setDishes] = useState<Dish[]>([]);
+  const [tabs, setTabs] = useState<string[]>(["All"]);
   const [active, setActive] = useState("All");
-  const filtered = active === "All" ? ALL_DISHES : ALL_DISHES.filter((d) => d.category === active);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+    fetchCommunityVendors()
+      .then((vendors) => {
+        if (!mounted) return;
+        const all = vendors.flatMap((v) =>
+          v.menuItems
+            .filter((m) => m.isAvailable)
+            .map((m) => ({
+              id: m.id,
+              name: m.name,
+              chef: v.user.name,
+              price: Number(m.price),
+              image: m.imageUrl || FALLBACK_IMAGE,
+              category: m.category,
+              isVegetarian: false,
+              hot: false,
+            }))
+        );
+        setDishes(all);
+        const categories = Array.from(new Set(all.map((d) => d.category))).sort();
+        setTabs(["All", ...categories.slice(0, 5)]);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (!mounted) return;
+        setError(err.message || "Failed to load dishes");
+        setLoading(false);
+      });
+    return () => { mounted = false; };
+  }, []);
+
+  const filtered = active === "All" ? dishes : dishes.filter((d) => d.category === active);
+
+  if (loading) {
+    return (
+      <section className="relative bg-gray-950 py-24 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_rgba(251,146,60,0.08),_transparent_70%)]" />
+        <div className="relative max-w-7xl mx-auto px-4 flex items-center justify-center gap-2 text-gray-400">
+          <Loader2 className="h-5 w-5 animate-spin" /> Loading dishes…
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="relative bg-gray-950 py-24 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_rgba(251,146,60,0.08),_transparent_70%)]" />
+        <div className="relative max-w-7xl mx-auto px-4 text-center text-red-400">
+          {error}
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section className="bg-gray-50 py-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="relative bg-gray-950 py-24 overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_rgba(251,146,60,0.08),_transparent_70%)]" />
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
           <div>
             <motion.p className="text-sm font-bold uppercase tracking-widest text-orange-500 mb-3" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
               Today's Menu
             </motion.p>
-            <motion.h2 className="text-4xl sm:text-5xl font-extrabold text-gray-900" initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}>
+            <motion.h2 className="text-4xl sm:text-5xl font-extrabold text-white" initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}>
               Popular Dishes
             </motion.h2>
           </div>
-          <Link to="/dashboard/buyer" className="hidden sm:flex items-center gap-2 text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors">
+          <Link to="/dashboard/buyer" className="hidden sm:flex items-center gap-2 text-sm font-semibold text-orange-400 hover:text-orange-300 transition-colors">
             Explore All <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
         {/* Category tabs */}
         <div className="flex gap-2 flex-wrap mb-10">
-          {TABS.map((tab) => (
+          {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActive(tab)}
               className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${
                 active === tab
                   ? "bg-orange-500 text-white shadow-lg shadow-orange-500/30"
-                  : "bg-white border border-gray-200 text-gray-600 hover:border-orange-300 hover:text-orange-500"
+                  : "border border-white/20 bg-white/5 text-gray-300 hover:border-orange-500/40 hover:text-orange-400"
               }`}
             >
               {tab}
@@ -79,11 +142,11 @@ export function PopularDishes() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.35, delay: i * 0.06 }}
-                className="group bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+                className="group rounded-3xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-sm hover:border-orange-500/40 hover:bg-white/[0.07] hover:-translate-y-1 transition-all duration-300 cursor-pointer"
               >
                 <div className="relative h-52 overflow-hidden">
                   <img src={dish.image} alt={dish.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent" />
                   <FavBtn dishId={dish.id} />
                   <div className="absolute bottom-3 left-3 flex gap-2">
                     {dish.isVegetarian && <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-[11px] font-bold text-white">Veg</span>}
@@ -92,13 +155,12 @@ export function PopularDishes() {
                 </div>
 
                 <div className="p-5">
-                  <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-1">{dish.category}</p>
-                  <h3 className="text-base font-bold text-gray-900 mb-0.5 line-clamp-1">{dish.name}</h3>
-                  <p className="text-sm text-gray-500 mb-4">by {dish.chef}</p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-orange-400 mb-1">{dish.category}</p>
+                  <h3 className="text-base font-bold text-white mb-0.5 line-clamp-1">{dish.name}</h3>
+                  <p className="text-sm text-gray-400 mb-4">by {dish.chef}</p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-xl font-extrabold text-gray-900">{symbol}{dish.price}</span>
-                      {dish.originalPrice && <span className="text-sm text-gray-400 line-through">{symbol}{dish.originalPrice}</span>}
+                      <span className="text-xl font-extrabold text-white">{symbol}{dish.price.toLocaleString()}</span>
                     </div>
                     <Link
                       to="/dashboard/buyer"
@@ -113,8 +175,12 @@ export function PopularDishes() {
           </div>
         </AnimatePresence>
 
+        {filtered.length === 0 && (
+          <p className="relative text-center text-gray-400 mt-8">No dishes available in this category.</p>
+        )}
+
         <div className="mt-8 sm:hidden text-center">
-          <Link to="/dashboard/buyer" className="inline-flex items-center gap-2 text-sm font-semibold text-orange-500">
+          <Link to="/dashboard/buyer" className="inline-flex items-center gap-2 text-sm font-semibold text-orange-400">
             Explore All Dishes <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
