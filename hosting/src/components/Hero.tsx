@@ -39,9 +39,9 @@ export function Hero() {
       {/* Cinematic background */}
       <div className="absolute inset-0">
         <img
-          src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1800&q=80&auto=format&fit=crop"
+          src="https://images.unsplash.com/photo-1664993101841-036f189719b6?w=1800&q=85&auto=format&fit=crop"
           alt=""
-          className="w-full h-full object-cover opacity-40"
+          className="w-full h-full object-cover opacity-45"
           aria-hidden="true"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/10" />
@@ -176,8 +176,8 @@ export function Hero() {
               className="relative rounded-3xl overflow-hidden shadow-2xl"
             >
               <img
-                src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=80&auto=format&fit=crop"
-                alt="Delicious home-cooked food"
+                src="https://images.unsplash.com/photo-1664992960082-0ea299a9c53e?w=900&q=85&auto=format&fit=crop"
+                alt="Nigerian jollof rice with chicken"
                 className="w-full h-[540px] object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent" />
