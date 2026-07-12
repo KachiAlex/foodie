@@ -23,13 +23,15 @@ import { Button } from "@/components/ui/button";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
+import { useApp } from "@/context/AppContext";
+import { PaystackCheckout } from "@/components/PaystackCheckout";
+import { NewRequestModal } from "@/components/NewRequestModal";
 import {
   fetchMarketRequests,
   placeBid,
   updateBid,
   counterBid,
   rejectBid,
-  selectBid,
 } from "@/services/marketApi";
 import type { MarketRequest, MarketBid, MarketBidVendor } from "@/services/marketApi";
 
@@ -317,6 +319,7 @@ export function BuyerMarket() {
   const { symbol } = useCurrency();
   const { user } = useAuth();
   const { showToast } = useToast();
+  const { acceptBid } = useApp();
   const [requests, setRequests] = useState<MarketRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -331,6 +334,8 @@ export function BuyerMarket() {
   const [editBid, setEditBid] = useState<MarketBid | null>(null);
   const [counterTarget, setCounterTarget] = useState<MarketBid | null>(null);
   const [profileVendor, setProfileVendor] = useState<MarketBidVendor | null>(null);
+  const [checkout, setCheckout] = useState<{ orderId: string; amount: number; foodName: string } | null>(null);
+  const [showNewRequest, setShowNewRequest] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const load = async () => {
@@ -348,6 +353,18 @@ export function BuyerMarket() {
   useEffect(() => {
     load();
   }, [showToast]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      load();
+    }, 30_000);
+    const onFocus = () => load();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, []);
 
   const categories = useMemo(
     () => Array.from(new Set(requests.map((r) => r.category))),
@@ -482,12 +499,16 @@ export function BuyerMarket() {
     }
   };
 
-  const handleSelect = async (bid: MarketBid) => {
+  const handleSelect = async (bid: MarketBid, request: MarketRequest) => {
     setSubmitting(true);
     try {
-      await selectBid(bid.id);
-      showToast("Vendor selected");
-      await load();
+      const { order } = await acceptBid(bid.id, request.id);
+      setCheckout({
+        orderId: order.id,
+        amount: order.amount,
+        foodName: request.foodName,
+      });
+      showToast("Vendor selected — complete payment to confirm");
     } catch {
       showToast("Failed to select vendor");
     } finally {
@@ -508,9 +529,16 @@ export function BuyerMarket() {
               Open food requests from buyers. Vendors bid, buyers negotiate, then pick the best vendor.
             </p>
           </div>
-          <Button variant="outline" asChild>
-            <Link to="/community">Back to Food Community</Link>
-          </Button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            {user?.role === "buyer" && (
+              <Button className="bg-orange-500 text-white hover:bg-orange-600" onClick={() => setShowNewRequest(true)}>
+                Post a request
+              </Button>
+            )}
+            <Button variant="outline" asChild>
+              <Link to="/community">Back to Food Community</Link>
+            </Button>
+          </div>
         </div>
 
         <div className="mt-6 rounded-3xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
@@ -669,6 +697,11 @@ export function BuyerMarket() {
             <Store className="mx-auto h-10 w-10 text-gray-300" />
             <p className="mt-4 text-sm font-semibold text-gray-600">No open requests match your search</p>
             <p className="text-xs text-gray-400">Post a request or check back later.</p>
+            {user?.role === "buyer" && (
+              <Button className="mt-4 bg-orange-500 text-white hover:bg-orange-600" onClick={() => setShowNewRequest(true)}>
+                Post a request
+              </Button>
+            )}
           </div>
         )}
 
@@ -807,7 +840,7 @@ export function BuyerMarket() {
                                 <Button
                                   size="sm"
                                   className="bg-emerald-500 text-white hover:bg-emerald-600"
-                                  onClick={() => handleSelect(bid)}
+                                  onClick={() => handleSelect(bid, request)}
                                   disabled={submitting}
                                 >
                                   <Check className="mr-1 h-3.5 w-3.5" /> Accept
@@ -893,6 +926,31 @@ export function BuyerMarket() {
         />
       )}
       {profileVendor && <VendorProfileModal vendor={profileVendor} onClose={() => setProfileVendor(null)} />}
+      {checkout && (
+        <PaystackCheckout
+          orderId={checkout.orderId}
+          orderAmount={checkout.amount}
+          foodName={checkout.foodName}
+          onClose={() => {
+            setCheckout(null);
+            load();
+          }}
+          onSuccess={() => {
+            showToast("Payment confirmed");
+            setCheckout(null);
+            load();
+          }}
+        />
+      )}
+      {showNewRequest && (
+        <NewRequestModal
+          onClose={() => setShowNewRequest(false)}
+          onCreated={() => {
+            setShowNewRequest(false);
+            load();
+          }}
+        />
+      )}
     </div>
   );
 }

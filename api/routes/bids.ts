@@ -7,6 +7,7 @@ import { createBidSchema, updateBidSchema, counterBidSchema } from "../validator
 const router = Router();
 
 router.get("/", authenticate, bidController.listBids);
+router.get("/my", authenticate, bidController.listMyBids);
 router.post("/", authenticate, requireVerifiedVendor, validate(createBidSchema), bidController.createBid);
 router.get("/:id", authenticate, bidController.getBid);
 router.patch("/:id", authenticate, requireVerifiedVendor, validate(updateBidSchema), bidController.updateBid);

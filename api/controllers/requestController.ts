@@ -1,6 +1,17 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
 import { prisma } from "../lib/prisma";
+import type { AuthUser } from "../middleware/auth";
+
+async function notify(userId: string, title: string, body: string, type: string) {
+  try {
+    await prisma.notification.create({
+      data: { userId, title, body, type },
+    });
+  } catch {
+    // silent fail — notifications should not break business logic
+  }
+}
 
 export const listRequests = asyncHandler(async (req: Request, res: Response) => {
   const buyerId = req.query.buyerId as string | undefined;
@@ -106,6 +117,62 @@ export const updateStatus = asyncHandler(async (req: Request, res: Response) => 
   const request = await prisma.foodRequest.update({
     where: { id: req.params.id },
     data: { status },
+  });
+  res.json({ success: true, data: request });
+});
+
+export const reopenRequest = asyncHandler(async (req: Request, res: Response) => {
+  const authUser = (req as Request & { user?: AuthUser }).user!;
+  const existing = await prisma.foodRequest.findUnique({
+    where: { id: req.params.id },
+    include: { bids: true },
+  });
+  if (!existing) {
+    res.status(404).json({ success: false, error: { message: "Request not found" } });
+    return;
+  }
+  if (existing.buyerId !== authUser.id) {
+    res.status(403).json({ success: false, error: { message: "Only the buyer can reopen this request" } });
+    return;
+  }
+  if (existing.status !== "bid_selected" && existing.status !== "paid") {
+    res.status(400).json({ success: false, error: { message: "Request can only be reopened before payment" } });
+    return;
+  }
+
+  // Cancel any unpaid order for this request
+  if (existing.status === "paid") {
+    await prisma.order.updateMany({
+      where: { requestId: existing.id, status: "paid" },
+      data: { status: "cancelled" },
+    });
+  }
+
+  // Reset all bids back to active
+  await prisma.bid.updateMany({
+    where: { requestId: existing.id },
+    data: { status: "active" },
+  });
+
+  // Reopen the request
+  await prisma.foodRequest.update({
+    where: { id: existing.id },
+    data: { status: "open", selectedBidId: null },
+  });
+
+  const selectedBid = existing.bids.find((b) => b.status === "selected");
+  if (selectedBid) {
+    await notify(
+      selectedBid.vendorId,
+      "Selection cancelled",
+      `Your selection for "${existing.foodName}" was cancelled. The request is open for bidding again.`,
+      "bid_reopened"
+    );
+  }
+
+  const request = await prisma.foodRequest.findUnique({
+    where: { id: existing.id },
+    include: { buyer: { select: { id: true, name: true, email: true } } },
   });
   res.json({ success: true, data: request });
 });

@@ -24,15 +24,17 @@ import { PaystackCheckout } from "@/components/PaystackCheckout";
 import type { VendorBid } from "@/types/domain";
 import { listVendors } from "@/services/vendorApi";
 import type { FeaturedVendor } from "@/services/vendorApi";
+import { reopenRequest } from "@/services/requestApi";
 
 export function BuyerDashboard() {
-  const { requests, orders, bids, acceptBid } = useApp();
+  const { requests, orders, bids, acceptBid, refresh } = useApp();
   const { symbol } = useCurrency();
   const [showNewRequest, setShowNewRequest] = useState(false);
   const [bidFilter, setBidFilter] = useState<"all" | "collecting_bids" | "in_progress" | "fulfilled">("all");
   const [timelineRequestId, setTimelineRequestId] = useState<string | null>(null);
   const [activeBriefId, setActiveBriefId] = useState<string | null>(null);
   const [acceptingBidId, setAcceptingBidId] = useState<string | null>(null);
+  const [reopeningRequestId, setReopeningRequestId] = useState<string | null>(null);
   const [checkoutOrder, setCheckoutOrder] = useState<{ orderId: string; amount: number; foodName: string } | null>(null);
   const [vendors, setVendors] = useState<FeaturedVendor[]>([]);
   const [expandedRequestIds, setExpandedRequestIds] = useState<Set<string>>(new Set());
@@ -54,6 +56,19 @@ export function BuyerDashboard() {
       // handled by context
     } finally {
       setAcceptingBidId(null);
+    }
+  };
+
+  const handleReopenRequest = async (requestId: string) => {
+    if (reopeningRequestId) return;
+    setReopeningRequestId(requestId);
+    try {
+      await reopenRequest(requestId);
+      await refresh();
+    } catch {
+      // error shown by api client
+    } finally {
+      setReopeningRequestId(null);
     }
   };
 
@@ -467,6 +482,17 @@ export function BuyerDashboard() {
                       onClick={() => setActiveBriefId(request.id)}>
                       Details
                     </Button>
+                    {request.status === "in_progress" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600"
+                        disabled={reopeningRequestId === request.id}
+                        onClick={() => handleReopenRequest(request.id)}
+                      >
+                        {reopeningRequestId === request.id ? "Reopening..." : "Reopen request"}
+                      </Button>
+                    )}
                   </div>
                 </motion.div>
               );

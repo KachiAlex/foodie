@@ -10,6 +10,7 @@ router.get("/", requestController.listRequests);
 router.post("/", authenticate, validate(createRequestSchema), requestController.createRequest);
 router.get("/:id", authenticate, requestController.getRequest);
 router.patch("/:id/status", authenticate, validate(updateRequestStatusSchema), requestController.updateStatus);
+router.post("/:id/reopen", authenticate, requestController.reopenRequest);
 router.get("/:id/bids", authenticate, requestController.getRequestBids);
 
 export default router;

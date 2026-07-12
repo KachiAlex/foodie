@@ -26,6 +26,18 @@ export const listBids = asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, data });
 });
 
+export const listMyBids = asyncHandler(async (req: Request, res: Response) => {
+  const authUser = (req as Request & { user?: AuthUser }).user!;
+  const data = await prisma.bid.findMany({
+    where: { vendorId: authUser.id },
+    orderBy: { createdAt: "desc" },
+    include: {
+      request: { select: { id: true, foodName: true, status: true } },
+    },
+  });
+  res.json({ success: true, data });
+});
+
 export const createBid = asyncHandler(async (req: Request, res: Response) => {
   const { requestId, bidAmount, prepTimeMinutes, estimatedDeliveryTime, message } = req.body;
   const authUser = (req as Request & { user?: AuthUser }).user!;

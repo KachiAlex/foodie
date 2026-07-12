@@ -10,6 +10,7 @@ import { ForgotPasswordPage } from "@/pages/auth/ForgotPassword";
 import { FoodCommunity } from "@/pages/community/FoodCommunity";
 import { BuyerMarket } from "@/pages/community/BuyerMarket";
 import { VendorMarket } from "@/pages/community/VendorMarket";
+import { VendorBids } from "@/pages/community/VendorBids";
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/community" element={<FoodCommunity />} />
         <Route path="/community/buyer-market" element={<BuyerMarket />} />
         <Route path="/community/vendor-market" element={<VendorMarket />} />
+        <Route path="/community/vendor-bids" element={<VendorBids />} />
         <Route path="/dashboard" element={<DashboardLanding />} />
         <Route path="/dashboard/:roleSlug" element={<DashboardGuard />} />
       </Routes>

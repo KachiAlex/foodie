@@ -7,9 +7,10 @@ import type { CreateRequestPayload } from "@/services/requestApi";
 
 interface NewRequestModalProps {
   onClose: () => void;
+  onCreated?: () => void;
 }
 
-export function NewRequestModal({ onClose }: NewRequestModalProps) {
+export function NewRequestModal({ onClose, onCreated }: NewRequestModalProps) {
   const { addRequest } = useApp();
   const { symbol } = useCurrency();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,6 +47,7 @@ export function NewRequestModal({ onClose }: NewRequestModalProps) {
     setIsSubmitting(true);
     try {
       await addRequest(form);
+      onCreated?.();
       onClose();
     } finally {
       setIsSubmitting(false);

@@ -130,6 +130,11 @@ export async function updateRequestStatus(
   return mapRequest(data);
 }
 
+export async function reopenRequest(requestId: string): Promise<BuyerRequest> {
+  const data = await api.post<BackendRequest>(`/requests/${requestId}/reopen`, {});
+  return mapRequest(data);
+}
+
 export async function fetchBids(): Promise<VendorBid[]> {
   const data = await api.get<BackendBid[]>("/bids");
   return data.map(mapBid);

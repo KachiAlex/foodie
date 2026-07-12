@@ -89,3 +89,19 @@ export async function rejectBid(bidId: string): Promise<MarketBid> {
 export async function selectBid(bidId: string): Promise<MarketBid> {
   return api.patch<MarketBid>(`/bids/${bidId}/select`, {});
 }
+
+export interface MyBid {
+  id: string;
+  requestId: string;
+  request: { id: string; foodName: string; status: string };
+  bidAmount: number;
+  prepTimeMinutes: number;
+  estimatedDeliveryTime: string;
+  message?: string | null;
+  status: string;
+  createdAt: string;
+}
+
+export async function fetchMyBids(): Promise<MyBid[]> {
+  return api.get<MyBid[]>("/bids/my");
+}

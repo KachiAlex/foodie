@@ -160,9 +160,16 @@ export function VendorMarket() {
             <h1 className="text-3xl font-bold text-gray-900">Vendor Market</h1>
             <p className="mt-1 text-gray-600">Browse dishes from verified home chefs and request what you crave.</p>
           </div>
-          <Button variant="outline" asChild>
-            <a href="/community">Back to Food Community</a>
-          </Button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            {user?.role === "vendor" && (
+              <Button variant="outline" asChild>
+                <a href="/community/vendor-bids">My Bids</a>
+              </Button>
+            )}
+            <Button variant="outline" asChild>
+              <a href="/community">Back to Food Community</a>
+            </Button>
+          </div>
         </div>
 
         <div className="mt-6 rounded-3xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
