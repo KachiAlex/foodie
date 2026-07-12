@@ -19,7 +19,7 @@ export const listBids = asyncHandler(async (req: Request, res: Response) => {
     where: requestId ? { requestId } : undefined,
     orderBy: { createdAt: "desc" },
     include: {
-      vendor: { select: { id: true, name: true } },
+      vendor: { select: { id: true, name: true, vendorProfile: true } },
       request: { select: { id: true, foodName: true, status: true } },
     },
   });
@@ -70,7 +70,7 @@ export const getBid = asyncHandler(async (req: Request, res: Response) => {
   const bid = await prisma.bid.findUnique({
     where: { id: req.params.id },
     include: {
-      vendor: { select: { id: true, name: true } },
+      vendor: { select: { id: true, name: true, vendorProfile: true } },
       request: { select: { id: true, foodName: true } },
     },
   });
@@ -82,9 +82,17 @@ export const getBid = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const selectBid = asyncHandler(async (req: Request, res: Response) => {
-  const existing = await prisma.bid.findUnique({ where: { id: req.params.id } });
+  const authUser = (req as Request & { user?: AuthUser }).user!;
+  const existing = await prisma.bid.findUnique({
+    where: { id: req.params.id },
+    include: { request: { select: { buyerId: true } } },
+  });
   if (!existing) {
     res.status(404).json({ success: false, error: { message: "Bid not found" } });
+    return;
+  }
+  if (existing.request.buyerId !== authUser.id) {
+    res.status(403).json({ success: false, error: { message: "Only the buyer can select this bid" } });
     return;
   }
 
@@ -92,7 +100,7 @@ export const selectBid = asyncHandler(async (req: Request, res: Response) => {
     where: { id: req.params.id },
     data: { status: "selected" },
     include: {
-      vendor: { select: { id: true, name: true } },
+      vendor: { select: { id: true, name: true, vendorProfile: true } },
       request: { select: { id: true, foodName: true } },
     },
   });
@@ -120,9 +128,17 @@ export const selectBid = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const rejectBid = asyncHandler(async (req: Request, res: Response) => {
-  const existing = await prisma.bid.findUnique({ where: { id: req.params.id } });
+  const authUser = (req as Request & { user?: AuthUser }).user!;
+  const existing = await prisma.bid.findUnique({
+    where: { id: req.params.id },
+    include: { request: { select: { buyerId: true } } },
+  });
   if (!existing) {
     res.status(404).json({ success: false, error: { message: "Bid not found" } });
+    return;
+  }
+  if (existing.request.buyerId !== authUser.id) {
+    res.status(403).json({ success: false, error: { message: "Only the buyer can reject this bid" } });
     return;
   }
 
@@ -130,9 +146,105 @@ export const rejectBid = asyncHandler(async (req: Request, res: Response) => {
     where: { id: req.params.id },
     data: { status: "rejected" },
     include: {
-      vendor: { select: { id: true, name: true } },
+      vendor: { select: { id: true, name: true, vendorProfile: true } },
       request: { select: { id: true, foodName: true } },
     },
   });
+  res.json({ success: true, data: bid });
+});
+
+export const updateBid = asyncHandler(async (req: Request, res: Response) => {
+  const authUser = (req as Request & { user?: AuthUser }).user!;
+  const { bidAmount, prepTimeMinutes, estimatedDeliveryTime, message } = req.body;
+
+  const existing = await prisma.bid.findUnique({
+    where: { id: req.params.id },
+    include: { request: { select: { buyerId: true, status: true } } },
+  });
+  if (!existing) {
+    res.status(404).json({ success: false, error: { message: "Bid not found" } });
+    return;
+  }
+  if (existing.vendorId !== authUser.id) {
+    res.status(403).json({ success: false, error: { message: "Only the vendor who placed this bid can update it" } });
+    return;
+  }
+  if (existing.status === "selected" || existing.status === "rejected") {
+    res.status(400).json({ success: false, error: { message: "Cannot update a selected or rejected bid" } });
+    return;
+  }
+  if (existing.request.status !== "open") {
+    res.status(400).json({ success: false, error: { message: "Request is no longer open for bids" } });
+    return;
+  }
+
+  const bid = await prisma.bid.update({
+    where: { id: req.params.id },
+    data: {
+      bidAmount: bidAmount !== undefined ? Number(bidAmount) : existing.bidAmount,
+      prepTimeMinutes: prepTimeMinutes !== undefined ? Number(prepTimeMinutes) : existing.prepTimeMinutes,
+      estimatedDeliveryTime: estimatedDeliveryTime ?? existing.estimatedDeliveryTime,
+      message: message ?? existing.message,
+    },
+    include: {
+      vendor: { select: { id: true, name: true, vendorProfile: true } },
+      request: { select: { id: true, foodName: true } },
+    },
+  });
+
+  await notify(
+    existing.request.buyerId,
+    "Bid updated",
+    `${authUser.name} updated their bid to ₦${Number(bid.bidAmount).toLocaleString()} for "${bid.request.foodName}"`,
+    "bid_updated"
+  );
+
+  res.json({ success: true, data: bid });
+});
+
+export const counterBid = asyncHandler(async (req: Request, res: Response) => {
+  const authUser = (req as Request & { user?: AuthUser }).user!;
+  const { bidAmount, message } = req.body;
+
+  const existing = await prisma.bid.findUnique({
+    where: { id: req.params.id },
+    include: { request: { select: { buyerId: true, status: true } } },
+  });
+  if (!existing) {
+    res.status(404).json({ success: false, error: { message: "Bid not found" } });
+    return;
+  }
+  if (existing.request.buyerId !== authUser.id) {
+    res.status(403).json({ success: false, error: { message: "Only the buyer can counter this bid" } });
+    return;
+  }
+  if (existing.status === "selected" || existing.status === "rejected") {
+    res.status(400).json({ success: false, error: { message: "Cannot counter a selected or rejected bid" } });
+    return;
+  }
+  if (existing.request.status !== "open") {
+    res.status(400).json({ success: false, error: { message: "Request is no longer open for bids" } });
+    return;
+  }
+
+  const bid = await prisma.bid.update({
+    where: { id: req.params.id },
+    data: {
+      bidAmount: Number(bidAmount),
+      message: message ? `Counter: ${message}` : "Counter offer sent",
+    },
+    include: {
+      vendor: { select: { id: true, name: true, vendorProfile: true } },
+      request: { select: { id: true, foodName: true } },
+    },
+  });
+
+  await notify(
+    existing.vendorId,
+    "Counter offer received",
+    `${authUser.name} sent a counter offer of ₦${Number(bidAmount).toLocaleString()} for "${bid.request.foodName}"`,
+    "bid_countered"
+  );
+
   res.json({ success: true, data: bid });
 });

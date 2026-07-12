@@ -26,6 +26,18 @@ export const createBidSchema = z.object({
   message: z.string().optional(),
 });
 
+export const updateBidSchema = z.object({
+  bidAmount: z.coerce.number().positive("Bid amount must be greater than 0").optional(),
+  prepTimeMinutes: z.coerce.number().int().nonnegative().optional(),
+  estimatedDeliveryTime: z.string().optional(),
+  message: z.string().optional(),
+});
+
+export const counterBidSchema = z.object({
+  bidAmount: z.coerce.number().positive("Counter amount must be greater than 0"),
+  message: z.string().optional(),
+});
+
 export const createOrderSchema = z.object({
   requestId: z.string().uuid().optional(),
   vendorId: z.string().uuid("Vendor ID must be a valid UUID"),

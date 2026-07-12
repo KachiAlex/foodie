@@ -6,7 +6,7 @@ import { createRequestSchema, updateRequestStatusSchema } from "../validators/ro
 
 const router = Router();
 
-router.get("/", authenticate, requestController.listRequests);
+router.get("/", requestController.listRequests);
 router.post("/", authenticate, validate(createRequestSchema), requestController.createRequest);
 router.get("/:id", authenticate, requestController.getRequest);
 router.patch("/:id/status", authenticate, validate(updateRequestStatusSchema), requestController.updateStatus);

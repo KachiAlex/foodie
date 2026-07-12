@@ -9,7 +9,11 @@ export interface CommunityVendor {
   city?: string | null;
   state?: string | null;
   landmark?: string | null;
+  specialties: string[];
+  rating: number;
+  totalOrders: number;
   isOnline: boolean;
+  verified: boolean;
   menuItems: CommunityMenuItem[];
 }
 

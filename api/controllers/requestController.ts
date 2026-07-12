@@ -9,7 +9,19 @@ export const listRequests = asyncHandler(async (req: Request, res: Response) => 
     orderBy: { createdAt: "desc" },
     include: {
       buyer: { select: { id: true, name: true, email: true } },
-      bids: { include: { vendor: { select: { id: true, name: true } } } },
+      bids: {
+        orderBy: { createdAt: "desc" },
+        include: {
+          vendor: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              vendorProfile: true,
+            },
+          },
+        },
+      },
       order: true,
     },
   });
@@ -62,8 +74,16 @@ export const getRequest = asyncHandler(async (req: Request, res: Response) => {
     include: {
       buyer: { select: { id: true, name: true, email: true } },
       bids: {
-        where: { status: "active" },
-        include: { vendor: { select: { id: true, name: true } } },
+        include: {
+          vendor: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              vendorProfile: true,
+            },
+          },
+        },
         orderBy: { bidAmount: "asc" },
       },
       order: true,
@@ -95,7 +115,16 @@ export const getRequestBids = asyncHandler(async (req: Request, res: Response) =
     where: { id: req.params.id },
     include: {
       bids: {
-        include: { vendor: { select: { id: true, name: true } } },
+        include: {
+          vendor: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              vendorProfile: true,
+            },
+          },
+        },
         orderBy: { bidAmount: "asc" },
       },
     },
