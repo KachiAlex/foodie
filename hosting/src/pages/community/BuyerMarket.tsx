@@ -14,6 +14,9 @@ import {
   Check,
   X,
   UtensilsCrossed,
+  Filter,
+  ChevronDown,
+  CalendarDays,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -318,6 +321,12 @@ export function BuyerMarket() {
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [minBudget, setMinBudget] = useState<number | "">("");
+  const [maxBudget, setMaxBudget] = useState<number | "">("");
+  const [deliveryDate, setDeliveryDate] = useState("");
+  const [hasBids, setHasBids] = useState<"" | "yes" | "no">("");
+  const [sortBy, setSortBy] = useState<"newest" | "budget-low" | "budget-high" | "most-bids">("newest");
   const [bidRequest, setBidRequest] = useState<MarketRequest | null>(null);
   const [editBid, setEditBid] = useState<MarketBid | null>(null);
   const [counterTarget, setCounterTarget] = useState<MarketBid | null>(null);
@@ -347,17 +356,59 @@ export function BuyerMarket() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return requests.filter((r) => {
-      const matchesCategory = !category || r.category === category;
-      const matchesSearch =
-        !q ||
-        r.foodName.toLowerCase().includes(q) ||
-        r.category.toLowerCase().includes(q) ||
-        r.deliveryAddress.toLowerCase().includes(q) ||
-        r.buyer.name.toLowerCase().includes(q);
-      return matchesCategory && matchesSearch && r.status === "open";
-    });
-  }, [requests, search, category]);
+    const minB = minBudget === "" ? 0 : Number(minBudget);
+    const maxB = maxBudget === "" ? Infinity : Number(maxBudget);
+    const selectedDate = deliveryDate ? new Date(deliveryDate).setHours(0, 0, 0, 0) : null;
+
+    const list = requests
+      .filter((r) => {
+        const matchesCategory = !category || r.category === category;
+        const matchesSearch =
+          !q ||
+          r.foodName.toLowerCase().includes(q) ||
+          r.category.toLowerCase().includes(q) ||
+          r.deliveryAddress.toLowerCase().includes(q) ||
+          r.buyer.name.toLowerCase().includes(q);
+        const matchesBudget = r.budgetMax >= minB && r.budgetMin <= maxB;
+        const matchesBids =
+          hasBids === "" ||
+          (hasBids === "yes" ? r.bids.length > 0 : r.bids.length === 0);
+        const matchesDate =
+          !selectedDate ||
+          new Date(r.deliveryDateTime).setHours(0, 0, 0, 0) === selectedDate;
+        return matchesCategory && matchesSearch && matchesBudget && matchesBids && matchesDate && r.status === "open";
+      })
+      .sort((a, b) => {
+        switch (sortBy) {
+          case "budget-low":
+            return a.budgetMin - b.budgetMin;
+          case "budget-high":
+            return b.budgetMax - a.budgetMax;
+          case "most-bids":
+            return b.bids.length - a.bids.length;
+          default:
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+      });
+
+    return list;
+  }, [requests, search, category, minBudget, maxBudget, deliveryDate, hasBids, sortBy]);
+
+  const activeFilterCount = [
+    minBudget !== "",
+    maxBudget !== "",
+    !!deliveryDate,
+    !!hasBids,
+    sortBy !== "newest",
+  ].filter(Boolean).length;
+
+  const clearFilters = () => {
+    setMinBudget("");
+    setMaxBudget("");
+    setDeliveryDate("");
+    setHasBids("");
+    setSortBy("newest");
+  };
 
   const isBuyer = (request: MarketRequest) => user?.role === "buyer" && user?.id === request.buyer.id;
   const isVendor = () => user?.role === "vendor";
@@ -462,31 +513,138 @@ export function BuyerMarket() {
           </Button>
         </div>
 
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <div className="flex flex-1 items-center gap-2 rounded-2xl border border-gray-200 bg-white px-3 py-2">
-            <Search className="h-4 w-4 text-gray-400" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search requests, cuisines, or locations"
-              className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal className="h-4 w-4 text-gray-500" />
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="rounded-2xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none"
+        <div className="mt-6 rounded-3xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-1 items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2">
+              <Search className="h-4 w-4 text-gray-400" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search requests, cuisines, or locations"
+                className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal className="h-4 w-4 text-gray-500" />
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none"
+              >
+                <option value="">All categories</option>
+                {categories.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="gap-2 border-gray-200 text-gray-700"
+              onClick={() => setShowFilters((s) => !s)}
             >
-              <option value="">All categories</option>
-              {categories.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+              <Filter className="h-4 w-4" />
+              Filters
+              {activeFilterCount > 0 && (
+                <span className="rounded-full bg-orange-500 px-2 py-0.5 text-xs text-white">{activeFilterCount}</span>
+              )}
+              <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
+            </Button>
           </div>
+
+          {showFilters && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="mt-4 grid gap-4 border-t border-gray-100 pt-4 sm:grid-cols-2 lg:grid-cols-4"
+            >
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">Min budget</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={minBudget}
+                  onChange={(e) => setMinBudget(e.target.value === "" ? "" : Number(e.target.value))}
+                  placeholder="Min budget"
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">Max budget</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={maxBudget}
+                  onChange={(e) => setMaxBudget(e.target.value === "" ? "" : Number(e.target.value))}
+                  placeholder="Max budget"
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">Delivery date</label>
+                <div className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2">
+                  <CalendarDays className="h-4 w-4 text-gray-400" />
+                  <input
+                    type="date"
+                    value={deliveryDate}
+                    onChange={(e) => setDeliveryDate(e.target.value)}
+                    className="w-full bg-transparent text-sm outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">Bids</label>
+                <select
+                  value={hasBids}
+                  onChange={(e) => setHasBids(e.target.value as "" | "yes" | "no")}
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none"
+                >
+                  <option value="">Any</option>
+                  <option value="yes">Has bids</option>
+                  <option value="no">No bids yet</option>
+                </select>
+              </div>
+
+              <div className="space-y-2 sm:col-span-2 lg:col-span-4">
+                <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">Sort by</label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { value: "newest", label: "Newest" },
+                    { value: "budget-low", label: "Budget: low to high" },
+                    { value: "budget-high", label: "Budget: high to low" },
+                    { value: "most-bids", label: "Most bids" },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setSortBy(option.value as typeof sortBy)}
+                      className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                        sortBy === option.value
+                          ? "bg-orange-500 text-white"
+                          : "border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                  {activeFilterCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={clearFilters}
+                      className="ml-auto flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100"
+                    >
+                      <X className="h-4 w-4" /> Clear filters
+                    </button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
         </div>
 
         {!user && (

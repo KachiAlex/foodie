@@ -1,6 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Search, SlidersHorizontal, Store, Star, BadgeCheck, UtensilsCrossed } from "lucide-react";
+import {
+  Search,
+  SlidersHorizontal,
+  Store,
+  Star,
+  BadgeCheck,
+  UtensilsCrossed,
+  ChevronDown,
+  Filter,
+  MapPin,
+  X,
+} from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -18,6 +29,14 @@ export function VendorMarket() {
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [minRating, setMinRating] = useState(0);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [onlineOnly, setOnlineOnly] = useState(false);
+  const [specialty, setSpecialty] = useState("");
+  const [location, setLocation] = useState("");
+  const [minPrice, setMinPrice] = useState<number | "">("");
+  const [maxPrice, setMaxPrice] = useState<number | "">("");
   const [activeVendor, setActiveVendor] = useState<CommunityVendor | null>(null);
   const [activeItem, setActiveItem] = useState<CommunityMenuItem | null>(null);
 
@@ -34,9 +53,32 @@ export function VendorMarket() {
     [vendors]
   );
 
+  const specialties = useMemo(
+    () => Array.from(new Set(vendors.flatMap((v) => v.specialties || []))),
+    [vendors]
+  );
+
   const filteredVendors = useMemo(() => {
     const q = search.trim().toLowerCase();
+    const loc = location.trim().toLowerCase();
+    const min = minPrice === "" ? 0 : Number(minPrice);
+    const max = maxPrice === "" ? Infinity : Number(maxPrice);
+
     return vendors
+      .filter((vendor) => {
+        const profileMatch =
+          vendor.rating >= minRating &&
+          (!verifiedOnly || vendor.verified) &&
+          (!onlineOnly || vendor.isOnline) &&
+          (!specialty || vendor.specialties.includes(specialty)) &&
+          (!loc ||
+            [vendor.city, vendor.state, vendor.streetAddress]
+              .filter(Boolean)
+              .join(" ")
+              .toLowerCase()
+              .includes(loc));
+        return profileMatch;
+      })
       .map((vendor) => ({
         ...vendor,
         menuItems: vendor.menuItems.filter((item) => {
@@ -46,11 +88,44 @@ export function VendorMarket() {
             item.name.toLowerCase().includes(q) ||
             item.category.toLowerCase().includes(q) ||
             vendor.kitchenName.toLowerCase().includes(q);
-          return matchesCategory && matchesSearch;
+          const price = Number(item.price);
+          const matchesPrice = price >= min && price <= max;
+          return matchesCategory && matchesSearch && matchesPrice;
         }),
       }))
       .filter((vendor) => vendor.menuItems.length > 0);
-  }, [vendors, search, category]);
+  }, [
+    vendors,
+    search,
+    category,
+    minRating,
+    verifiedOnly,
+    onlineOnly,
+    specialty,
+    location,
+    minPrice,
+    maxPrice,
+  ]);
+
+  const activeFilterCount = [
+    minRating > 0,
+    verifiedOnly,
+    onlineOnly,
+    !!specialty,
+    !!location,
+    minPrice !== "",
+    maxPrice !== "",
+  ].filter(Boolean).length;
+
+  const clearFilters = () => {
+    setMinRating(0);
+    setVerifiedOnly(false);
+    setOnlineOnly(false);
+    setSpecialty("");
+    setLocation("");
+    setMinPrice("");
+    setMaxPrice("");
+  };
 
   const openRequest = (vendor: CommunityVendor, item: CommunityMenuItem) => {
     if (!user) {
@@ -90,31 +165,151 @@ export function VendorMarket() {
           </Button>
         </div>
 
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <div className="flex flex-1 items-center gap-2 rounded-2xl border border-gray-200 bg-white px-3 py-2">
-            <Search className="h-4 w-4 text-gray-400" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search dishes, cuisines, or kitchens"
-              className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal className="h-4 w-4 text-gray-500" />
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="rounded-2xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none"
+        <div className="mt-6 rounded-3xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-1 items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2">
+              <Search className="h-4 w-4 text-gray-400" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search dishes, cuisines, or kitchens"
+                className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal className="h-4 w-4 text-gray-500" />
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none"
+              >
+                <option value="">All categories</option>
+                {categories.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="gap-2 border-gray-200 text-gray-700"
+              onClick={() => setShowFilters((s) => !s)}
             >
-              <option value="">All categories</option>
-              {categories.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+              <Filter className="h-4 w-4" />
+              Filters
+              {activeFilterCount > 0 && (
+                <span className="rounded-full bg-orange-500 px-2 py-0.5 text-xs text-white">{activeFilterCount}</span>
+              )}
+              <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
+            </Button>
           </div>
+
+          {showFilters && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="mt-4 grid gap-4 border-t border-gray-100 pt-4 sm:grid-cols-2 lg:grid-cols-4"
+            >
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">Min rating</label>
+                <select
+                  value={minRating}
+                  onChange={(e) => setMinRating(Number(e.target.value))}
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none"
+                >
+                  <option value={0}>Any rating</option>
+                  <option value={3}>3+ stars</option>
+                  <option value={3.5}>3.5+ stars</option>
+                  <option value={4}>4+ stars</option>
+                  <option value={4.5}>4.5+ stars</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">Specialty</label>
+                <select
+                  value={specialty}
+                  onChange={(e) => setSpecialty(e.target.value)}
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none"
+                >
+                  <option value="">Any specialty</option>
+                  {specialties.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">Location</label>
+                <div className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2">
+                  <MapPin className="h-4 w-4 text-gray-400" />
+                  <input
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="City or state"
+                    className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">Dish price range</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={0}
+                    value={minPrice}
+                    onChange={(e) => setMinPrice(e.target.value === "" ? "" : Number(e.target.value))}
+                    placeholder="Min"
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none"
+                  />
+                  <span className="text-gray-400">-</span>
+                  <input
+                    type="number"
+                    min={0}
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(e.target.value === "" ? "" : Number(e.target.value))}
+                    placeholder="Max"
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 sm:col-span-2 lg:col-span-4">
+                <label className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={verifiedOnly}
+                    onChange={(e) => setVerifiedOnly(e.target.checked)}
+                    className="h-4 w-4 accent-orange-500"
+                  />
+                  <BadgeCheck className="h-4 w-4 text-blue-500" /> Verified only
+                </label>
+                <label className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={onlineOnly}
+                    onChange={(e) => setOnlineOnly(e.target.checked)}
+                    className="h-4 w-4 accent-orange-500"
+                  />
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" /> Online now
+                </label>
+                {activeFilterCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="ml-auto flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-gray-700"
+                  >
+                    <X className="h-4 w-4" /> Clear filters
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          )}
         </div>
 
         {isLoading && (
@@ -129,7 +324,7 @@ export function VendorMarket() {
           <div className="mt-12 rounded-3xl border border-dashed border-gray-300 bg-white p-12 text-center">
             <Store className="mx-auto h-10 w-10 text-gray-300" />
             <p className="mt-4 text-sm font-semibold text-gray-600">No dishes match your search</p>
-            <p className="text-xs text-gray-400">Try a different keyword or category.</p>
+            <p className="text-xs text-gray-400">Try adjusting your filters.</p>
           </div>
         )}
 
