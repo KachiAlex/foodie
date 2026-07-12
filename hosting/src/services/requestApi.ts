@@ -56,6 +56,7 @@ function mapRequest(r: BackendRequest): BuyerRequest {
     servings: r.quantity,
     budget: r.budgetMax || r.budgetMin || 0,
     status: mapStatus(r.status),
+    rawStatus: r.status,
     deliveryWindow: new Date(r.deliveryDateTime).toLocaleString(undefined, {
       weekday: "short",
       month: "short",

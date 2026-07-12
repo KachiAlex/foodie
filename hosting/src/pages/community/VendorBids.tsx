@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Inbox, ChefHat } from "lucide-react";
@@ -33,33 +33,42 @@ export function VendorBids() {
   const { symbol } = useCurrency();
   const [bids, setBids] = useState<MyBid[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
 
-  const load = async () => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const load = useCallback(async () => {
     if (!user) return;
+    setIsLoading(true);
     try {
-      const data = await fetchMyBids();
-      setBids(data);
+      const res = await fetchMyBids(statusFilter, debouncedSearch, page);
+      setBids(res.data);
+      setPagination(res.pagination);
     } catch {
       showToast("Failed to load your bids");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, statusFilter, debouncedSearch, page, showToast]);
 
   useEffect(() => {
     load();
-  }, [showToast]);
+  }, [load]);
 
   useEffect(() => {
     const interval = setInterval(() => load(), 30_000);
     return () => clearInterval(interval);
   }, [load]);
-
-  const filtered = useMemo(() => {
-    if (!statusFilter) return bids;
-    return bids.filter((b) => b.status === statusFilter);
-  }, [bids, statusFilter]);
 
   const statuses = useMemo(
     () => Array.from(new Set(bids.map((b) => b.status))),
@@ -103,10 +112,23 @@ export function VendorBids() {
           </div>
         </div>
 
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by request or message..."
+            className="w-full max-w-md rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+          />
+          <p className="text-xs text-gray-500">
+            Page {pagination.page} of {pagination.totalPages} ({pagination.total} total)
+          </p>
+        </div>
+
         {statuses.length > 0 && (
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             <button
-              onClick={() => setStatusFilter("")}
+              onClick={() => { setStatusFilter(""); setPage(1); }}
               className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
                 statusFilter === "" ? "bg-orange-500 text-white" : "bg-white text-gray-600 hover:bg-gray-100"
               }`}
@@ -116,7 +138,7 @@ export function VendorBids() {
             {statuses.map((s) => (
               <button
                 key={s}
-                onClick={() => setStatusFilter(s)}
+                onClick={() => { setStatusFilter(s); setPage(1); }}
                 className={`rounded-full px-3 py-1 text-xs font-semibold capitalize transition ${
                   statusFilter === s ? "bg-orange-500 text-white" : "bg-white text-gray-600 hover:bg-gray-100"
                 }`}
@@ -135,14 +157,14 @@ export function VendorBids() {
           </div>
         )}
 
-        {!isLoading && filtered.length === 0 && (
+        {!isLoading && bids.length === 0 && (
           <div className="mt-12 rounded-3xl border border-dashed border-gray-300 bg-white p-12 text-center">
             <Inbox className="mx-auto h-10 w-10 text-gray-300" />
-            <p className="mt-4 text-sm font-semibold text-gray-600">No bids yet</p>
+            <p className="mt-4 text-sm font-semibold text-gray-600">No bids found</p>
             <p className="text-xs text-gray-400">
-              {statusFilter ? "No bids in this status." : "Head to the buyer market to place your first bid."}
+              {statusFilter || debouncedSearch ? "Try adjusting your filters." : "Head to the buyer market to place your first bid."}
             </p>
-            {!statusFilter && (
+            {!statusFilter && !debouncedSearch && (
               <Button className="mt-4 bg-orange-500 text-white hover:bg-orange-600" asChild>
                 <Link to="/community/buyer-market">Browse requests</Link>
               </Button>
@@ -151,7 +173,7 @@ export function VendorBids() {
         )}
 
         <div className="mt-8 space-y-4">
-          {filtered.map((bid) => (
+          {bids.map((bid) => (
             <motion.div
               key={bid.id}
               initial={{ opacity: 0, y: 8 }}
@@ -220,6 +242,30 @@ export function VendorBids() {
             </motion.div>
           ))}
         </div>
+
+        {pagination.totalPages > 1 && (
+          <div className="mt-8 flex items-center justify-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-gray-600">
+              Page {pagination.page} of {pagination.totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= pagination.totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next
+            </Button>
+          </div>
+        )}
       </section>
     </div>
   );

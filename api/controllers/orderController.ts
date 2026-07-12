@@ -7,8 +7,8 @@ async function notify(userId: string, title: string, body: string, type: string)
     await prisma.notification.create({
       data: { userId, title, body, type },
     });
-  } catch {
-    // silent fail
+  } catch (err) {
+    console.error("[notification] failed to create notification for user", userId, { title, type, error: err });
   }
 }
 
@@ -51,6 +51,17 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
+  const existingActiveOrder = await prisma.order.findFirst({
+    where: {
+      requestId,
+      status: { notIn: ["cancelled", "disputed"] },
+    },
+  });
+  if (existingActiveOrder) {
+    res.status(409).json({ success: false, error: { message: "An active order already exists for this request" } });
+    return;
+  }
+
   const order = await prisma.order.create({
     data: {
       requestId,
@@ -62,7 +73,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
       platformFee: Number(platformFee) || 0,
       escrowFee: Number(escrowFee) || 0,
       totalAmount: Number(totalAmount) || 0,
-      status: "paid",
+      status: "accepted",
     },
     include: {
       buyer: { select: { id: true, name: true } },
@@ -70,11 +81,13 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     },
   });
 
-  // Update request status to paid
-  await prisma.foodRequest.update({
-    where: { id: requestId },
-    data: { status: "paid" },
-  });
+  // Notify vendor that their bid was selected and payment is pending
+  await notify(
+    vendorId,
+    "Bid selected",
+    `Your bid for "${order.request?.foodName ?? "a request"}" was selected. Awaiting buyer payment.`,
+    "bid_selected"
+  );
 
   res.status(201).json({ success: true, data: order });
 });

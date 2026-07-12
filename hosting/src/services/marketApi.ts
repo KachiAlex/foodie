@@ -48,6 +48,7 @@ export interface MarketRequest {
   imageUrl?: string | null;
   status: string;
   createdAt: string;
+  updatedAt: string;
   bids: MarketBid[];
 }
 
@@ -59,8 +60,9 @@ export interface PlaceBidPayload {
   message: string;
 }
 
-export async function fetchMarketRequests(): Promise<MarketRequest[]> {
-  return api.get<MarketRequest[]>("/requests");
+export async function fetchMarketRequests(updatedAfter?: string): Promise<MarketRequest[]> {
+  const url = updatedAfter ? `/requests?updatedAfter=${encodeURIComponent(updatedAfter)}` : "/requests";
+  return api.get<MarketRequest[]>(url);
 }
 
 export async function placeBid(payload: PlaceBidPayload): Promise<MarketBid> {
@@ -102,6 +104,21 @@ export interface MyBid {
   createdAt: string;
 }
 
-export async function fetchMyBids(): Promise<MyBid[]> {
-  return api.get<MyBid[]>("/bids/my");
+export interface PaginatedMyBids {
+  data: MyBid[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+}
+
+export async function fetchMyBids(
+  status = "",
+  search = "",
+  page = 1,
+  limit = 10
+): Promise<PaginatedMyBids> {
+  const params = new URLSearchParams();
+  if (status) params.append("status", status);
+  if (search) params.append("search", search);
+  params.append("page", String(page));
+  params.append("limit", String(limit));
+  return api.get<PaginatedMyBids>(`/bids/my?${params.toString()}`);
 }

@@ -4,6 +4,7 @@ import { api } from "./apiClient";
 /* Backend shape mapping */
 interface BackendOrder {
   id: string;
+  requestId?: string;
   buyer?: { name: string };
   request?: { foodName: string };
   foodCost: number;
@@ -16,8 +17,9 @@ interface BackendOrder {
 
 function mapOrderStatus(status: string): BuyerOrder["status"] {
   switch (status) {
-    case "paid":
     case "accepted":
+      return "New";
+    case "paid":
     case "cooking":
       return "Cooking";
     case "ready_for_pickup":
@@ -30,7 +32,7 @@ function mapOrderStatus(status: string): BuyerOrder["status"] {
     case "cancelled":
       return "Delivered";
     default:
-      return "Cooking";
+      return "New";
   }
 }
 
@@ -58,11 +60,13 @@ function mapVendorOrderStatus(status: string): VendorOrderStage["status"] {
 function mapBuyerOrder(o: BackendOrder): BuyerOrder {
   return {
     id: o.id,
+    requestId: o.requestId || "",
     chef: o.request?.foodName || "Unknown",
     dishes: o.request?.foodName || "Unknown",
     amount: o.totalAmount || o.foodCost + o.deliveryFee || 0,
     eta: o.deliveredAt ? new Date(o.deliveredAt).toLocaleString() : "Pending",
     status: mapOrderStatus(o.status),
+    rawStatus: o.status,
     createdAt: o.createdAt,
   };
 }
@@ -141,7 +145,7 @@ export async function updateVendorOrderStatus(
         ? "ready_for_pickup"
         : status === "Cooking"
           ? "cooking"
-          : "paid";
+          : "accepted";
   const data = await api.patch<BackendOrder>(`/orders/${orderId}/status`, { status: backendStatus });
   return mapVendorOrder(data);
 }

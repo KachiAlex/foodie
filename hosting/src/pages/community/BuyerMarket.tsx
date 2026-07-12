@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -337,18 +337,35 @@ export function BuyerMarket() {
   const [checkout, setCheckout] = useState<{ orderId: string; amount: number; foodName: string } | null>(null);
   const [showNewRequest, setShowNewRequest] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const lastUpdatedAtRef = useRef<string | null>(null);
 
-  const load = async () => {
-    setIsLoading(true);
-    try {
-      const data = await fetchMarketRequests();
-      setRequests(data);
-    } catch {
-      showToast("Failed to load buyer market");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const load = useCallback(
+    async (incremental = false) => {
+      if (!incremental) setIsLoading(true);
+      try {
+        const data = await fetchMarketRequests(incremental ? lastUpdatedAtRef.current ?? undefined : undefined);
+        if (data.length > 0) {
+          setRequests((prev) => {
+            const map = new Map(prev.map((r) => [r.id, r]));
+            data.forEach((r) => map.set(r.id, r));
+            return Array.from(map.values()).sort(
+              (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+          });
+          const latest = data.reduce((max, r) => {
+            const t = new Date(r.updatedAt).getTime();
+            return t > max ? t : max;
+          }, new Date(lastUpdatedAtRef.current ?? 0).getTime());
+          lastUpdatedAtRef.current = new Date(latest).toISOString();
+        }
+      } catch {
+        if (!incremental) showToast("Failed to load buyer market");
+      } finally {
+        if (!incremental) setIsLoading(false);
+      }
+    },
+    [showToast]
+  );
 
   useEffect(() => {
     load();
@@ -356,15 +373,15 @@ export function BuyerMarket() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      load();
+      load(true);
     }, 30_000);
-    const onFocus = () => load();
+    const onFocus = () => load(true);
     window.addEventListener("focus", onFocus);
     return () => {
       clearInterval(interval);
       window.removeEventListener("focus", onFocus);
     };
-  }, []);
+  }, [load]);
 
   const categories = useMemo(
     () => Array.from(new Set(requests.map((r) => r.category))),

@@ -8,8 +8,8 @@ async function notify(userId: string, title: string, body: string, type: string)
     await prisma.notification.create({
       data: { userId, title, body, type },
     });
-  } catch {
-    // silent fail — notifications should not break business logic
+  } catch (err) {
+    console.error("[notification] failed to create notification for user", userId, { title, type, error: err });
   }
 }
 
@@ -28,14 +28,43 @@ export const listBids = asyncHandler(async (req: Request, res: Response) => {
 
 export const listMyBids = asyncHandler(async (req: Request, res: Response) => {
   const authUser = (req as Request & { user?: AuthUser }).user!;
-  const data = await prisma.bid.findMany({
-    where: { vendorId: authUser.id },
-    orderBy: { createdAt: "desc" },
-    include: {
-      request: { select: { id: true, foodName: true, status: true } },
-    },
+  const status = req.query.status as string | undefined;
+  const search = req.query.search as string | undefined;
+  const page = Math.max(1, Number(req.query.page) || 1);
+  const limit = Math.max(1, Math.min(100, Number(req.query.limit) || 10));
+  const skip = (page - 1) * limit;
+
+  const where: NonNullable<Parameters<typeof prisma.bid.findMany>[0]>["where"] = {
+    vendorId: authUser.id,
+    ...(status ? { status: status as any } : {}),
+    ...(search
+      ? {
+          OR: [
+            { request: { foodName: { contains: search, mode: "insensitive" } } },
+            { message: { contains: search, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+  };
+
+  const [data, total] = await prisma.$transaction([
+    prisma.bid.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+      include: {
+        request: { select: { id: true, foodName: true, status: true } },
+      },
+    }),
+    prisma.bid.count({ where }),
+  ]);
+
+  res.json({
+    success: true,
+    data,
+    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
   });
-  res.json({ success: true, data });
 });
 
 export const createBid = asyncHandler(async (req: Request, res: Response) => {

@@ -51,7 +51,7 @@ export const initiatePayment = asyncHandler(async (req: Request, res: Response) 
     res.status(403).json({ success: false, error: { message: "Not your order" } });
     return;
   }
-  if (order.status !== "paid") {
+  if (order.status !== "accepted") {
     res.status(400).json({ success: false, error: { message: `Order already in status: ${order.status}` } });
     return;
   }
@@ -144,11 +144,19 @@ export const verifyPayment = asyncHandler(async (req: Request, res: Response) =>
     create: { vendorId, available: 0, pending: amount, totalEarned: 0, currency: "NGN" },
   });
 
-  // Advance order to accepted
-  await prisma.order.update({
+  // Advance order to paid
+  const order = await prisma.order.update({
     where: { id: orderId },
-    data: { status: "accepted" },
+    data: { status: "paid" },
   });
+
+  // Advance linked request to paid
+  if (order.requestId) {
+    await prisma.foodRequest.update({
+      where: { id: order.requestId },
+      data: { status: "paid" },
+    });
+  }
 
   res.json({ success: true, data: { status: "success", orderId } });
 });

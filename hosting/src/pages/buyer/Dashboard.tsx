@@ -89,6 +89,15 @@ export function BuyerDashboard() {
     [bids],
   );
 
+  const ordersByRequest = useMemo(
+    () =>
+      orders.reduce<Record<string, (typeof orders)[0]>>((acc, order) => {
+        if (order.requestId) acc[order.requestId] = order;
+        return acc;
+      }, {}),
+    [orders],
+  );
+
   const actionableRequests = useMemo(
     () => requests.filter((r) => r.status === "collecting_bids" && (bidsByRequest[r.id]?.length ?? 0) > 0),
     [requests, bidsByRequest],
@@ -395,6 +404,8 @@ export function BuyerDashboard() {
               const reqBids = bidsByRequest[request.id] ?? [];
               const isExpanded = expandedRequestIds.has(request.id);
               const hasActionable = request.status === "collecting_bids" && reqBids.length > 0;
+              const linkedOrder = ordersByRequest[request.id];
+              const canReopen = request.rawStatus === "bid_selected" && (!linkedOrder || linkedOrder.rawStatus === "accepted");
               return (
                 <motion.div
                   key={request.id}
@@ -482,7 +493,7 @@ export function BuyerDashboard() {
                       onClick={() => setActiveBriefId(request.id)}>
                       Details
                     </Button>
-                    {request.status === "in_progress" && (
+                    {canReopen && (
                       <Button
                         variant="ghost"
                         size="sm"

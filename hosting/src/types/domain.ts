@@ -10,17 +10,20 @@ export interface BuyerRequest {
   servings: number;
   budget: number;
   status: RequestStatus;
+  rawStatus: string;
   deliveryWindow: string;
   bids: number;
 }
 
 export interface BuyerOrder {
   id: string;
+  requestId: string;
   chef: string;
   dishes: string;
   amount: number;
   eta: string;
-  status: "Cooking" | "Out for delivery" | "Delivered";
+  status: "New" | "Cooking" | "Out for delivery" | "Delivered";
+  rawStatus: string;
   createdAt?: string;
 }
 

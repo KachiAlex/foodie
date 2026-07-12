@@ -8,15 +8,27 @@ async function notify(userId: string, title: string, body: string, type: string)
     await prisma.notification.create({
       data: { userId, title, body, type },
     });
-  } catch {
-    // silent fail — notifications should not break business logic
+  } catch (err) {
+    // Notification failures should not break business logic, but they must be visible.
+    console.error("[notification] failed to create notification for user", userId, { title, type, error: err });
   }
 }
 
 export const listRequests = asyncHandler(async (req: Request, res: Response) => {
   const buyerId = req.query.buyerId as string | undefined;
+  const updatedAfter = req.query.updatedAfter as string | undefined;
   const data = await prisma.foodRequest.findMany({
-    where: buyerId ? { buyerId } : undefined,
+    where: {
+      ...(buyerId ? { buyerId } : {}),
+      ...(updatedAfter
+        ? {
+            OR: [
+              { updatedAt: { gt: new Date(updatedAfter) } },
+              { bids: { some: { updatedAt: { gt: new Date(updatedAfter) } } } },
+            ],
+          }
+        : {}),
+    },
     orderBy: { createdAt: "desc" },
     include: {
       buyer: { select: { id: true, name: true, email: true } },
@@ -135,18 +147,16 @@ export const reopenRequest = asyncHandler(async (req: Request, res: Response) =>
     res.status(403).json({ success: false, error: { message: "Only the buyer can reopen this request" } });
     return;
   }
-  if (existing.status !== "bid_selected" && existing.status !== "paid") {
+  if (existing.status !== "bid_selected") {
     res.status(400).json({ success: false, error: { message: "Request can only be reopened before payment" } });
     return;
   }
 
-  // Cancel any unpaid order for this request
-  if (existing.status === "paid") {
-    await prisma.order.updateMany({
-      where: { requestId: existing.id, status: "paid" },
-      data: { status: "cancelled" },
-    });
-  }
+  // Cancel the accepted (unpaid) order for this request
+  await prisma.order.updateMany({
+    where: { requestId: existing.id, status: "accepted" },
+    data: { status: "cancelled" },
+  });
 
   // Reset all bids back to active
   await prisma.bid.updateMany({
