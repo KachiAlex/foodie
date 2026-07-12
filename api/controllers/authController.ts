@@ -33,27 +33,25 @@ export const signUp = asyncHandler(async (req: Request, res: Response) => {
       passwordHash,
       role: role || "buyer",
       verificationStatus: role === "vendor" ? "pending" : "verified",
-      vendorProfile:
-        role === "vendor" && vendorVerification
-          ? {
-              create: {
-                kitchenName: name,
-                streetAddress: vendorVerification.streetAddress || "",
-                city: vendorVerification.city || "",
-                state: vendorVerification.state || "",
-                landmark: vendorVerification.landmark || "",
-                specialties: ["Nigerian"],
-                rating: 0,
-                totalOrders: 0,
-                isOnline: false,
-                verified: false,
-              },
-            }
-          : undefined,
     },
   });
 
   if (user.role === "vendor") {
+    await prisma.vendorProfile.create({
+      data: {
+        userId: user.id,
+        kitchenName: name,
+        streetAddress: vendorVerification?.streetAddress || "",
+        city: vendorVerification?.city || "",
+        state: vendorVerification?.state || "",
+        landmark: vendorVerification?.landmark || "",
+        specialties: ["Nigerian"],
+        rating: 0,
+        totalOrders: 0,
+        isOnline: false,
+        verified: false,
+      },
+    });
     await prisma.escrowWallet.create({
       data: {
         vendorId: user.id,

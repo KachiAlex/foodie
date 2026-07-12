@@ -157,17 +157,15 @@ export const verifyVendor = asyncHandler(async (req: Request, res: Response) => 
     res.status(404).json({ success: false, error: { message: "Vendor profile not found" } });
     return;
   }
-  const [profile] = await prisma.$transaction([
-    prisma.vendorProfile.update({
-      where: { userId: req.params.id },
-      data: { verified: true },
-      include: { user: { select: { id: true, name: true, email: true } } },
-    }),
-    prisma.user.update({
-      where: { id: req.params.id },
-      data: { verificationStatus: "verified" },
-    }),
-  ]);
+  const profile = await prisma.vendorProfile.update({
+    where: { userId: req.params.id },
+    data: { verified: true },
+    include: { user: { select: { id: true, name: true, email: true } } },
+  });
+  await prisma.user.update({
+    where: { id: req.params.id },
+    data: { verificationStatus: "verified" },
+  });
   await prisma.auditLog.create({
     data: {
       actor: "admin",
@@ -198,17 +196,15 @@ export const flagVendor = asyncHandler(async (req: Request, res: Response) => {
     res.status(404).json({ success: false, error: { message: "Vendor not found" } });
     return;
   }
-  const [profile] = await prisma.$transaction([
-    prisma.vendorProfile.update({
-      where: { userId: req.params.id },
-      data: { verified: false },
-      include: { user: { select: { id: true, name: true, email: true } } },
-    }),
-    prisma.user.update({
-      where: { id: req.params.id },
-      data: { verificationStatus: "pending" },
-    }),
-  ]);
+  const profile = await prisma.vendorProfile.update({
+    where: { userId: req.params.id },
+    data: { verified: false },
+    include: { user: { select: { id: true, name: true, email: true } } },
+  });
+  await prisma.user.update({
+    where: { id: req.params.id },
+    data: { verificationStatus: "pending" },
+  });
   await prisma.auditLog.create({
     data: {
       actor: "admin",

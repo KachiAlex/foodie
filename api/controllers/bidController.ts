@@ -47,7 +47,7 @@ export const listMyBids = asyncHandler(async (req: Request, res: Response) => {
       : {}),
   };
 
-  const [data, total] = await prisma.$transaction([
+  const [data, total] = await Promise.all([
     prisma.bid.findMany({
       where,
       orderBy: { createdAt: "desc" },

@@ -138,11 +138,17 @@ export const verifyPayment = asyncHandler(async (req: Request, res: Response) =>
   });
 
   // Hold funds in vendor wallet as pending (not yet available until delivery)
-  await prisma.escrowWallet.upsert({
-    where: { vendorId },
-    update: { pending: { increment: amount } },
-    create: { vendorId, available: 0, pending: amount, totalEarned: 0, currency: "NGN" },
-  });
+  const wallet = await prisma.escrowWallet.findUnique({ where: { vendorId } });
+  if (wallet) {
+    await prisma.escrowWallet.update({
+      where: { vendorId },
+      data: { pending: { increment: amount } },
+    });
+  } else {
+    await prisma.escrowWallet.create({
+      data: { vendorId, available: 0, pending: amount, totalEarned: 0, currency: "NGN" },
+    });
+  }
 
   // Advance order to paid
   const order = await prisma.order.update({
@@ -275,10 +281,16 @@ export const deposit = asyncHandler(async (req: Request, res: Response) => {
   const tx = await prisma.escrowTransaction.create({
     data: { vendorId, orderId, amount: Number(amount) || 0, type: "deposit", status: "completed" },
   });
-  await prisma.escrowWallet.upsert({
-    where: { vendorId },
-    update: { pending: { increment: Number(amount) || 0 } },
-    create: { vendorId, available: 0, pending: Number(amount) || 0, totalEarned: 0, currency: "NGN" },
-  });
+  const wallet = await prisma.escrowWallet.findUnique({ where: { vendorId } });
+  if (wallet) {
+    await prisma.escrowWallet.update({
+      where: { vendorId },
+      data: { pending: { increment: Number(amount) || 0 } },
+    });
+  } else {
+    await prisma.escrowWallet.create({
+      data: { vendorId, available: 0, pending: Number(amount) || 0, totalEarned: 0, currency: "NGN" },
+    });
+  }
   res.json({ success: true, data: tx });
 });

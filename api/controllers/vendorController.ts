@@ -61,17 +61,18 @@ export const updateProfile = asyncHandler(async (req: Request, res: Response) =>
 
 export const getWallet = asyncHandler(async (req: Request, res: Response) => {
   const vendorId = (req.params.id || (req as Request & { user?: { id: string } }).user?.id) as string;
-  const wallet = await prisma.escrowWallet.upsert({
-    where: { vendorId },
-    update: {},
-    create: {
-      vendorId,
-      available: 0,
-      pending: 0,
-      totalEarned: 0,
-      currency: "NGN",
-    },
-  });
+  let wallet = await prisma.escrowWallet.findUnique({ where: { vendorId } });
+  if (!wallet) {
+    wallet = await prisma.escrowWallet.create({
+      data: {
+        vendorId,
+        available: 0,
+        pending: 0,
+        totalEarned: 0,
+        currency: "NGN",
+      },
+    });
+  }
   res.json({ success: true, data: wallet });
 });
 
