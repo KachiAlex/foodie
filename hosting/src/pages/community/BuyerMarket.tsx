@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -25,6 +25,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { useApp } from "@/context/AppContext";
 import { PaystackCheckout } from "@/components/PaystackCheckout";
+import { verifyPayment } from "@/services/paymentApi";
 import { NewRequestModal } from "@/components/NewRequestModal";
 import {
   fetchMarketRequests,
@@ -334,7 +335,7 @@ export function BuyerMarket() {
   const [editBid, setEditBid] = useState<MarketBid | null>(null);
   const [counterTarget, setCounterTarget] = useState<MarketBid | null>(null);
   const [profileVendor, setProfileVendor] = useState<MarketBidVendor | null>(null);
-  const [checkout, setCheckout] = useState<{ orderId: string; amount: number; foodName: string } | null>(null);
+  const [checkout, setCheckout] = useState<{ orderId: string; amount: number; foodName: string; foodCost?: number; deliveryFee?: number; platformFee?: number; escrowFee?: number } | null>(null);
   const [showNewRequest, setShowNewRequest] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const lastUpdatedAtRef = useRef<string | null>(null);
@@ -370,6 +371,30 @@ export function BuyerMarket() {
   useEffect(() => {
     load();
   }, [showToast]);
+
+  // Handle Paystack payment redirect callback
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const payment = searchParams.get("payment");
+    const ref = searchParams.get("ref");
+    if (payment === "success" && ref) {
+      verifyPayment(ref)
+        .then((result) => {
+          if (result.status === "success" || result.status === "already_processed") {
+            showToast("Payment confirmed! Your order is now active.");
+            load();
+          } else {
+            showToast("Payment verification pending. If you paid, your order will update shortly.");
+          }
+        })
+        .catch(() => {
+          showToast("Could not verify payment. Please contact support if you were charged.");
+        })
+        .finally(() => {
+          setSearchParams({}, { replace: true });
+        });
+    }
+  }, [searchParams, setSearchParams, showToast, load]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -524,6 +549,10 @@ export function BuyerMarket() {
         orderId: order.id,
         amount: order.amount,
         foodName: request.foodName,
+        foodCost: order.foodCost,
+        deliveryFee: order.deliveryFee,
+        platformFee: order.platformFee,
+        escrowFee: order.escrowFee,
       });
       showToast("Vendor selected — complete payment to confirm");
     } catch {
@@ -948,6 +977,10 @@ export function BuyerMarket() {
           orderId={checkout.orderId}
           orderAmount={checkout.amount}
           foodName={checkout.foodName}
+          foodCost={checkout.foodCost}
+          deliveryFee={checkout.deliveryFee}
+          platformFee={checkout.platformFee}
+          escrowFee={checkout.escrowFee}
           onClose={() => {
             setCheckout(null);
             load();

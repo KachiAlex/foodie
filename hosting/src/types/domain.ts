@@ -21,6 +21,10 @@ export interface BuyerOrder {
   chef: string;
   dishes: string;
   amount: number;
+  foodCost?: number;
+  deliveryFee?: number;
+  platformFee?: number;
+  escrowFee?: number;
   eta: string;
   status: "New" | "Cooking" | "Out for delivery" | "Delivered";
   rawStatus: string;

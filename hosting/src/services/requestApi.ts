@@ -35,6 +35,8 @@ interface BackendOrder {
   request?: { foodName: string };
   foodCost: number;
   deliveryFee: number;
+  platformFee: number;
+  escrowFee: number;
   totalAmount: number;
   status: string;
   createdAt: string;
@@ -69,6 +71,10 @@ function mapBuyerOrder(o: BackendOrder): BuyerOrder {
     chef: o.request?.foodName || "Unknown",
     dishes: o.request?.foodName || "Unknown",
     amount: o.totalAmount || o.foodCost + o.deliveryFee || 0,
+    foodCost: o.foodCost,
+    deliveryFee: o.deliveryFee,
+    platformFee: o.platformFee,
+    escrowFee: o.escrowFee,
     eta: o.deliveredAt ? new Date(o.deliveredAt).toLocaleString() : "Pending",
     status: mapOrderStatus(o.status),
     rawStatus: o.status,

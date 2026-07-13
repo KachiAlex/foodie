@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { CheckCircle2, CreditCard, Loader2, ShieldCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { initiatePayment, verifyPayment } from "@/services/paymentApi";
@@ -8,17 +8,23 @@ interface PaystackCheckoutProps {
   orderId: string;
   orderAmount: number;
   foodName: string;
+  foodCost?: number;
+  deliveryFee?: number;
+  platformFee?: number;
+  escrowFee?: number;
   onClose: () => void;
   onSuccess: (reference: string) => void;
 }
 
 type Step = "confirm" | "redirecting" | "verifying" | "success" | "error";
 
-export function PaystackCheckout({ orderId, orderAmount, foodName, onClose, onSuccess }: PaystackCheckoutProps) {
+export function PaystackCheckout({ orderId, orderAmount, foodName, foodCost, deliveryFee, platformFee, escrowFee, onClose, onSuccess }: PaystackCheckoutProps) {
   const { symbol } = useCurrency();
   const [step, setStep] = useState<Step>("confirm");
   const [errorMsg, setErrorMsg] = useState("");
   const total = orderAmount;
+  const stepRef = useRef<Step>(step);
+  stepRef.current = step;
 
   const handlePay = async () => {
     setStep("redirecting");
@@ -52,7 +58,7 @@ export function PaystackCheckout({ orderId, orderAmount, foodName, onClose, onSu
       // Timeout after 10 minutes
       setTimeout(() => {
         clearInterval(pollInterval);
-        if (step === "verifying") {
+        if (stepRef.current === "verifying") {
           setErrorMsg("Payment window timed out. If you paid, please contact support.");
           setStep("error");
         }
@@ -87,11 +93,34 @@ export function PaystackCheckout({ orderId, orderAmount, foodName, onClose, onSu
               <p className="text-sm text-gray-500">Order</p>
               <p className="text-lg font-semibold text-gray-900">{foodName}</p>
               <div className="mt-4 space-y-2 text-sm text-gray-600">
-                <div className="flex justify-between">
-                  <span>Total to pay</span>
+                {foodCost != null && (
+                  <div className="flex justify-between">
+                    <span>Food cost</span>
+                    <span>{symbol}{foodCost.toLocaleString()}</span>
+                  </div>
+                )}
+                {deliveryFee != null && deliveryFee > 0 && (
+                  <div className="flex justify-between">
+                    <span>Delivery fee</span>
+                    <span>{symbol}{deliveryFee.toLocaleString()}</span>
+                  </div>
+                )}
+                {platformFee != null && platformFee > 0 && (
+                  <div className="flex justify-between">
+                    <span>Platform fee (5%)</span>
+                    <span>{symbol}{platformFee.toLocaleString()}</span>
+                  </div>
+                )}
+                {escrowFee != null && escrowFee > 0 && (
+                  <div className="flex justify-between">
+                    <span>Escrow fee (2%)</span>
+                    <span>{symbol}{escrowFee.toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="mt-2 border-t border-gray-100 pt-2 flex justify-between">
+                  <span className="font-semibold text-gray-900">Total to pay</span>
                   <span className="font-semibold text-gray-900">{symbol}{total.toLocaleString()}</span>
                 </div>
-                <p className="text-xs text-gray-500">Includes food cost, platform, delivery, and escrow fees.</p>
               </div>
             </div>
             <div className="mt-4 flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
@@ -123,6 +152,7 @@ export function PaystackCheckout({ orderId, orderAmount, foodName, onClose, onSu
             <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
             <p className="text-lg font-semibold text-gray-900">Verifying payment…</p>
             <p className="text-sm text-gray-500">We're confirming your transaction. This takes a few seconds.</p>
+            <p className="text-xs text-gray-400">If you've completed payment, close the Paystack tab and we'll verify automatically.</p>
           </div>
         )}
 

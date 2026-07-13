@@ -35,7 +35,7 @@ export function BuyerDashboard() {
   const [activeBriefId, setActiveBriefId] = useState<string | null>(null);
   const [acceptingBidId, setAcceptingBidId] = useState<string | null>(null);
   const [reopeningRequestId, setReopeningRequestId] = useState<string | null>(null);
-  const [checkoutOrder, setCheckoutOrder] = useState<{ orderId: string; amount: number; foodName: string } | null>(null);
+  const [checkoutOrder, setCheckoutOrder] = useState<{ orderId: string; amount: number; foodName: string; foodCost?: number; deliveryFee?: number; platformFee?: number; escrowFee?: number } | null>(null);
   const [vendors, setVendors] = useState<FeaturedVendor[]>([]);
   const [expandedRequestIds, setExpandedRequestIds] = useState<Set<string>>(new Set());
   const [spendRange, setSpendRange] = useState<"7d" | "30d">("7d");
@@ -51,7 +51,7 @@ export function BuyerDashboard() {
     try {
       const { order } = await acceptBid(bid.id, requestId);
       const req = requests.find((r) => r.id === requestId);
-      setCheckoutOrder({ orderId: order.id, amount: order.amount, foodName: req?.title ?? bid.chef });
+      setCheckoutOrder({ orderId: order.id, amount: order.amount, foodName: req?.title ?? bid.chef, foodCost: order.foodCost, deliveryFee: order.deliveryFee, platformFee: order.platformFee, escrowFee: order.escrowFee });
     } catch {
       // handled by context
     } finally {
@@ -589,6 +589,10 @@ export function BuyerDashboard() {
           orderId={checkoutOrder.orderId}
           orderAmount={checkoutOrder.amount}
           foodName={checkoutOrder.foodName}
+          foodCost={checkoutOrder.foodCost}
+          deliveryFee={checkoutOrder.deliveryFee}
+          platformFee={checkoutOrder.platformFee}
+          escrowFee={checkoutOrder.escrowFee}
           onClose={() => setCheckoutOrder(null)}
           onSuccess={() => setCheckoutOrder(null)}
         />

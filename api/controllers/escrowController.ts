@@ -64,7 +64,7 @@ export const initiatePayment = asyncHandler(async (req: Request, res: Response) 
     amount,
     reference,
     metadata: { orderId, buyerId: buyer.id, vendorId: order.vendorId },
-    callback_url: `${process.env.FRONTEND_URL ?? "https://foodie.vercel.app"}/dashboard/buyer?payment=success&ref=${reference}`,
+    callback_url: `${process.env.FRONTEND_URL ?? "https://foodiemarket.vercel.app"}/community/buyer-market?payment=success&ref=${reference}`,
   });
 
   // Create a pending escrow transaction
