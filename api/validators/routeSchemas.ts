@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const createRequestSchema = z.object({
-  buyerId: z.string().uuid().optional(),
+  buyerId: z.string().cuid2().optional(),
   foodName: z.string().min(1, "Food name is required"),
   category: z.string().optional(),
   quantity: z.coerce.number().int().positive().optional().default(1),
@@ -19,7 +19,7 @@ export const updateRequestStatusSchema = z.object({
 });
 
 export const createBidSchema = z.object({
-  requestId: z.string().uuid("Request ID must be a valid UUID"),
+  requestId: z.string().cuid2("Request ID must be a valid CUID"),
   bidAmount: z.coerce.number().positive("Bid amount must be greater than 0"),
   prepTimeMinutes: z.coerce.number().int().nonnegative().optional().default(0),
   estimatedDeliveryTime: z.string().optional(),
@@ -39,9 +39,9 @@ export const counterBidSchema = z.object({
 });
 
 export const createOrderSchema = z.object({
-  requestId: z.string().uuid().optional(),
-  vendorId: z.string().uuid("Vendor ID must be a valid UUID"),
-  bidId: z.string().uuid().optional(),
+  requestId: z.string().cuid2().optional(),
+  vendorId: z.string().cuid2("Vendor ID must be a valid CUID"),
+  bidId: z.string().cuid2().optional(),
   foodCost: z.coerce.number().nonnegative().optional().default(0),
   deliveryFee: z.coerce.number().nonnegative().optional().default(0),
   platformFee: z.coerce.number().nonnegative().optional().default(0),
@@ -65,7 +65,7 @@ export const updateOrderStatusSchema = z.object({
 
 export const openDisputeSchema = z.object({
   reason: z.string().min(1, "Reason is required"),
-  openedById: z.string().uuid().optional(),
+  openedById: z.string().cuid2().optional(),
 });
 
 export const addMenuItemSchema = z.object({
@@ -92,7 +92,7 @@ export const uploadVendorDocumentSchema = z.object({
 });
 
 export const initiatePaymentSchema = z.object({
-  orderId: z.string().uuid("Order ID must be a valid UUID"),
+  orderId: z.string().cuid2("Order ID must be a valid CUID"),
 });
 
 export const withdrawSchema = z.object({
@@ -102,9 +102,9 @@ export const withdrawSchema = z.object({
 });
 
 export const legacyDepositSchema = z.object({
-  vendorId: z.string().uuid(),
+  vendorId: z.string().cuid2(),
   amount: z.coerce.number().nonnegative(),
-  orderId: z.string().uuid().optional(),
+  orderId: z.string().cuid2().optional(),
 });
 
 export const resolveDisputeSchema = z.object({
@@ -120,8 +120,8 @@ export const reviewDocumentSchema = z.object({
 });
 
 export const vendorMarketOfferSchema = z.object({
-  menuItemId: z.string().cuid(),
-  vendorId: z.string().cuid(),
+  menuItemId: z.string().cuid2(),
+  vendorId: z.string().cuid2(),
   quantity: z.coerce.number().int().min(1),
   servings: z.coerce.number().int().min(1).optional(),
   deliveryDate: z.coerce.date().optional(),
