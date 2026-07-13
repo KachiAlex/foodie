@@ -38,10 +38,12 @@ export const counterBidSchema = z.object({
   message: z.string().optional(),
 });
 
+const optionalCuid2 = z.union([z.string().length(0), z.string().cuid2()]).optional().transform((v) => (v === "" ? undefined : v));
+
 export const createOrderSchema = z.object({
-  requestId: z.string().cuid2().optional(),
+  requestId: optionalCuid2,
   vendorId: z.string().cuid2("Vendor ID must be a valid CUID"),
-  bidId: z.string().cuid2().optional(),
+  bidId: optionalCuid2,
   foodCost: z.coerce.number().nonnegative().optional().default(0),
   deliveryFee: z.coerce.number().nonnegative().optional().default(0),
   platformFee: z.coerce.number().nonnegative().optional().default(0),

@@ -50,6 +50,10 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     res.status(400).json({ success: false, error: { message: "vendorId is required" } });
     return;
   }
+  if (!requestId || !bidId) {
+    res.status(400).json({ success: false, error: { message: "requestId and bidId are required" } });
+    return;
+  }
 
   const existingActiveOrder = await prisma.order.findFirst({
     where: {
