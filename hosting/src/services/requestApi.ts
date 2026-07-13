@@ -1,4 +1,4 @@
-import type { BuyerRequest, RequestStatus, VendorBid } from "@/types/domain";
+import type { BuyerRequest, BuyerOrder, RequestStatus, VendorBid } from "@/types/domain";
 import { api } from "./apiClient";
 
 /* Backend shape mapping */
@@ -26,6 +26,54 @@ interface BackendBid {
   bidAmount: number;
   estimatedDeliveryTime?: string;
   message?: string;
+}
+
+interface BackendOrder {
+  id: string;
+  requestId?: string;
+  buyer?: { name: string };
+  request?: { foodName: string };
+  foodCost: number;
+  deliveryFee: number;
+  totalAmount: number;
+  status: string;
+  createdAt: string;
+  deliveredAt?: string | null;
+}
+
+function mapOrderStatus(status: string): BuyerOrder["status"] {
+  switch (status) {
+    case "accepted":
+      return "New";
+    case "paid":
+    case "cooking":
+      return "Cooking";
+    case "ready_for_pickup":
+    case "picked_up":
+      return "Out for delivery";
+    case "delivered":
+    case "completed":
+      return "Delivered";
+    case "disputed":
+    case "cancelled":
+      return "Delivered";
+    default:
+      return "New";
+  }
+}
+
+function mapBuyerOrder(o: BackendOrder): BuyerOrder {
+  return {
+    id: o.id,
+    requestId: o.requestId || "",
+    chef: o.request?.foodName || "Unknown",
+    dishes: o.request?.foodName || "Unknown",
+    amount: o.totalAmount || o.foodCost + o.deliveryFee || 0,
+    eta: o.deliveredAt ? new Date(o.deliveredAt).toLocaleString() : "Pending",
+    status: mapOrderStatus(o.status),
+    rawStatus: o.status,
+    createdAt: o.createdAt,
+  };
 }
 
 function mapStatus(status: string): RequestStatus {
@@ -151,9 +199,9 @@ export async function createBid(payload: CreateBidPayload): Promise<VendorBid> {
   return mapBid(data);
 }
 
-export async function selectBid(bidId: string): Promise<VendorBid> {
-  const data = await api.patch<BackendBid>(`/bids/${bidId}/select`, {});
-  return mapBid(data);
+export async function selectBid(bidId: string): Promise<{ bid: VendorBid; order: BuyerOrder }> {
+  const data = await api.patch<{ bid: BackendBid; order: BackendOrder }>(`/bids/${bidId}/select`, {});
+  return { bid: mapBid(data.bid), order: mapBuyerOrder(data.order) };
 }
 
 // Admin actions

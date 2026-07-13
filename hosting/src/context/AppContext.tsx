@@ -167,17 +167,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const acceptBid = useCallback(
     async (bidId: string, requestId: string) => {
-      const bid = await selectBid(bidId);
-      // Create the order record immediately so we have an orderId for payment
-      const order = await createOrder({
-        chef: bid.chef,
-        dishes: bid.requestId,
-        amount: bid.price,
-        eta: bid.eta,
-        requestId,
-        bidId,
-        vendorId: bid.vendorId,
-      });
+      const { bid, order } = await selectBid(bidId);
       setBids((prev) => prev.map((b) => b.id === bidId ? { ...b } : b));
       setRequests((prev) =>
         prev.map((r) => r.id === requestId ? { ...r, status: "in_progress" as const } : r)

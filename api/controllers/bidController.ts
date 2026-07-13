@@ -126,7 +126,7 @@ export const selectBid = asyncHandler(async (req: Request, res: Response) => {
   const authUser = (req as Request & { user?: AuthUser }).user!;
   const existing = await prisma.bid.findUnique({
     where: { id: req.params.id },
-    include: { request: { select: { buyerId: true } } },
+    include: { request: { select: { buyerId: true, foodName: true } } },
   });
   if (!existing) {
     res.status(404).json({ success: false, error: { message: "Bid not found" } });
@@ -137,6 +137,16 @@ export const selectBid = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
+  // Check for existing active order on this request
+  const existingActiveOrder = await prisma.order.findFirst({
+    where: { requestId: existing.requestId, status: { notIn: ["cancelled", "disputed"] } },
+  });
+  if (existingActiveOrder) {
+    res.status(409).json({ success: false, error: { message: "An active order already exists for this request" } });
+    return;
+  }
+
+  // Update bid to selected
   const selected = await prisma.bid.update({
     where: { id: req.params.id },
     data: { status: "selected" },
@@ -158,6 +168,32 @@ export const selectBid = asyncHandler(async (req: Request, res: Response) => {
     data: { status: "bid_selected", selectedBidId: selected.id },
   });
 
+  // Create the order immediately so we have an orderId for payment
+  const foodCost = Number(selected.bidAmount) || 0;
+  const deliveryFee = Math.round(foodCost * 0.10);
+  const platformFee = Math.round(foodCost * 0.05);
+  const escrowFee = Math.round(foodCost * 0.02);
+  const totalAmount = foodCost + deliveryFee + platformFee + escrowFee;
+
+  const order = await prisma.order.create({
+    data: {
+      requestId: selected.requestId,
+      buyerId: authUser.id,
+      vendorId: selected.vendorId,
+      bidId: selected.id,
+      foodCost,
+      deliveryFee,
+      platformFee,
+      escrowFee,
+      totalAmount,
+      status: "accepted",
+    },
+    include: {
+      buyer: { select: { id: true, name: true } },
+      request: true,
+    },
+  });
+
   await notify(
     selected.vendorId,
     "Bid accepted",
@@ -165,7 +201,7 @@ export const selectBid = asyncHandler(async (req: Request, res: Response) => {
     "bid_selected"
   );
 
-  res.json({ success: true, data: selected });
+  res.json({ success: true, data: { bid: selected, order } });
 });
 
 export const rejectBid = asyncHandler(async (req: Request, res: Response) => {
