@@ -42,7 +42,7 @@ app.use("/api", routes);
 
 app.use(errorHandler);
 
-if (process.env.NODE_ENV !== "production") {
+if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`Foodie Market API running on http://localhost:${PORT}`);
   });
