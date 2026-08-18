@@ -8,6 +8,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
 import { AppProvider } from "./context/AppContext";
 import { CurrencyProvider } from "./context/CurrencyContext";
+import { SocketProvider } from "./context/SocketContext";
 import { registerSW } from 'virtual:pwa-register';
 
 // Register PWA service worker
@@ -20,9 +21,11 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <AuthProvider>
           <CurrencyProvider>
             <AppProvider>
-              <BrowserRouter>
-                <App />
-              </BrowserRouter>
+              <SocketProvider>
+                <BrowserRouter>
+                  <App />
+                </BrowserRouter>
+              </SocketProvider>
             </AppProvider>
           </CurrencyProvider>
         </AuthProvider>
