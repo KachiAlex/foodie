@@ -39,7 +39,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     newSocket.on('notification', (notification: any) => {
       console.log('[socket] Received notification:', notification);
-      showToast(notification.message, "info");
+      showToast(notification.message);
     });
 
     newSocket.on('disconnect', () => {
