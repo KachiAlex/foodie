@@ -315,6 +315,7 @@ export type OrderWhereInput = {
   request?: Prisma.XOR<Prisma.FoodRequestScalarRelationFilter, Prisma.FoodRequestWhereInput>
   buyer?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   dispute?: Prisma.XOR<Prisma.DisputeNullableScalarRelationFilter, Prisma.DisputeWhereInput> | null
+  review?: Prisma.XOR<Prisma.ReviewNullableScalarRelationFilter, Prisma.ReviewWhereInput> | null
 }
 
 export type OrderOrderByWithRelationInput = {
@@ -336,6 +337,7 @@ export type OrderOrderByWithRelationInput = {
   request?: Prisma.FoodRequestOrderByWithRelationInput
   buyer?: Prisma.UserOrderByWithRelationInput
   dispute?: Prisma.DisputeOrderByWithRelationInput
+  review?: Prisma.ReviewOrderByWithRelationInput
 }
 
 export type OrderWhereUniqueInput = Prisma.AtLeast<{
@@ -360,6 +362,7 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   request?: Prisma.XOR<Prisma.FoodRequestScalarRelationFilter, Prisma.FoodRequestWhereInput>
   buyer?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   dispute?: Prisma.XOR<Prisma.DisputeNullableScalarRelationFilter, Prisma.DisputeWhereInput> | null
+  review?: Prisma.XOR<Prisma.ReviewNullableScalarRelationFilter, Prisma.ReviewWhereInput> | null
 }, "id" | "requestId">
 
 export type OrderOrderByWithAggregationInput = {
@@ -423,6 +426,7 @@ export type OrderCreateInput = {
   request: Prisma.FoodRequestCreateNestedOneWithoutOrderInput
   buyer: Prisma.UserCreateNestedOneWithoutOrdersAsBuyerInput
   dispute?: Prisma.DisputeCreateNestedOneWithoutOrderInput
+  review?: Prisma.ReviewCreateNestedOneWithoutOrderInput
 }
 
 export type OrderUncheckedCreateInput = {
@@ -442,6 +446,7 @@ export type OrderUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   dispute?: Prisma.DisputeUncheckedCreateNestedOneWithoutOrderInput
+  review?: Prisma.ReviewUncheckedCreateNestedOneWithoutOrderInput
 }
 
 export type OrderUpdateInput = {
@@ -461,6 +466,7 @@ export type OrderUpdateInput = {
   request?: Prisma.FoodRequestUpdateOneRequiredWithoutOrderNestedInput
   buyer?: Prisma.UserUpdateOneRequiredWithoutOrdersAsBuyerNestedInput
   dispute?: Prisma.DisputeUpdateOneWithoutOrderNestedInput
+  review?: Prisma.ReviewUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateInput = {
@@ -480,6 +486,7 @@ export type OrderUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dispute?: Prisma.DisputeUncheckedUpdateOneWithoutOrderNestedInput
+  review?: Prisma.ReviewUncheckedUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderCreateManyInput = {
@@ -720,6 +727,20 @@ export type OrderUpdateOneRequiredWithoutDisputeNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutDisputeInput, Prisma.OrderUpdateWithoutDisputeInput>, Prisma.OrderUncheckedUpdateWithoutDisputeInput>
 }
 
+export type OrderCreateNestedOneWithoutReviewInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutReviewInput, Prisma.OrderUncheckedCreateWithoutReviewInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutReviewInput
+  connect?: Prisma.OrderWhereUniqueInput
+}
+
+export type OrderUpdateOneRequiredWithoutReviewNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutReviewInput, Prisma.OrderUncheckedCreateWithoutReviewInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutReviewInput
+  upsert?: Prisma.OrderUpsertWithoutReviewInput
+  connect?: Prisma.OrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutReviewInput, Prisma.OrderUpdateWithoutReviewInput>, Prisma.OrderUncheckedUpdateWithoutReviewInput>
+}
+
 export type OrderCreateWithoutBuyerInput = {
   id?: string
   vendorId: string
@@ -736,6 +757,7 @@ export type OrderCreateWithoutBuyerInput = {
   updatedAt?: Date | string
   request: Prisma.FoodRequestCreateNestedOneWithoutOrderInput
   dispute?: Prisma.DisputeCreateNestedOneWithoutOrderInput
+  review?: Prisma.ReviewCreateNestedOneWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutBuyerInput = {
@@ -754,6 +776,7 @@ export type OrderUncheckedCreateWithoutBuyerInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   dispute?: Prisma.DisputeUncheckedCreateNestedOneWithoutOrderInput
+  review?: Prisma.ReviewUncheckedCreateNestedOneWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutBuyerInput = {
@@ -819,6 +842,7 @@ export type OrderCreateWithoutRequestInput = {
   updatedAt?: Date | string
   buyer: Prisma.UserCreateNestedOneWithoutOrdersAsBuyerInput
   dispute?: Prisma.DisputeCreateNestedOneWithoutOrderInput
+  review?: Prisma.ReviewCreateNestedOneWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutRequestInput = {
@@ -837,6 +861,7 @@ export type OrderUncheckedCreateWithoutRequestInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   dispute?: Prisma.DisputeUncheckedCreateNestedOneWithoutOrderInput
+  review?: Prisma.ReviewUncheckedCreateNestedOneWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutRequestInput = {
@@ -871,6 +896,7 @@ export type OrderUpdateWithoutRequestInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   buyer?: Prisma.UserUpdateOneRequiredWithoutOrdersAsBuyerNestedInput
   dispute?: Prisma.DisputeUpdateOneWithoutOrderNestedInput
+  review?: Prisma.ReviewUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutRequestInput = {
@@ -889,6 +915,7 @@ export type OrderUncheckedUpdateWithoutRequestInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dispute?: Prisma.DisputeUncheckedUpdateOneWithoutOrderNestedInput
+  review?: Prisma.ReviewUncheckedUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutDisputeInput = {
@@ -907,6 +934,7 @@ export type OrderCreateWithoutDisputeInput = {
   updatedAt?: Date | string
   request: Prisma.FoodRequestCreateNestedOneWithoutOrderInput
   buyer: Prisma.UserCreateNestedOneWithoutOrdersAsBuyerInput
+  review?: Prisma.ReviewCreateNestedOneWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutDisputeInput = {
@@ -925,6 +953,7 @@ export type OrderUncheckedCreateWithoutDisputeInput = {
   deliveredAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  review?: Prisma.ReviewUncheckedCreateNestedOneWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutDisputeInput = {
@@ -959,6 +988,7 @@ export type OrderUpdateWithoutDisputeInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   request?: Prisma.FoodRequestUpdateOneRequiredWithoutOrderNestedInput
   buyer?: Prisma.UserUpdateOneRequiredWithoutOrdersAsBuyerNestedInput
+  review?: Prisma.ReviewUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutDisputeInput = {
@@ -977,6 +1007,99 @@ export type OrderUncheckedUpdateWithoutDisputeInput = {
   deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  review?: Prisma.ReviewUncheckedUpdateOneWithoutOrderNestedInput
+}
+
+export type OrderCreateWithoutReviewInput = {
+  id?: string
+  vendorId: string
+  bidId: string
+  foodCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  deliveryFee: runtime.Decimal | runtime.DecimalJsLike | number | string
+  platformFee: runtime.Decimal | runtime.DecimalJsLike | number | string
+  escrowFee: runtime.Decimal | runtime.DecimalJsLike | number | string
+  totalAmount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  status?: $Enums.OrderStatus
+  riderId?: string | null
+  deliveredAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  request: Prisma.FoodRequestCreateNestedOneWithoutOrderInput
+  buyer: Prisma.UserCreateNestedOneWithoutOrdersAsBuyerInput
+  dispute?: Prisma.DisputeCreateNestedOneWithoutOrderInput
+}
+
+export type OrderUncheckedCreateWithoutReviewInput = {
+  id?: string
+  requestId: string
+  buyerId: string
+  vendorId: string
+  bidId: string
+  foodCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  deliveryFee: runtime.Decimal | runtime.DecimalJsLike | number | string
+  platformFee: runtime.Decimal | runtime.DecimalJsLike | number | string
+  escrowFee: runtime.Decimal | runtime.DecimalJsLike | number | string
+  totalAmount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  status?: $Enums.OrderStatus
+  riderId?: string | null
+  deliveredAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  dispute?: Prisma.DisputeUncheckedCreateNestedOneWithoutOrderInput
+}
+
+export type OrderCreateOrConnectWithoutReviewInput = {
+  where: Prisma.OrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderCreateWithoutReviewInput, Prisma.OrderUncheckedCreateWithoutReviewInput>
+}
+
+export type OrderUpsertWithoutReviewInput = {
+  update: Prisma.XOR<Prisma.OrderUpdateWithoutReviewInput, Prisma.OrderUncheckedUpdateWithoutReviewInput>
+  create: Prisma.XOR<Prisma.OrderCreateWithoutReviewInput, Prisma.OrderUncheckedCreateWithoutReviewInput>
+  where?: Prisma.OrderWhereInput
+}
+
+export type OrderUpdateToOneWithWhereWithoutReviewInput = {
+  where?: Prisma.OrderWhereInput
+  data: Prisma.XOR<Prisma.OrderUpdateWithoutReviewInput, Prisma.OrderUncheckedUpdateWithoutReviewInput>
+}
+
+export type OrderUpdateWithoutReviewInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  vendorId?: Prisma.StringFieldUpdateOperationsInput | string
+  bidId?: Prisma.StringFieldUpdateOperationsInput | string
+  foodCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  deliveryFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  platformFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  escrowFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  totalAmount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  riderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  request?: Prisma.FoodRequestUpdateOneRequiredWithoutOrderNestedInput
+  buyer?: Prisma.UserUpdateOneRequiredWithoutOrdersAsBuyerNestedInput
+  dispute?: Prisma.DisputeUpdateOneWithoutOrderNestedInput
+}
+
+export type OrderUncheckedUpdateWithoutReviewInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  requestId?: Prisma.StringFieldUpdateOperationsInput | string
+  buyerId?: Prisma.StringFieldUpdateOperationsInput | string
+  vendorId?: Prisma.StringFieldUpdateOperationsInput | string
+  bidId?: Prisma.StringFieldUpdateOperationsInput | string
+  foodCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  deliveryFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  platformFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  escrowFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  totalAmount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  riderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dispute?: Prisma.DisputeUncheckedUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderCreateManyBuyerInput = {
@@ -1012,6 +1135,7 @@ export type OrderUpdateWithoutBuyerInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   request?: Prisma.FoodRequestUpdateOneRequiredWithoutOrderNestedInput
   dispute?: Prisma.DisputeUpdateOneWithoutOrderNestedInput
+  review?: Prisma.ReviewUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutBuyerInput = {
@@ -1030,6 +1154,7 @@ export type OrderUncheckedUpdateWithoutBuyerInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dispute?: Prisma.DisputeUncheckedUpdateOneWithoutOrderNestedInput
+  review?: Prisma.ReviewUncheckedUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutBuyerInput = {
@@ -1070,6 +1195,7 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   request?: boolean | Prisma.FoodRequestDefaultArgs<ExtArgs>
   buyer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   dispute?: boolean | Prisma.Order$disputeArgs<ExtArgs>
+  review?: boolean | Prisma.Order$reviewArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
 export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1135,6 +1261,7 @@ export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   request?: boolean | Prisma.FoodRequestDefaultArgs<ExtArgs>
   buyer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   dispute?: boolean | Prisma.Order$disputeArgs<ExtArgs>
+  review?: boolean | Prisma.Order$reviewArgs<ExtArgs>
 }
 export type OrderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   request?: boolean | Prisma.FoodRequestDefaultArgs<ExtArgs>
@@ -1151,6 +1278,7 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     request: Prisma.$FoodRequestPayload<ExtArgs>
     buyer: Prisma.$UserPayload<ExtArgs>
     dispute: Prisma.$DisputePayload<ExtArgs> | null
+    review: Prisma.$ReviewPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1565,6 +1693,7 @@ export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Ty
   request<T extends Prisma.FoodRequestDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FoodRequestDefaultArgs<ExtArgs>>): Prisma.Prisma__FoodRequestClient<runtime.Types.Result.GetResult<Prisma.$FoodRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   buyer<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   dispute<T extends Prisma.Order$disputeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$disputeArgs<ExtArgs>>): Prisma.Prisma__DisputeClient<runtime.Types.Result.GetResult<Prisma.$DisputePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  review<T extends Prisma.Order$reviewArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$reviewArgs<ExtArgs>>): Prisma.Prisma__ReviewClient<runtime.Types.Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2026,6 +2155,25 @@ export type Order$disputeArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    */
   include?: Prisma.DisputeInclude<ExtArgs> | null
   where?: Prisma.DisputeWhereInput
+}
+
+/**
+ * Order.review
+ */
+export type Order$reviewArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Review
+   */
+  select?: Prisma.ReviewSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Review
+   */
+  omit?: Prisma.ReviewOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReviewInclude<ExtArgs> | null
+  where?: Prisma.ReviewWhereInput
 }
 
 /**

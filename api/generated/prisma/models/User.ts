@@ -216,6 +216,7 @@ export type UserWhereInput = {
   notifications?: Prisma.NotificationListRelationFilter
   offersMade?: Prisma.VendorMarketOfferListRelationFilter
   offersReceived?: Prisma.VendorMarketOfferListRelationFilter
+  reviewsMade?: Prisma.ReviewListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -237,6 +238,7 @@ export type UserOrderByWithRelationInput = {
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   offersMade?: Prisma.VendorMarketOfferOrderByRelationAggregateInput
   offersReceived?: Prisma.VendorMarketOfferOrderByRelationAggregateInput
+  reviewsMade?: Prisma.ReviewOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -261,6 +263,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   notifications?: Prisma.NotificationListRelationFilter
   offersMade?: Prisma.VendorMarketOfferListRelationFilter
   offersReceived?: Prisma.VendorMarketOfferListRelationFilter
+  reviewsMade?: Prisma.ReviewListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -310,6 +313,7 @@ export type UserCreateInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -331,6 +335,7 @@ export type UserUncheckedCreateInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
 }
 
 export type UserUpdateInput = {
@@ -352,6 +357,7 @@ export type UserUpdateInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -373,6 +379,7 @@ export type UserUncheckedUpdateInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -602,6 +609,20 @@ export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationsInput, Prisma.UserUpdateWithoutNotificationsInput>, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
 }
 
+export type UserCreateNestedOneWithoutReviewsMadeInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReviewsMadeInput, Prisma.UserUncheckedCreateWithoutReviewsMadeInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewsMadeInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutReviewsMadeNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReviewsMadeInput, Prisma.UserUncheckedCreateWithoutReviewsMadeInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewsMadeInput
+  upsert?: Prisma.UserUpsertWithoutReviewsMadeInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReviewsMadeInput, Prisma.UserUpdateWithoutReviewsMadeInput>, Prisma.UserUncheckedUpdateWithoutReviewsMadeInput>
+}
+
 export type UserCreateWithoutVendorProfileInput = {
   id?: string
   email: string
@@ -620,6 +641,7 @@ export type UserCreateWithoutVendorProfileInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
 }
 
 export type UserUncheckedCreateWithoutVendorProfileInput = {
@@ -640,6 +662,7 @@ export type UserUncheckedCreateWithoutVendorProfileInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
 }
 
 export type UserCreateOrConnectWithoutVendorProfileInput = {
@@ -676,6 +699,7 @@ export type UserUpdateWithoutVendorProfileInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutVendorProfileInput = {
@@ -696,6 +720,7 @@ export type UserUncheckedUpdateWithoutVendorProfileInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserCreateWithoutBuyerRequestsInput = {
@@ -716,6 +741,7 @@ export type UserCreateWithoutBuyerRequestsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
 }
 
 export type UserUncheckedCreateWithoutBuyerRequestsInput = {
@@ -736,6 +762,7 @@ export type UserUncheckedCreateWithoutBuyerRequestsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
 }
 
 export type UserCreateOrConnectWithoutBuyerRequestsInput = {
@@ -772,6 +799,7 @@ export type UserUpdateWithoutBuyerRequestsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBuyerRequestsInput = {
@@ -792,6 +820,7 @@ export type UserUncheckedUpdateWithoutBuyerRequestsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserCreateWithoutBidsInput = {
@@ -812,6 +841,7 @@ export type UserCreateWithoutBidsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
 }
 
 export type UserUncheckedCreateWithoutBidsInput = {
@@ -832,6 +862,7 @@ export type UserUncheckedCreateWithoutBidsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
 }
 
 export type UserCreateOrConnectWithoutBidsInput = {
@@ -868,6 +899,7 @@ export type UserUpdateWithoutBidsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBidsInput = {
@@ -888,6 +920,7 @@ export type UserUncheckedUpdateWithoutBidsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserCreateWithoutOrdersAsBuyerInput = {
@@ -908,6 +941,7 @@ export type UserCreateWithoutOrdersAsBuyerInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
 }
 
 export type UserUncheckedCreateWithoutOrdersAsBuyerInput = {
@@ -928,6 +962,7 @@ export type UserUncheckedCreateWithoutOrdersAsBuyerInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
 }
 
 export type UserCreateOrConnectWithoutOrdersAsBuyerInput = {
@@ -964,6 +999,7 @@ export type UserUpdateWithoutOrdersAsBuyerInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOrdersAsBuyerInput = {
@@ -984,6 +1020,7 @@ export type UserUncheckedUpdateWithoutOrdersAsBuyerInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserCreateWithoutOffersReceivedInput = {
@@ -1004,6 +1041,7 @@ export type UserCreateWithoutOffersReceivedInput = {
   disputesOpened?: Prisma.DisputeCreateNestedManyWithoutOpenedByInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
+  reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
 }
 
 export type UserUncheckedCreateWithoutOffersReceivedInput = {
@@ -1024,6 +1062,7 @@ export type UserUncheckedCreateWithoutOffersReceivedInput = {
   disputesOpened?: Prisma.DisputeUncheckedCreateNestedManyWithoutOpenedByInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
+  reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
 }
 
 export type UserCreateOrConnectWithoutOffersReceivedInput = {
@@ -1049,6 +1088,7 @@ export type UserCreateWithoutOffersMadeInput = {
   disputesOpened?: Prisma.DisputeCreateNestedManyWithoutOpenedByInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
 }
 
 export type UserUncheckedCreateWithoutOffersMadeInput = {
@@ -1069,6 +1109,7 @@ export type UserUncheckedCreateWithoutOffersMadeInput = {
   disputesOpened?: Prisma.DisputeUncheckedCreateNestedManyWithoutOpenedByInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
 }
 
 export type UserCreateOrConnectWithoutOffersMadeInput = {
@@ -1105,6 +1146,7 @@ export type UserUpdateWithoutOffersReceivedInput = {
   disputesOpened?: Prisma.DisputeUpdateManyWithoutOpenedByNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
+  reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOffersReceivedInput = {
@@ -1125,6 +1167,7 @@ export type UserUncheckedUpdateWithoutOffersReceivedInput = {
   disputesOpened?: Prisma.DisputeUncheckedUpdateManyWithoutOpenedByNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
+  reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserUpsertWithoutOffersMadeInput = {
@@ -1156,6 +1199,7 @@ export type UserUpdateWithoutOffersMadeInput = {
   disputesOpened?: Prisma.DisputeUpdateManyWithoutOpenedByNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOffersMadeInput = {
@@ -1176,6 +1220,7 @@ export type UserUncheckedUpdateWithoutOffersMadeInput = {
   disputesOpened?: Prisma.DisputeUncheckedUpdateManyWithoutOpenedByNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserCreateWithoutEscrowWalletInput = {
@@ -1196,6 +1241,7 @@ export type UserCreateWithoutEscrowWalletInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
 }
 
 export type UserUncheckedCreateWithoutEscrowWalletInput = {
@@ -1216,6 +1262,7 @@ export type UserUncheckedCreateWithoutEscrowWalletInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
 }
 
 export type UserCreateOrConnectWithoutEscrowWalletInput = {
@@ -1252,6 +1299,7 @@ export type UserUpdateWithoutEscrowWalletInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEscrowWalletInput = {
@@ -1272,6 +1320,7 @@ export type UserUncheckedUpdateWithoutEscrowWalletInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserCreateWithoutTransactionsInput = {
@@ -1292,6 +1341,7 @@ export type UserCreateWithoutTransactionsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
 }
 
 export type UserUncheckedCreateWithoutTransactionsInput = {
@@ -1312,6 +1362,7 @@ export type UserUncheckedCreateWithoutTransactionsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
 }
 
 export type UserCreateOrConnectWithoutTransactionsInput = {
@@ -1348,6 +1399,7 @@ export type UserUpdateWithoutTransactionsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTransactionsInput = {
@@ -1368,6 +1420,7 @@ export type UserUncheckedUpdateWithoutTransactionsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserCreateWithoutDisputesOpenedInput = {
@@ -1388,6 +1441,7 @@ export type UserCreateWithoutDisputesOpenedInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
 }
 
 export type UserUncheckedCreateWithoutDisputesOpenedInput = {
@@ -1408,6 +1462,7 @@ export type UserUncheckedCreateWithoutDisputesOpenedInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
 }
 
 export type UserCreateOrConnectWithoutDisputesOpenedInput = {
@@ -1444,6 +1499,7 @@ export type UserUpdateWithoutDisputesOpenedInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDisputesOpenedInput = {
@@ -1464,6 +1520,7 @@ export type UserUncheckedUpdateWithoutDisputesOpenedInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -1484,6 +1541,7 @@ export type UserCreateWithoutNotificationsInput = {
   disputesOpened?: Prisma.DisputeCreateNestedManyWithoutOpenedByInput
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -1504,6 +1562,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   disputesOpened?: Prisma.DisputeUncheckedCreateNestedManyWithoutOpenedByInput
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -1540,6 +1599,7 @@ export type UserUpdateWithoutNotificationsInput = {
   disputesOpened?: Prisma.DisputeUpdateManyWithoutOpenedByNestedInput
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -1560,6 +1620,107 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   disputesOpened?: Prisma.DisputeUncheckedUpdateManyWithoutOpenedByNestedInput
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
+}
+
+export type UserCreateWithoutReviewsMadeInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  role: $Enums.Role
+  verificationStatus?: $Enums.VerificationStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  buyerRequests?: Prisma.FoodRequestCreateNestedManyWithoutBuyerInput
+  ordersAsBuyer?: Prisma.OrderCreateNestedManyWithoutBuyerInput
+  bids?: Prisma.BidCreateNestedManyWithoutVendorInput
+  vendorProfile?: Prisma.VendorProfileCreateNestedOneWithoutUserInput
+  escrowWallet?: Prisma.EscrowWalletCreateNestedOneWithoutVendorInput
+  transactions?: Prisma.EscrowTransactionCreateNestedManyWithoutVendorInput
+  disputesOpened?: Prisma.DisputeCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
+  offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
+}
+
+export type UserUncheckedCreateWithoutReviewsMadeInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  role: $Enums.Role
+  verificationStatus?: $Enums.VerificationStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  buyerRequests?: Prisma.FoodRequestUncheckedCreateNestedManyWithoutBuyerInput
+  ordersAsBuyer?: Prisma.OrderUncheckedCreateNestedManyWithoutBuyerInput
+  bids?: Prisma.BidUncheckedCreateNestedManyWithoutVendorInput
+  vendorProfile?: Prisma.VendorProfileUncheckedCreateNestedOneWithoutUserInput
+  escrowWallet?: Prisma.EscrowWalletUncheckedCreateNestedOneWithoutVendorInput
+  transactions?: Prisma.EscrowTransactionUncheckedCreateNestedManyWithoutVendorInput
+  disputesOpened?: Prisma.DisputeUncheckedCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
+  offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
+}
+
+export type UserCreateOrConnectWithoutReviewsMadeInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutReviewsMadeInput, Prisma.UserUncheckedCreateWithoutReviewsMadeInput>
+}
+
+export type UserUpsertWithoutReviewsMadeInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutReviewsMadeInput, Prisma.UserUncheckedUpdateWithoutReviewsMadeInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutReviewsMadeInput, Prisma.UserUncheckedCreateWithoutReviewsMadeInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutReviewsMadeInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutReviewsMadeInput, Prisma.UserUncheckedUpdateWithoutReviewsMadeInput>
+}
+
+export type UserUpdateWithoutReviewsMadeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  buyerRequests?: Prisma.FoodRequestUpdateManyWithoutBuyerNestedInput
+  ordersAsBuyer?: Prisma.OrderUpdateManyWithoutBuyerNestedInput
+  bids?: Prisma.BidUpdateManyWithoutVendorNestedInput
+  vendorProfile?: Prisma.VendorProfileUpdateOneWithoutUserNestedInput
+  escrowWallet?: Prisma.EscrowWalletUpdateOneWithoutVendorNestedInput
+  transactions?: Prisma.EscrowTransactionUpdateManyWithoutVendorNestedInput
+  disputesOpened?: Prisma.DisputeUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
+  offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutReviewsMadeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  buyerRequests?: Prisma.FoodRequestUncheckedUpdateManyWithoutBuyerNestedInput
+  ordersAsBuyer?: Prisma.OrderUncheckedUpdateManyWithoutBuyerNestedInput
+  bids?: Prisma.BidUncheckedUpdateManyWithoutVendorNestedInput
+  vendorProfile?: Prisma.VendorProfileUncheckedUpdateOneWithoutUserNestedInput
+  escrowWallet?: Prisma.EscrowWalletUncheckedUpdateOneWithoutVendorNestedInput
+  transactions?: Prisma.EscrowTransactionUncheckedUpdateManyWithoutVendorNestedInput
+  disputesOpened?: Prisma.DisputeUncheckedUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
+  offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
 }
 
 
@@ -1576,6 +1737,7 @@ export type UserCountOutputType = {
   notifications: number
   offersMade: number
   offersReceived: number
+  reviewsMade: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1587,6 +1749,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   offersMade?: boolean | UserCountOutputTypeCountOffersMadeArgs
   offersReceived?: boolean | UserCountOutputTypeCountOffersReceivedArgs
+  reviewsMade?: boolean | UserCountOutputTypeCountReviewsMadeArgs
 }
 
 /**
@@ -1655,6 +1818,13 @@ export type UserCountOutputTypeCountOffersReceivedArgs<ExtArgs extends runtime.T
   where?: Prisma.VendorMarketOfferWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountReviewsMadeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReviewWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1675,6 +1845,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   offersMade?: boolean | Prisma.User$offersMadeArgs<ExtArgs>
   offersReceived?: boolean | Prisma.User$offersReceivedArgs<ExtArgs>
+  reviewsMade?: boolean | Prisma.User$reviewsMadeArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1723,6 +1894,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   offersMade?: boolean | Prisma.User$offersMadeArgs<ExtArgs>
   offersReceived?: boolean | Prisma.User$offersReceivedArgs<ExtArgs>
+  reviewsMade?: boolean | Prisma.User$reviewsMadeArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1741,6 +1913,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     offersMade: Prisma.$VendorMarketOfferPayload<ExtArgs>[]
     offersReceived: Prisma.$VendorMarketOfferPayload<ExtArgs>[]
+    reviewsMade: Prisma.$ReviewPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2155,6 +2328,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   offersMade<T extends Prisma.User$offersMadeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$offersMadeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VendorMarketOfferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   offersReceived<T extends Prisma.User$offersReceivedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$offersReceivedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VendorMarketOfferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reviewsMade<T extends Prisma.User$reviewsMadeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewsMadeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2812,6 +2986,30 @@ export type User$offersReceivedArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.VendorMarketOfferScalarFieldEnum | Prisma.VendorMarketOfferScalarFieldEnum[]
+}
+
+/**
+ * User.reviewsMade
+ */
+export type User$reviewsMadeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Review
+   */
+  select?: Prisma.ReviewSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Review
+   */
+  omit?: Prisma.ReviewOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReviewInclude<ExtArgs> | null
+  where?: Prisma.ReviewWhereInput
+  orderBy?: Prisma.ReviewOrderByWithRelationInput | Prisma.ReviewOrderByWithRelationInput[]
+  cursor?: Prisma.ReviewWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReviewScalarFieldEnum | Prisma.ReviewScalarFieldEnum[]
 }
 
 /**

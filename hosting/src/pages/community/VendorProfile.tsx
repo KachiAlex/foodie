@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useToast } from "@/context/ToastContext";
 import { getVendorMarket } from "@/services/communityApi";
+import { getVendorReviews, type Review } from "@/services/reviewApi";
 import type { CommunityVendor, CommunityMenuItem } from "@/services/communityApi";
 import { RequestDishModal } from "./RequestDishModal";
 
@@ -15,16 +16,20 @@ export function VendorProfile() {
   const { symbol } = useCurrency();
   const { showToast } = useToast();
   const [vendor, setVendor] = useState<CommunityVendor | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeItem, setActiveItem] = useState<CommunityMenuItem | null>(null);
 
   useEffect(() => {
     setIsLoading(true);
-    getVendorMarket()
-      .then((vendors) => {
-        const found = vendors.find((v) => v.id === id);
-        if (found) setVendor(found);
+    Promise.all([
+      getVendorMarket().then(vendors => vendors.find(v => v.id === id)),
+      getVendorReviews(id!)
+    ])
+      .then(([foundVendor, vendorReviews]) => {
+        if (foundVendor) setVendor(foundVendor);
         else showToast("Vendor not found");
+        setReviews(vendorReviews);
       })
       .catch(() => showToast("Failed to load vendor profile"))
       .finally(() => setIsLoading(false));
@@ -170,6 +175,63 @@ export function VendorProfile() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Reviews Section */}
+            <div className="rounded-3xl bg-white p-6 shadow-sm border border-gray-100">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-gray-900 uppercase tracking-wider text-sm">Customer Reviews</h3>
+                <span className="text-xs font-bold text-gray-400">{reviews.length} reviews</span>
+              </div>
+              
+              {reviews.length === 0 ? (
+                <div className="text-center py-6">
+                  <p className="text-sm text-gray-500">No reviews yet for this kitchen.</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {reviews.map((review) => (
+                    <div key={review.id} className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500">
+                            {review.buyer?.name[0].toUpperCase()}
+                          </div>
+                          <span className="text-sm font-bold text-gray-900">{review.buyer?.name}</span>
+                        </div>
+                        <div className="flex items-center gap-0.5">
+                          {[...Array(5)].map((_, i) => (
+                            <Star 
+                              key={i} 
+                              className={`h-3 w-3 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`} 
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 italic">"{review.comment}"</p>
+                      
+                      {review.images && review.images.length > 0 && (
+                        <div className="flex gap-2 overflow-x-auto pb-2">
+                          {review.images.map((img, i) => (
+                            <img 
+                              key={i} 
+                              src={img} 
+                              className="h-16 w-16 rounded-lg object-cover border border-gray-100 shrink-0" 
+                              alt="Customer food photo" 
+                            />
+                          ))}
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center gap-2 pt-1">
+                        <BadgeCheck className="h-3 w-3 text-emerald-500" />
+                        <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Verified Purchase</span>
+                        <span className="text-[10px] text-gray-400 ml-auto">{new Date(review.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

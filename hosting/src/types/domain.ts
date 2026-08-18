@@ -15,6 +15,14 @@ export interface BuyerRequest {
   bids: number;
 }
 
+export interface OrderReview {
+  id: string;
+  rating: number;
+  comment?: string;
+  images: string[];
+  createdAt: string;
+}
+
 export interface BuyerOrder {
   id: string;
   requestId: string;
@@ -26,9 +34,10 @@ export interface BuyerOrder {
   platformFee?: number;
   escrowFee?: number;
   eta: string;
-  status: "New" | "Cooking" | "Out for delivery" | "Delivered";
+  status: "New" | "Cooking" | "Out for delivery" | "Delivered" | "Disputed" | "Cancelled";
   rawStatus: string;
   createdAt?: string;
+  review?: OrderReview | null;
 }
 
 export interface VendorBid {

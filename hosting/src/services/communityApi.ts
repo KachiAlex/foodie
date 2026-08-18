@@ -57,7 +57,7 @@ export interface CreateOfferPayload {
 }
 
 export interface UpdateOfferPayload {
-  status: "accepted" | "rejected" | "countered";
+  status: "accepted" | "rejected" | "countered" | "cancelled" | "converted";
   proposedPrice?: number;
   note?: string;
 }

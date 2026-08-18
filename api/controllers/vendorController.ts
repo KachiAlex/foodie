@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
 import { prisma } from "../lib/prisma";
-import { cloudinary } from "../lib/cloudinary";
+import { uploadToR2 } from "../lib/r2";
+import crypto from "crypto";
 
 export const listVendors = asyncHandler(async (_req: Request, res: Response) => {
   const vendors = await prisma.vendorProfile.findMany({
@@ -192,17 +193,15 @@ export const uploadDocument = asyncHandler(async (req: Request, res: Response) =
     return;
   }
 
-  const uploadResult = await cloudinary.uploader.upload(fileBase64, {
-    folder: `foodie/vendors/${vendorId}`,
-    resource_type: "auto",
-  });
+  const key = `foodie/vendors/${vendorId}/${crypto.randomUUID()}.jpg`;
+  const uploadResult = await uploadToR2(fileBase64, key, "image/jpeg");
 
   const doc = await prisma.vendorDocument.create({
     data: {
       vendorId: profile.id,
       type,
-      url: uploadResult.secure_url,
-      publicId: uploadResult.public_id,
+      url: uploadResult.url,
+      publicId: uploadResult.key,
     },
   });
 

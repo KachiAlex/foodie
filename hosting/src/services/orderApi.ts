@@ -1,4 +1,4 @@
-import type { BuyerOrder, VendorOrderStage } from "@/types/domain";
+import type { BuyerOrder, OrderReview, VendorOrderStage } from "@/types/domain";
 import { api } from "./apiClient";
 
 /* Backend shape mapping */
@@ -13,7 +13,16 @@ interface BackendOrder {
   status: string;
   createdAt: string;
   deliveredAt?: string | null;
+  review?: {
+    id: string;
+    rating: number;
+    comment?: string;
+    images?: string[];
+    createdAt: string;
+  } | null;
 }
+
+export type BuyerOrderStatus = "New" | "Cooking" | "Out for delivery" | "Delivered" | "Disputed" | "Cancelled";
 
 function mapOrderStatus(status: string): BuyerOrder["status"] {
   switch (status) {
@@ -29,8 +38,9 @@ function mapOrderStatus(status: string): BuyerOrder["status"] {
     case "completed":
       return "Delivered";
     case "disputed":
+      return "Disputed";
     case "cancelled":
-      return "Delivered";
+      return "Cancelled";
     default:
       return "New";
   }
@@ -57,6 +67,17 @@ function mapVendorOrderStatus(status: string): VendorOrderStage["status"] {
   }
 }
 
+function mapReview(r: BackendOrder["review"]): OrderReview | null | undefined {
+  if (!r) return r === null ? null : undefined;
+  return {
+    id: r.id,
+    rating: r.rating,
+    comment: r.comment,
+    images: r.images ?? [],
+    createdAt: r.createdAt,
+  };
+}
+
 function mapBuyerOrder(o: BackendOrder): BuyerOrder {
   return {
     id: o.id,
@@ -68,6 +89,7 @@ function mapBuyerOrder(o: BackendOrder): BuyerOrder {
     status: mapOrderStatus(o.status),
     rawStatus: o.status,
     createdAt: o.createdAt,
+    review: mapReview(o.review),
   };
 }
 

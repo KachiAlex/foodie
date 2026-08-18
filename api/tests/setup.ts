@@ -1,4 +1,8 @@
-process.env.CLOUDINARY_URL = process.env.CLOUDINARY_URL || "cloudinary://test:test@test";
+process.env.R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || "test";
+process.env.R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || "test";
+process.env.R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || "test";
+process.env.R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || "test-bucket";
+process.env.R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || "https://test.r2.dev";
 process.env.NODE_ENV = "production";
 process.env.DATABASE_URL = process.env.DATABASE_URL || "postgresql://test:test@localhost:5432/test";
 process.env.JWT_SECRET = process.env.JWT_SECRET || "test-secret";

@@ -8,6 +8,8 @@ import adminRoutes from "./admin";
 import escrowRoutes from "./escrow";
 import notificationRoutes from "./notifications";
 import vendorMarketRoutes from "./vendorMarket";
+import reviewRoutes from "./review";
+import uploadRoutes from "./upload";
 
 const router = Router();
 
@@ -20,5 +22,7 @@ router.use("/admin", adminRoutes);
 router.use("/escrow", escrowRoutes);
 router.use("/notifications", notificationRoutes);
 router.use("/community", vendorMarketRoutes);
+router.use("/reviews", reviewRoutes);
+router.use("/upload", uploadRoutes);
 
 export default router;

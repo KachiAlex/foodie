@@ -24,6 +24,7 @@ export const listOrders = asyncHandler(async (req: Request, res: Response) => {
       buyer: { select: { id: true, name: true, email: true } },
       request: true,
       dispute: true,
+      review: true,
     },
   });
   res.json({ success: true, data });
@@ -82,6 +83,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     include: {
       buyer: { select: { id: true, name: true } },
       request: true,
+      review: true,
     },
   });
 
@@ -103,6 +105,7 @@ export const getOrder = asyncHandler(async (req: Request, res: Response) => {
       buyer: { select: { id: true, name: true } },
       request: true,
       dispute: true,
+      review: true,
     },
   });
   if (!order) {
@@ -162,6 +165,7 @@ export const confirmDelivery = asyncHandler(async (req: Request, res: Response) 
     include: {
       buyer: { select: { id: true, name: true } },
       request: true,
+      review: true,
     },
   });
   res.json({ success: true, data: order });

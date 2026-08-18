@@ -29,6 +29,7 @@ model User {
   notifications  Notification[] @relation("UserNotifications")
   offersMade     VendorMarketOffer[] @relation("BuyerOffers")
   offersReceived VendorMarketOffer[] @relation("VendorOffers")
+  reviewsMade    Review[] @relation("BuyerReviews")
 
   @@map("users")
 }
@@ -66,6 +67,7 @@ model VendorProfile {
 
   menuItems MenuItem[]
   documents VendorDocument[]
+  reviews   Review[]
 
   @@map("vendor_profiles")
 }
@@ -187,6 +189,7 @@ model Order {
   riderId       String?
   deliveredAt   DateTime?
   dispute       Dispute?
+  review        Review?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
@@ -330,4 +333,23 @@ model Notification {
   createdAt   DateTime @default(now())
 
   @@map("notifications")
+}
+
+// ===================== REVIEWS =====================
+
+model Review {
+  id              String   @id @default(cuid())
+  orderId         String   @unique
+  order           Order    @relation(fields: [orderId], references: [id])
+  buyerId         String
+  buyer           User     @relation("BuyerReviews", fields: [buyerId], references: [id])
+  vendorProfileId String
+  vendorProfile   VendorProfile @relation(fields: [vendorProfileId], references: [id])
+  rating          Int      // 1-5
+  comment         String?
+  images          String[] // URLs of food photos
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("reviews")
 }
