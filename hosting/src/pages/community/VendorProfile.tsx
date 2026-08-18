@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Star, BadgeCheck, UtensilsCrossed, MapPin, Share2, ArrowLeft } from "lucide-react";
+import { Star, BadgeCheck, MapPin, Share2, ArrowLeft } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { useCurrency } from "@/context/CurrencyContext";
-import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { getVendorMarket } from "@/services/communityApi";
 import type { CommunityVendor, CommunityMenuItem } from "@/services/communityApi";
@@ -14,7 +13,6 @@ import { RequestDishModal } from "./RequestDishModal";
 export function VendorProfile() {
   const { id } = useParams();
   const { symbol } = useCurrency();
-  const { user } = useAuth();
   const { showToast } = useToast();
   const [vendor, setVendor] = useState<CommunityVendor | null>(null);
   const [isLoading, setIsLoading] = useState(true);
