@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
 import { prisma } from "../lib/prisma";
 import { queueNotification } from "../services/notificationService";
+import { updateBuyerPreferences } from "../services/tasteMatchService";
 
 export const createReview = asyncHandler(async (req: Request, res: Response) => {
   const { orderId, rating, comment, images } = req.body;
@@ -79,6 +80,11 @@ export const createReview = asyncHandler(async (req: Request, res: Response) => 
     body: `A buyer left a ${rating}-star review for order #${order.id.slice(-6)}`,
     metadata: { orderId, reviewId: review.id }
   });
+
+  // Update buyer's taste preferences with review signal
+  updateBuyerPreferences(buyerId).catch((err) =>
+    console.error("[taste-match] Failed to update preferences after review:", err)
+  );
 
   res.status(201).json({ success: true, data: review });
 });

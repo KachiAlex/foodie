@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { UtensilsCrossed, ClipboardList, ArrowRight } from "lucide-react";
+import { UtensilsCrossed, ClipboardList, ArrowRight, Sparkles, Users } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 
 export function FoodCommunity() {
@@ -22,7 +22,7 @@ export function FoodCommunity() {
             transition={{ delay: 0.1 }}
             className="mx-auto mt-4 max-w-2xl text-lg text-gray-600"
           >
-            Two ways to eat. Choose how you want to find your next meal.
+            Four ways to eat. Choose how you want to find your next meal.
           </motion.p>
         </div>
 
@@ -66,6 +66,48 @@ export function FoodCommunity() {
               className="mt-6 inline-flex items-center gap-2 font-semibold text-emerald-600 hover:text-emerald-700"
             >
               Browse dishes <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="group rounded-3xl bg-white p-8 shadow-sm transition-shadow hover:shadow-md"
+          >
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-100 to-pink-100">
+              <Sparkles className="h-7 w-7 text-orange-600" />
+            </div>
+            <h2 className="mt-6 text-2xl font-semibold text-gray-900">Taste Match</h2>
+            <p className="mt-3 text-gray-600">
+              Get personalized vendor recommendations based on your order history and reviews.
+            </p>
+            <Link
+              to="/community/taste-match"
+              className="mt-6 inline-flex items-center gap-2 font-semibold text-orange-600 hover:text-orange-700"
+            >
+              Find your match <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="group rounded-3xl bg-white p-8 shadow-sm transition-shadow hover:shadow-md"
+          >
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-100 to-teal-100">
+              <Users className="h-7 w-7 text-emerald-600" />
+            </div>
+            <h2 className="mt-6 text-2xl font-semibold text-gray-900">Food Circles</h2>
+            <p className="mt-3 text-gray-600">
+              Join neighborhood circles, pool orders with neighbors, and split delivery fees on group buys.
+            </p>
+            <Link
+              to="/community/circles"
+              className="mt-6 inline-flex items-center gap-2 font-semibold text-emerald-600 hover:text-emerald-700"
+            >
+              Explore circles <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </motion.div>
         </div>

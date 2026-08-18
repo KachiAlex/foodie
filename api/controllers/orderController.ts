@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
 import { prisma } from "../lib/prisma";
+import { updateBuyerPreferences } from "../services/tasteMatchService";
 
 async function notify(userId: string, title: string, body: string, type: string) {
   try {
@@ -168,6 +169,12 @@ export const confirmDelivery = asyncHandler(async (req: Request, res: Response) 
       review: true,
     },
   });
+
+  // Update buyer's taste preferences after order completion
+  updateBuyerPreferences(existing.buyerId).catch((err) =>
+    console.error("[taste-match] Failed to update preferences:", err)
+  );
+
   res.json({ success: true, data: order });
 });
 

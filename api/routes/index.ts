@@ -10,6 +10,9 @@ import notificationRoutes from "./notifications";
 import vendorMarketRoutes from "./vendorMarket";
 import reviewRoutes from "./review";
 import uploadRoutes from "./upload";
+import tasteMatchRoutes from "./tasteMatch";
+import bidPricingRoutes from "./bidPricing";
+import foodCircleRoutes from "./foodCircles";
 
 const router = Router();
 
@@ -24,5 +27,8 @@ router.use("/notifications", notificationRoutes);
 router.use("/community", vendorMarketRoutes);
 router.use("/reviews", reviewRoutes);
 router.use("/upload", uploadRoutes);
+router.use("/taste-match", tasteMatchRoutes);
+router.use("/bid-pricing", bidPricingRoutes);
+router.use("/circles", foodCircleRoutes);
 
 export default router;

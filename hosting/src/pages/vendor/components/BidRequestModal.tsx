@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BidPricingPanel } from "@/pages/community/BidPricingPanel";
 import type { VendorOpenRequest } from "@/types/domain";
 
 interface BidRequestModalProps {
@@ -100,6 +101,7 @@ export function BidRequestModal({ request, onClose, isSubmitting, onSubmit, bidS
               <p className="mt-1 text-xs text-gray-500">{notes.length}/500</p>
             </label>
             <p className="text-xs text-gray-500">Tip: mention prep timeline + plating style to win trust.</p>
+            <BidPricingPanel requestId={request.id} onApplySuggestion={(amount) => setBidAmount(String(amount))} />
           </div>
         )}
 
