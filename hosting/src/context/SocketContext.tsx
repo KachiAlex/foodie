@@ -27,7 +27,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
 
     const API_URL = import.meta.env.VITE_API_BASE || window.location.origin;
-    const newSocket = io(API_URL);
+    const newSocket = io(API_URL, {
+      path: '/api/socket.io'
+    });
 
     newSocket.on('connect', () => {
       console.log('[socket] Connected to server');
