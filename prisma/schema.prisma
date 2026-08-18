@@ -30,6 +30,10 @@ model User {
   offersMade     VendorMarketOffer[] @relation("BuyerOffers")
   offersReceived VendorMarketOffer[] @relation("VendorOffers")
   reviewsMade    Review[] @relation("BuyerReviews")
+  buyerPreference BuyerPreference?
+  circleMemberships CircleMember[]
+  groupOrderSlots  GroupOrderSlot[]
+  createdGroupOrders GroupOrder[] @relation("GroupOrderCreator")
 
   @@map("users")
 }
@@ -68,6 +72,8 @@ model VendorProfile {
   menuItems MenuItem[]
   documents VendorDocument[]
   reviews   Review[]
+  circleMemberships CircleMember[]
+  groupOrders GroupOrder[]
 
   @@map("vendor_profiles")
 }
@@ -352,4 +358,125 @@ model Review {
   updatedAt       DateTime @updatedAt
 
   @@map("reviews")
+}
+
+// ===================== BUYER PREFERENCES (Taste Match) =====================
+
+model BuyerPreference {
+  id               String   @id @default(cuid())
+  buyerId          String   @unique
+  buyer            User     @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  cuisineAffinities Json    @default("{}") // { "nigerian": 0.8, "italian": 0.3, ... }
+  spiceTolerance   Int      @default(3)    // 1 (mild) to 5 (very hot)
+  dietaryTags      String[] @default([])
+  preferredPortion String?  // "small" | "medium" | "large"
+  avgBudgetMin     Float    @default(0)
+  avgBudgetMax     Float    @default(0)
+  totalOrders      Int      @default(0)
+  updatedAt        DateTime @updatedAt
+
+  @@map("buyer_preferences")
+}
+
+// ===================== FOOD CIRCLES (Neighborhood) =====================
+
+model FoodCircle {
+  id          String   @id @default(cuid())
+  name        String
+  neighborhood String
+  city        String
+  state       String
+  lat         Float?
+  lng         Float?
+  radiusKm    Int      @default(5)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members      CircleMember[]
+  groupOrders  GroupOrder[]
+
+  @@map("food_circles")
+}
+
+model CircleMember {
+  id            String       @id @default(cuid())
+  circleId      String
+  circle        FoodCircle   @relation(fields: [circleId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vendorProfileId String?
+  vendorProfile VendorProfile? @relation(fields: [vendorProfileId], references: [id], onDelete: Cascade)
+  role          CircleRole   @default(member)
+  joinedAt      DateTime     @default(now())
+
+  @@unique([circleId, userId])
+  @@map("circle_members")
+}
+
+enum CircleRole {
+  member
+  admin
+}
+
+// ===================== GROUP ORDERS =====================
+
+model GroupOrder {
+  id              String           @id @default(cuid())
+  circleId        String
+  circle          FoodCircle       @relation(fields: [circleId], references: [id], onDelete: Cascade)
+  creatorId       String
+  creator         User             @relation("GroupOrderCreator", fields: [creatorId], references: [id])
+  vendorId        String
+  vendor          VendorProfile    @relation(fields: [vendorId], references: [id])
+  menuItemId      String?
+  foodName        String
+  cuisine         String
+  targetServings  Int
+  filledServings  Int              @default(0)
+  pricePerServing Decimal          @db.Decimal(10, 2)
+  totalDeliveryFee Decimal         @db.Decimal(10, 2)
+  deliveryFeePerServing Decimal    @db.Decimal(10, 2) @default(0)
+  deliveryWindow  DateTime
+  deliveryAddress String
+  status          GroupOrderStatus @default(open)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  slots           GroupOrderSlot[]
+
+  @@map("group_orders")
+}
+
+enum GroupOrderStatus {
+  open
+  full
+  cooking
+  ready_for_pickup
+  picked_up
+  delivered
+  completed
+  cancelled
+}
+
+model GroupOrderSlot {
+  id            String   @id @default(cuid())
+  groupOrderId  String
+  groupOrder    GroupOrder @relation(fields: [groupOrderId], references: [id], onDelete: Cascade)
+  buyerId       String
+  buyer         User     @relation(fields: [buyerId], references: [id])
+  servings      Int
+  amountPaid    Decimal  @db.Decimal(10, 2)
+  status        SlotStatus @default(reserved)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([groupOrderId, buyerId])
+  @@map("group_order_slots")
+}
+
+enum SlotStatus {
+  reserved
+  paid
+  refunded
+  cancelled
 }

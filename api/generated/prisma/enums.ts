@@ -106,3 +106,35 @@ export const DisputeStatus = {
 } as const
 
 export type DisputeStatus = (typeof DisputeStatus)[keyof typeof DisputeStatus]
+
+
+export const CircleRole = {
+  member: 'member',
+  admin: 'admin'
+} as const
+
+export type CircleRole = (typeof CircleRole)[keyof typeof CircleRole]
+
+
+export const GroupOrderStatus = {
+  open: 'open',
+  full: 'full',
+  cooking: 'cooking',
+  ready_for_pickup: 'ready_for_pickup',
+  picked_up: 'picked_up',
+  delivered: 'delivered',
+  completed: 'completed',
+  cancelled: 'cancelled'
+} as const
+
+export type GroupOrderStatus = (typeof GroupOrderStatus)[keyof typeof GroupOrderStatus]
+
+
+export const SlotStatus = {
+  reserved: 'reserved',
+  paid: 'paid',
+  refunded: 'refunded',
+  cancelled: 'cancelled'
+} as const
+
+export type SlotStatus = (typeof SlotStatus)[keyof typeof SlotStatus]

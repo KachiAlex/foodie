@@ -64,7 +64,12 @@ export const ModelName = {
   Dispute: 'Dispute',
   AuditLog: 'AuditLog',
   Notification: 'Notification',
-  Review: 'Review'
+  Review: 'Review',
+  BuyerPreference: 'BuyerPreference',
+  FoodCircle: 'FoodCircle',
+  CircleMember: 'CircleMember',
+  GroupOrder: 'GroupOrder',
+  GroupOrderSlot: 'GroupOrderSlot'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -309,12 +314,100 @@ export const ReviewScalarFieldEnum = {
 export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof ReviewScalarFieldEnum]
 
 
+export const BuyerPreferenceScalarFieldEnum = {
+  id: 'id',
+  buyerId: 'buyerId',
+  cuisineAffinities: 'cuisineAffinities',
+  spiceTolerance: 'spiceTolerance',
+  dietaryTags: 'dietaryTags',
+  preferredPortion: 'preferredPortion',
+  avgBudgetMin: 'avgBudgetMin',
+  avgBudgetMax: 'avgBudgetMax',
+  totalOrders: 'totalOrders',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BuyerPreferenceScalarFieldEnum = (typeof BuyerPreferenceScalarFieldEnum)[keyof typeof BuyerPreferenceScalarFieldEnum]
+
+
+export const FoodCircleScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  neighborhood: 'neighborhood',
+  city: 'city',
+  state: 'state',
+  lat: 'lat',
+  lng: 'lng',
+  radiusKm: 'radiusKm',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FoodCircleScalarFieldEnum = (typeof FoodCircleScalarFieldEnum)[keyof typeof FoodCircleScalarFieldEnum]
+
+
+export const CircleMemberScalarFieldEnum = {
+  id: 'id',
+  circleId: 'circleId',
+  userId: 'userId',
+  vendorProfileId: 'vendorProfileId',
+  role: 'role',
+  joinedAt: 'joinedAt'
+} as const
+
+export type CircleMemberScalarFieldEnum = (typeof CircleMemberScalarFieldEnum)[keyof typeof CircleMemberScalarFieldEnum]
+
+
+export const GroupOrderScalarFieldEnum = {
+  id: 'id',
+  circleId: 'circleId',
+  creatorId: 'creatorId',
+  vendorId: 'vendorId',
+  menuItemId: 'menuItemId',
+  foodName: 'foodName',
+  cuisine: 'cuisine',
+  targetServings: 'targetServings',
+  filledServings: 'filledServings',
+  pricePerServing: 'pricePerServing',
+  totalDeliveryFee: 'totalDeliveryFee',
+  deliveryFeePerServing: 'deliveryFeePerServing',
+  deliveryWindow: 'deliveryWindow',
+  deliveryAddress: 'deliveryAddress',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GroupOrderScalarFieldEnum = (typeof GroupOrderScalarFieldEnum)[keyof typeof GroupOrderScalarFieldEnum]
+
+
+export const GroupOrderSlotScalarFieldEnum = {
+  id: 'id',
+  groupOrderId: 'groupOrderId',
+  buyerId: 'buyerId',
+  servings: 'servings',
+  amountPaid: 'amountPaid',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GroupOrderSlotScalarFieldEnum = (typeof GroupOrderSlotScalarFieldEnum)[keyof typeof GroupOrderSlotScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -331,4 +424,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

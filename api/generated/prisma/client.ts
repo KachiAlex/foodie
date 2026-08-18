@@ -109,3 +109,28 @@ export type Notification = Prisma.NotificationModel
  * 
  */
 export type Review = Prisma.ReviewModel
+/**
+ * Model BuyerPreference
+ * 
+ */
+export type BuyerPreference = Prisma.BuyerPreferenceModel
+/**
+ * Model FoodCircle
+ * 
+ */
+export type FoodCircle = Prisma.FoodCircleModel
+/**
+ * Model CircleMember
+ * 
+ */
+export type CircleMember = Prisma.CircleMemberModel
+/**
+ * Model GroupOrder
+ * 
+ */
+export type GroupOrder = Prisma.GroupOrderModel
+/**
+ * Model GroupOrderSlot
+ * 
+ */
+export type GroupOrderSlot = Prisma.GroupOrderSlotModel

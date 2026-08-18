@@ -217,6 +217,10 @@ export type UserWhereInput = {
   offersMade?: Prisma.VendorMarketOfferListRelationFilter
   offersReceived?: Prisma.VendorMarketOfferListRelationFilter
   reviewsMade?: Prisma.ReviewListRelationFilter
+  buyerPreference?: Prisma.XOR<Prisma.BuyerPreferenceNullableScalarRelationFilter, Prisma.BuyerPreferenceWhereInput> | null
+  circleMemberships?: Prisma.CircleMemberListRelationFilter
+  groupOrderSlots?: Prisma.GroupOrderSlotListRelationFilter
+  createdGroupOrders?: Prisma.GroupOrderListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -239,6 +243,10 @@ export type UserOrderByWithRelationInput = {
   offersMade?: Prisma.VendorMarketOfferOrderByRelationAggregateInput
   offersReceived?: Prisma.VendorMarketOfferOrderByRelationAggregateInput
   reviewsMade?: Prisma.ReviewOrderByRelationAggregateInput
+  buyerPreference?: Prisma.BuyerPreferenceOrderByWithRelationInput
+  circleMemberships?: Prisma.CircleMemberOrderByRelationAggregateInput
+  groupOrderSlots?: Prisma.GroupOrderSlotOrderByRelationAggregateInput
+  createdGroupOrders?: Prisma.GroupOrderOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -264,6 +272,10 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   offersMade?: Prisma.VendorMarketOfferListRelationFilter
   offersReceived?: Prisma.VendorMarketOfferListRelationFilter
   reviewsMade?: Prisma.ReviewListRelationFilter
+  buyerPreference?: Prisma.XOR<Prisma.BuyerPreferenceNullableScalarRelationFilter, Prisma.BuyerPreferenceWhereInput> | null
+  circleMemberships?: Prisma.CircleMemberListRelationFilter
+  groupOrderSlots?: Prisma.GroupOrderSlotListRelationFilter
+  createdGroupOrders?: Prisma.GroupOrderListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -314,6 +326,10 @@ export type UserCreateInput = {
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -336,6 +352,10 @@ export type UserUncheckedCreateInput = {
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberUncheckedCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUpdateInput = {
@@ -358,6 +378,10 @@ export type UserUpdateInput = {
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -380,6 +404,10 @@ export type UserUncheckedUpdateInput = {
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUncheckedUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -623,6 +651,62 @@ export type UserUpdateOneRequiredWithoutReviewsMadeNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReviewsMadeInput, Prisma.UserUpdateWithoutReviewsMadeInput>, Prisma.UserUncheckedUpdateWithoutReviewsMadeInput>
 }
 
+export type UserCreateNestedOneWithoutBuyerPreferenceInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBuyerPreferenceInput, Prisma.UserUncheckedCreateWithoutBuyerPreferenceInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBuyerPreferenceInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutBuyerPreferenceNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBuyerPreferenceInput, Prisma.UserUncheckedCreateWithoutBuyerPreferenceInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBuyerPreferenceInput
+  upsert?: Prisma.UserUpsertWithoutBuyerPreferenceInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutBuyerPreferenceInput, Prisma.UserUpdateWithoutBuyerPreferenceInput>, Prisma.UserUncheckedUpdateWithoutBuyerPreferenceInput>
+}
+
+export type UserCreateNestedOneWithoutCircleMembershipsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCircleMembershipsInput, Prisma.UserUncheckedCreateWithoutCircleMembershipsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCircleMembershipsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutCircleMembershipsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCircleMembershipsInput, Prisma.UserUncheckedCreateWithoutCircleMembershipsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCircleMembershipsInput
+  upsert?: Prisma.UserUpsertWithoutCircleMembershipsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCircleMembershipsInput, Prisma.UserUpdateWithoutCircleMembershipsInput>, Prisma.UserUncheckedUpdateWithoutCircleMembershipsInput>
+}
+
+export type UserCreateNestedOneWithoutCreatedGroupOrdersInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCreatedGroupOrdersInput, Prisma.UserUncheckedCreateWithoutCreatedGroupOrdersInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCreatedGroupOrdersInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutCreatedGroupOrdersNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCreatedGroupOrdersInput, Prisma.UserUncheckedCreateWithoutCreatedGroupOrdersInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCreatedGroupOrdersInput
+  upsert?: Prisma.UserUpsertWithoutCreatedGroupOrdersInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCreatedGroupOrdersInput, Prisma.UserUpdateWithoutCreatedGroupOrdersInput>, Prisma.UserUncheckedUpdateWithoutCreatedGroupOrdersInput>
+}
+
+export type UserCreateNestedOneWithoutGroupOrderSlotsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutGroupOrderSlotsInput, Prisma.UserUncheckedCreateWithoutGroupOrderSlotsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutGroupOrderSlotsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutGroupOrderSlotsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutGroupOrderSlotsInput, Prisma.UserUncheckedCreateWithoutGroupOrderSlotsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutGroupOrderSlotsInput
+  upsert?: Prisma.UserUpsertWithoutGroupOrderSlotsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutGroupOrderSlotsInput, Prisma.UserUpdateWithoutGroupOrderSlotsInput>, Prisma.UserUncheckedUpdateWithoutGroupOrderSlotsInput>
+}
+
 export type UserCreateWithoutVendorProfileInput = {
   id?: string
   email: string
@@ -642,6 +726,10 @@ export type UserCreateWithoutVendorProfileInput = {
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutVendorProfileInput = {
@@ -663,6 +751,10 @@ export type UserUncheckedCreateWithoutVendorProfileInput = {
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberUncheckedCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutVendorProfileInput = {
@@ -700,6 +792,10 @@ export type UserUpdateWithoutVendorProfileInput = {
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutVendorProfileInput = {
@@ -721,6 +817,10 @@ export type UserUncheckedUpdateWithoutVendorProfileInput = {
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUncheckedUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutBuyerRequestsInput = {
@@ -742,6 +842,10 @@ export type UserCreateWithoutBuyerRequestsInput = {
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutBuyerRequestsInput = {
@@ -763,6 +867,10 @@ export type UserUncheckedCreateWithoutBuyerRequestsInput = {
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberUncheckedCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutBuyerRequestsInput = {
@@ -800,6 +908,10 @@ export type UserUpdateWithoutBuyerRequestsInput = {
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBuyerRequestsInput = {
@@ -821,6 +933,10 @@ export type UserUncheckedUpdateWithoutBuyerRequestsInput = {
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUncheckedUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutBidsInput = {
@@ -842,6 +958,10 @@ export type UserCreateWithoutBidsInput = {
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutBidsInput = {
@@ -863,6 +983,10 @@ export type UserUncheckedCreateWithoutBidsInput = {
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberUncheckedCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutBidsInput = {
@@ -900,6 +1024,10 @@ export type UserUpdateWithoutBidsInput = {
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBidsInput = {
@@ -921,6 +1049,10 @@ export type UserUncheckedUpdateWithoutBidsInput = {
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUncheckedUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutOrdersAsBuyerInput = {
@@ -942,6 +1074,10 @@ export type UserCreateWithoutOrdersAsBuyerInput = {
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutOrdersAsBuyerInput = {
@@ -963,6 +1099,10 @@ export type UserUncheckedCreateWithoutOrdersAsBuyerInput = {
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberUncheckedCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutOrdersAsBuyerInput = {
@@ -1000,6 +1140,10 @@ export type UserUpdateWithoutOrdersAsBuyerInput = {
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOrdersAsBuyerInput = {
@@ -1021,6 +1165,10 @@ export type UserUncheckedUpdateWithoutOrdersAsBuyerInput = {
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUncheckedUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutOffersReceivedInput = {
@@ -1042,6 +1190,10 @@ export type UserCreateWithoutOffersReceivedInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutOffersReceivedInput = {
@@ -1063,6 +1215,10 @@ export type UserUncheckedCreateWithoutOffersReceivedInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberUncheckedCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutOffersReceivedInput = {
@@ -1089,6 +1245,10 @@ export type UserCreateWithoutOffersMadeInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutOffersMadeInput = {
@@ -1110,6 +1270,10 @@ export type UserUncheckedCreateWithoutOffersMadeInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberUncheckedCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutOffersMadeInput = {
@@ -1147,6 +1311,10 @@ export type UserUpdateWithoutOffersReceivedInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOffersReceivedInput = {
@@ -1168,6 +1336,10 @@ export type UserUncheckedUpdateWithoutOffersReceivedInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUncheckedUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUpsertWithoutOffersMadeInput = {
@@ -1200,6 +1372,10 @@ export type UserUpdateWithoutOffersMadeInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOffersMadeInput = {
@@ -1221,6 +1397,10 @@ export type UserUncheckedUpdateWithoutOffersMadeInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUncheckedUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutEscrowWalletInput = {
@@ -1242,6 +1422,10 @@ export type UserCreateWithoutEscrowWalletInput = {
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutEscrowWalletInput = {
@@ -1263,6 +1447,10 @@ export type UserUncheckedCreateWithoutEscrowWalletInput = {
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberUncheckedCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutEscrowWalletInput = {
@@ -1300,6 +1488,10 @@ export type UserUpdateWithoutEscrowWalletInput = {
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEscrowWalletInput = {
@@ -1321,6 +1513,10 @@ export type UserUncheckedUpdateWithoutEscrowWalletInput = {
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUncheckedUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutTransactionsInput = {
@@ -1342,6 +1538,10 @@ export type UserCreateWithoutTransactionsInput = {
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutTransactionsInput = {
@@ -1363,6 +1563,10 @@ export type UserUncheckedCreateWithoutTransactionsInput = {
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberUncheckedCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutTransactionsInput = {
@@ -1400,6 +1604,10 @@ export type UserUpdateWithoutTransactionsInput = {
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTransactionsInput = {
@@ -1421,6 +1629,10 @@ export type UserUncheckedUpdateWithoutTransactionsInput = {
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUncheckedUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutDisputesOpenedInput = {
@@ -1442,6 +1654,10 @@ export type UserCreateWithoutDisputesOpenedInput = {
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutDisputesOpenedInput = {
@@ -1463,6 +1679,10 @@ export type UserUncheckedCreateWithoutDisputesOpenedInput = {
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberUncheckedCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutDisputesOpenedInput = {
@@ -1500,6 +1720,10 @@ export type UserUpdateWithoutDisputesOpenedInput = {
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDisputesOpenedInput = {
@@ -1521,6 +1745,10 @@ export type UserUncheckedUpdateWithoutDisputesOpenedInput = {
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUncheckedUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -1542,6 +1770,10 @@ export type UserCreateWithoutNotificationsInput = {
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -1563,6 +1795,10 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
   reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberUncheckedCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -1600,6 +1836,10 @@ export type UserUpdateWithoutNotificationsInput = {
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -1621,6 +1861,10 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
   reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUncheckedUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutReviewsMadeInput = {
@@ -1642,6 +1886,10 @@ export type UserCreateWithoutReviewsMadeInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
+  buyerPreference?: Prisma.BuyerPreferenceCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutReviewsMadeInput = {
@@ -1663,6 +1911,10 @@ export type UserUncheckedCreateWithoutReviewsMadeInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberUncheckedCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutReviewsMadeInput = {
@@ -1700,6 +1952,10 @@ export type UserUpdateWithoutReviewsMadeInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewsMadeInput = {
@@ -1721,6 +1977,474 @@ export type UserUncheckedUpdateWithoutReviewsMadeInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
   offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUncheckedUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedUpdateManyWithoutCreatorNestedInput
+}
+
+export type UserCreateWithoutBuyerPreferenceInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  role: $Enums.Role
+  verificationStatus?: $Enums.VerificationStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  buyerRequests?: Prisma.FoodRequestCreateNestedManyWithoutBuyerInput
+  ordersAsBuyer?: Prisma.OrderCreateNestedManyWithoutBuyerInput
+  bids?: Prisma.BidCreateNestedManyWithoutVendorInput
+  vendorProfile?: Prisma.VendorProfileCreateNestedOneWithoutUserInput
+  escrowWallet?: Prisma.EscrowWalletCreateNestedOneWithoutVendorInput
+  transactions?: Prisma.EscrowTransactionCreateNestedManyWithoutVendorInput
+  disputesOpened?: Prisma.DisputeCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
+  offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderCreateNestedManyWithoutCreatorInput
+}
+
+export type UserUncheckedCreateWithoutBuyerPreferenceInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  role: $Enums.Role
+  verificationStatus?: $Enums.VerificationStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  buyerRequests?: Prisma.FoodRequestUncheckedCreateNestedManyWithoutBuyerInput
+  ordersAsBuyer?: Prisma.OrderUncheckedCreateNestedManyWithoutBuyerInput
+  bids?: Prisma.BidUncheckedCreateNestedManyWithoutVendorInput
+  vendorProfile?: Prisma.VendorProfileUncheckedCreateNestedOneWithoutUserInput
+  escrowWallet?: Prisma.EscrowWalletUncheckedCreateNestedOneWithoutVendorInput
+  transactions?: Prisma.EscrowTransactionUncheckedCreateNestedManyWithoutVendorInput
+  disputesOpened?: Prisma.DisputeUncheckedCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
+  offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberUncheckedCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedCreateNestedManyWithoutCreatorInput
+}
+
+export type UserCreateOrConnectWithoutBuyerPreferenceInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutBuyerPreferenceInput, Prisma.UserUncheckedCreateWithoutBuyerPreferenceInput>
+}
+
+export type UserUpsertWithoutBuyerPreferenceInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutBuyerPreferenceInput, Prisma.UserUncheckedUpdateWithoutBuyerPreferenceInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutBuyerPreferenceInput, Prisma.UserUncheckedCreateWithoutBuyerPreferenceInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutBuyerPreferenceInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutBuyerPreferenceInput, Prisma.UserUncheckedUpdateWithoutBuyerPreferenceInput>
+}
+
+export type UserUpdateWithoutBuyerPreferenceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  buyerRequests?: Prisma.FoodRequestUpdateManyWithoutBuyerNestedInput
+  ordersAsBuyer?: Prisma.OrderUpdateManyWithoutBuyerNestedInput
+  bids?: Prisma.BidUpdateManyWithoutVendorNestedInput
+  vendorProfile?: Prisma.VendorProfileUpdateOneWithoutUserNestedInput
+  escrowWallet?: Prisma.EscrowWalletUpdateOneWithoutVendorNestedInput
+  transactions?: Prisma.EscrowTransactionUpdateManyWithoutVendorNestedInput
+  disputesOpened?: Prisma.DisputeUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
+  offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUpdateManyWithoutCreatorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutBuyerPreferenceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  buyerRequests?: Prisma.FoodRequestUncheckedUpdateManyWithoutBuyerNestedInput
+  ordersAsBuyer?: Prisma.OrderUncheckedUpdateManyWithoutBuyerNestedInput
+  bids?: Prisma.BidUncheckedUpdateManyWithoutVendorNestedInput
+  vendorProfile?: Prisma.VendorProfileUncheckedUpdateOneWithoutUserNestedInput
+  escrowWallet?: Prisma.EscrowWalletUncheckedUpdateOneWithoutVendorNestedInput
+  transactions?: Prisma.EscrowTransactionUncheckedUpdateManyWithoutVendorNestedInput
+  disputesOpened?: Prisma.DisputeUncheckedUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
+  offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUncheckedUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedUpdateManyWithoutCreatorNestedInput
+}
+
+export type UserCreateWithoutCircleMembershipsInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  role: $Enums.Role
+  verificationStatus?: $Enums.VerificationStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  buyerRequests?: Prisma.FoodRequestCreateNestedManyWithoutBuyerInput
+  ordersAsBuyer?: Prisma.OrderCreateNestedManyWithoutBuyerInput
+  bids?: Prisma.BidCreateNestedManyWithoutVendorInput
+  vendorProfile?: Prisma.VendorProfileCreateNestedOneWithoutUserInput
+  escrowWallet?: Prisma.EscrowWalletCreateNestedOneWithoutVendorInput
+  transactions?: Prisma.EscrowTransactionCreateNestedManyWithoutVendorInput
+  disputesOpened?: Prisma.DisputeCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
+  offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceCreateNestedOneWithoutBuyerInput
+  groupOrderSlots?: Prisma.GroupOrderSlotCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderCreateNestedManyWithoutCreatorInput
+}
+
+export type UserUncheckedCreateWithoutCircleMembershipsInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  role: $Enums.Role
+  verificationStatus?: $Enums.VerificationStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  buyerRequests?: Prisma.FoodRequestUncheckedCreateNestedManyWithoutBuyerInput
+  ordersAsBuyer?: Prisma.OrderUncheckedCreateNestedManyWithoutBuyerInput
+  bids?: Prisma.BidUncheckedCreateNestedManyWithoutVendorInput
+  vendorProfile?: Prisma.VendorProfileUncheckedCreateNestedOneWithoutUserInput
+  escrowWallet?: Prisma.EscrowWalletUncheckedCreateNestedOneWithoutVendorInput
+  transactions?: Prisma.EscrowTransactionUncheckedCreateNestedManyWithoutVendorInput
+  disputesOpened?: Prisma.DisputeUncheckedCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
+  offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedCreateNestedOneWithoutBuyerInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedCreateNestedManyWithoutBuyerInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedCreateNestedManyWithoutCreatorInput
+}
+
+export type UserCreateOrConnectWithoutCircleMembershipsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCircleMembershipsInput, Prisma.UserUncheckedCreateWithoutCircleMembershipsInput>
+}
+
+export type UserUpsertWithoutCircleMembershipsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCircleMembershipsInput, Prisma.UserUncheckedUpdateWithoutCircleMembershipsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCircleMembershipsInput, Prisma.UserUncheckedCreateWithoutCircleMembershipsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCircleMembershipsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCircleMembershipsInput, Prisma.UserUncheckedUpdateWithoutCircleMembershipsInput>
+}
+
+export type UserUpdateWithoutCircleMembershipsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  buyerRequests?: Prisma.FoodRequestUpdateManyWithoutBuyerNestedInput
+  ordersAsBuyer?: Prisma.OrderUpdateManyWithoutBuyerNestedInput
+  bids?: Prisma.BidUpdateManyWithoutVendorNestedInput
+  vendorProfile?: Prisma.VendorProfileUpdateOneWithoutUserNestedInput
+  escrowWallet?: Prisma.EscrowWalletUpdateOneWithoutVendorNestedInput
+  transactions?: Prisma.EscrowTransactionUpdateManyWithoutVendorNestedInput
+  disputesOpened?: Prisma.DisputeUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
+  offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUpdateOneWithoutBuyerNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUpdateManyWithoutCreatorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCircleMembershipsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  buyerRequests?: Prisma.FoodRequestUncheckedUpdateManyWithoutBuyerNestedInput
+  ordersAsBuyer?: Prisma.OrderUncheckedUpdateManyWithoutBuyerNestedInput
+  bids?: Prisma.BidUncheckedUpdateManyWithoutVendorNestedInput
+  vendorProfile?: Prisma.VendorProfileUncheckedUpdateOneWithoutUserNestedInput
+  escrowWallet?: Prisma.EscrowWalletUncheckedUpdateOneWithoutVendorNestedInput
+  transactions?: Prisma.EscrowTransactionUncheckedUpdateManyWithoutVendorNestedInput
+  disputesOpened?: Prisma.DisputeUncheckedUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
+  offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedUpdateOneWithoutBuyerNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedUpdateManyWithoutBuyerNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedUpdateManyWithoutCreatorNestedInput
+}
+
+export type UserCreateWithoutCreatedGroupOrdersInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  role: $Enums.Role
+  verificationStatus?: $Enums.VerificationStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  buyerRequests?: Prisma.FoodRequestCreateNestedManyWithoutBuyerInput
+  ordersAsBuyer?: Prisma.OrderCreateNestedManyWithoutBuyerInput
+  bids?: Prisma.BidCreateNestedManyWithoutVendorInput
+  vendorProfile?: Prisma.VendorProfileCreateNestedOneWithoutUserInput
+  escrowWallet?: Prisma.EscrowWalletCreateNestedOneWithoutVendorInput
+  transactions?: Prisma.EscrowTransactionCreateNestedManyWithoutVendorInput
+  disputesOpened?: Prisma.DisputeCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
+  offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotCreateNestedManyWithoutBuyerInput
+}
+
+export type UserUncheckedCreateWithoutCreatedGroupOrdersInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  role: $Enums.Role
+  verificationStatus?: $Enums.VerificationStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  buyerRequests?: Prisma.FoodRequestUncheckedCreateNestedManyWithoutBuyerInput
+  ordersAsBuyer?: Prisma.OrderUncheckedCreateNestedManyWithoutBuyerInput
+  bids?: Prisma.BidUncheckedCreateNestedManyWithoutVendorInput
+  vendorProfile?: Prisma.VendorProfileUncheckedCreateNestedOneWithoutUserInput
+  escrowWallet?: Prisma.EscrowWalletUncheckedCreateNestedOneWithoutVendorInput
+  transactions?: Prisma.EscrowTransactionUncheckedCreateNestedManyWithoutVendorInput
+  disputesOpened?: Prisma.DisputeUncheckedCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
+  offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberUncheckedCreateNestedManyWithoutUserInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedCreateNestedManyWithoutBuyerInput
+}
+
+export type UserCreateOrConnectWithoutCreatedGroupOrdersInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCreatedGroupOrdersInput, Prisma.UserUncheckedCreateWithoutCreatedGroupOrdersInput>
+}
+
+export type UserUpsertWithoutCreatedGroupOrdersInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCreatedGroupOrdersInput, Prisma.UserUncheckedUpdateWithoutCreatedGroupOrdersInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCreatedGroupOrdersInput, Prisma.UserUncheckedCreateWithoutCreatedGroupOrdersInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCreatedGroupOrdersInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCreatedGroupOrdersInput, Prisma.UserUncheckedUpdateWithoutCreatedGroupOrdersInput>
+}
+
+export type UserUpdateWithoutCreatedGroupOrdersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  buyerRequests?: Prisma.FoodRequestUpdateManyWithoutBuyerNestedInput
+  ordersAsBuyer?: Prisma.OrderUpdateManyWithoutBuyerNestedInput
+  bids?: Prisma.BidUpdateManyWithoutVendorNestedInput
+  vendorProfile?: Prisma.VendorProfileUpdateOneWithoutUserNestedInput
+  escrowWallet?: Prisma.EscrowWalletUpdateOneWithoutVendorNestedInput
+  transactions?: Prisma.EscrowTransactionUpdateManyWithoutVendorNestedInput
+  disputesOpened?: Prisma.DisputeUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
+  offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUpdateManyWithoutBuyerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCreatedGroupOrdersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  buyerRequests?: Prisma.FoodRequestUncheckedUpdateManyWithoutBuyerNestedInput
+  ordersAsBuyer?: Prisma.OrderUncheckedUpdateManyWithoutBuyerNestedInput
+  bids?: Prisma.BidUncheckedUpdateManyWithoutVendorNestedInput
+  vendorProfile?: Prisma.VendorProfileUncheckedUpdateOneWithoutUserNestedInput
+  escrowWallet?: Prisma.EscrowWalletUncheckedUpdateOneWithoutVendorNestedInput
+  transactions?: Prisma.EscrowTransactionUncheckedUpdateManyWithoutVendorNestedInput
+  disputesOpened?: Prisma.DisputeUncheckedUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
+  offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUncheckedUpdateManyWithoutUserNestedInput
+  groupOrderSlots?: Prisma.GroupOrderSlotUncheckedUpdateManyWithoutBuyerNestedInput
+}
+
+export type UserCreateWithoutGroupOrderSlotsInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  role: $Enums.Role
+  verificationStatus?: $Enums.VerificationStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  buyerRequests?: Prisma.FoodRequestCreateNestedManyWithoutBuyerInput
+  ordersAsBuyer?: Prisma.OrderCreateNestedManyWithoutBuyerInput
+  bids?: Prisma.BidCreateNestedManyWithoutVendorInput
+  vendorProfile?: Prisma.VendorProfileCreateNestedOneWithoutUserInput
+  escrowWallet?: Prisma.EscrowWalletCreateNestedOneWithoutVendorInput
+  transactions?: Prisma.EscrowTransactionCreateNestedManyWithoutVendorInput
+  disputesOpened?: Prisma.DisputeCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  offersMade?: Prisma.VendorMarketOfferCreateNestedManyWithoutBuyerInput
+  offersReceived?: Prisma.VendorMarketOfferCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberCreateNestedManyWithoutUserInput
+  createdGroupOrders?: Prisma.GroupOrderCreateNestedManyWithoutCreatorInput
+}
+
+export type UserUncheckedCreateWithoutGroupOrderSlotsInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  role: $Enums.Role
+  verificationStatus?: $Enums.VerificationStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  buyerRequests?: Prisma.FoodRequestUncheckedCreateNestedManyWithoutBuyerInput
+  ordersAsBuyer?: Prisma.OrderUncheckedCreateNestedManyWithoutBuyerInput
+  bids?: Prisma.BidUncheckedCreateNestedManyWithoutVendorInput
+  vendorProfile?: Prisma.VendorProfileUncheckedCreateNestedOneWithoutUserInput
+  escrowWallet?: Prisma.EscrowWalletUncheckedCreateNestedOneWithoutVendorInput
+  transactions?: Prisma.EscrowTransactionUncheckedCreateNestedManyWithoutVendorInput
+  disputesOpened?: Prisma.DisputeUncheckedCreateNestedManyWithoutOpenedByInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  offersMade?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutBuyerInput
+  offersReceived?: Prisma.VendorMarketOfferUncheckedCreateNestedManyWithoutVendorInput
+  reviewsMade?: Prisma.ReviewUncheckedCreateNestedManyWithoutBuyerInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedCreateNestedOneWithoutBuyerInput
+  circleMemberships?: Prisma.CircleMemberUncheckedCreateNestedManyWithoutUserInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedCreateNestedManyWithoutCreatorInput
+}
+
+export type UserCreateOrConnectWithoutGroupOrderSlotsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutGroupOrderSlotsInput, Prisma.UserUncheckedCreateWithoutGroupOrderSlotsInput>
+}
+
+export type UserUpsertWithoutGroupOrderSlotsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutGroupOrderSlotsInput, Prisma.UserUncheckedUpdateWithoutGroupOrderSlotsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutGroupOrderSlotsInput, Prisma.UserUncheckedCreateWithoutGroupOrderSlotsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutGroupOrderSlotsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutGroupOrderSlotsInput, Prisma.UserUncheckedUpdateWithoutGroupOrderSlotsInput>
+}
+
+export type UserUpdateWithoutGroupOrderSlotsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  buyerRequests?: Prisma.FoodRequestUpdateManyWithoutBuyerNestedInput
+  ordersAsBuyer?: Prisma.OrderUpdateManyWithoutBuyerNestedInput
+  bids?: Prisma.BidUpdateManyWithoutVendorNestedInput
+  vendorProfile?: Prisma.VendorProfileUpdateOneWithoutUserNestedInput
+  escrowWallet?: Prisma.EscrowWalletUpdateOneWithoutVendorNestedInput
+  transactions?: Prisma.EscrowTransactionUpdateManyWithoutVendorNestedInput
+  disputesOpened?: Prisma.DisputeUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  offersMade?: Prisma.VendorMarketOfferUpdateManyWithoutBuyerNestedInput
+  offersReceived?: Prisma.VendorMarketOfferUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUpdateManyWithoutUserNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUpdateManyWithoutCreatorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutGroupOrderSlotsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  verificationStatus?: Prisma.EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  buyerRequests?: Prisma.FoodRequestUncheckedUpdateManyWithoutBuyerNestedInput
+  ordersAsBuyer?: Prisma.OrderUncheckedUpdateManyWithoutBuyerNestedInput
+  bids?: Prisma.BidUncheckedUpdateManyWithoutVendorNestedInput
+  vendorProfile?: Prisma.VendorProfileUncheckedUpdateOneWithoutUserNestedInput
+  escrowWallet?: Prisma.EscrowWalletUncheckedUpdateOneWithoutVendorNestedInput
+  transactions?: Prisma.EscrowTransactionUncheckedUpdateManyWithoutVendorNestedInput
+  disputesOpened?: Prisma.DisputeUncheckedUpdateManyWithoutOpenedByNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  offersMade?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutBuyerNestedInput
+  offersReceived?: Prisma.VendorMarketOfferUncheckedUpdateManyWithoutVendorNestedInput
+  reviewsMade?: Prisma.ReviewUncheckedUpdateManyWithoutBuyerNestedInput
+  buyerPreference?: Prisma.BuyerPreferenceUncheckedUpdateOneWithoutBuyerNestedInput
+  circleMemberships?: Prisma.CircleMemberUncheckedUpdateManyWithoutUserNestedInput
+  createdGroupOrders?: Prisma.GroupOrderUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 
@@ -1738,6 +2462,9 @@ export type UserCountOutputType = {
   offersMade: number
   offersReceived: number
   reviewsMade: number
+  circleMemberships: number
+  groupOrderSlots: number
+  createdGroupOrders: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1750,6 +2477,9 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   offersMade?: boolean | UserCountOutputTypeCountOffersMadeArgs
   offersReceived?: boolean | UserCountOutputTypeCountOffersReceivedArgs
   reviewsMade?: boolean | UserCountOutputTypeCountReviewsMadeArgs
+  circleMemberships?: boolean | UserCountOutputTypeCountCircleMembershipsArgs
+  groupOrderSlots?: boolean | UserCountOutputTypeCountGroupOrderSlotsArgs
+  createdGroupOrders?: boolean | UserCountOutputTypeCountCreatedGroupOrdersArgs
 }
 
 /**
@@ -1825,6 +2555,27 @@ export type UserCountOutputTypeCountReviewsMadeArgs<ExtArgs extends runtime.Type
   where?: Prisma.ReviewWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCircleMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CircleMemberWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountGroupOrderSlotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.GroupOrderSlotWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCreatedGroupOrdersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.GroupOrderWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1846,6 +2597,10 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   offersMade?: boolean | Prisma.User$offersMadeArgs<ExtArgs>
   offersReceived?: boolean | Prisma.User$offersReceivedArgs<ExtArgs>
   reviewsMade?: boolean | Prisma.User$reviewsMadeArgs<ExtArgs>
+  buyerPreference?: boolean | Prisma.User$buyerPreferenceArgs<ExtArgs>
+  circleMemberships?: boolean | Prisma.User$circleMembershipsArgs<ExtArgs>
+  groupOrderSlots?: boolean | Prisma.User$groupOrderSlotsArgs<ExtArgs>
+  createdGroupOrders?: boolean | Prisma.User$createdGroupOrdersArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1895,6 +2650,10 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   offersMade?: boolean | Prisma.User$offersMadeArgs<ExtArgs>
   offersReceived?: boolean | Prisma.User$offersReceivedArgs<ExtArgs>
   reviewsMade?: boolean | Prisma.User$reviewsMadeArgs<ExtArgs>
+  buyerPreference?: boolean | Prisma.User$buyerPreferenceArgs<ExtArgs>
+  circleMemberships?: boolean | Prisma.User$circleMembershipsArgs<ExtArgs>
+  groupOrderSlots?: boolean | Prisma.User$groupOrderSlotsArgs<ExtArgs>
+  createdGroupOrders?: boolean | Prisma.User$createdGroupOrdersArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1914,6 +2673,10 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     offersMade: Prisma.$VendorMarketOfferPayload<ExtArgs>[]
     offersReceived: Prisma.$VendorMarketOfferPayload<ExtArgs>[]
     reviewsMade: Prisma.$ReviewPayload<ExtArgs>[]
+    buyerPreference: Prisma.$BuyerPreferencePayload<ExtArgs> | null
+    circleMemberships: Prisma.$CircleMemberPayload<ExtArgs>[]
+    groupOrderSlots: Prisma.$GroupOrderSlotPayload<ExtArgs>[]
+    createdGroupOrders: Prisma.$GroupOrderPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2329,6 +3092,10 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   offersMade<T extends Prisma.User$offersMadeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$offersMadeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VendorMarketOfferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   offersReceived<T extends Prisma.User$offersReceivedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$offersReceivedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VendorMarketOfferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reviewsMade<T extends Prisma.User$reviewsMadeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewsMadeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  buyerPreference<T extends Prisma.User$buyerPreferenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$buyerPreferenceArgs<ExtArgs>>): Prisma.Prisma__BuyerPreferenceClient<runtime.Types.Result.GetResult<Prisma.$BuyerPreferencePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  circleMemberships<T extends Prisma.User$circleMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$circleMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CircleMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  groupOrderSlots<T extends Prisma.User$groupOrderSlotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$groupOrderSlotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GroupOrderSlotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  createdGroupOrders<T extends Prisma.User$createdGroupOrdersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdGroupOrdersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GroupOrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3010,6 +3777,97 @@ export type User$reviewsMadeArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.ReviewScalarFieldEnum | Prisma.ReviewScalarFieldEnum[]
+}
+
+/**
+ * User.buyerPreference
+ */
+export type User$buyerPreferenceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BuyerPreference
+   */
+  select?: Prisma.BuyerPreferenceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BuyerPreference
+   */
+  omit?: Prisma.BuyerPreferenceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BuyerPreferenceInclude<ExtArgs> | null
+  where?: Prisma.BuyerPreferenceWhereInput
+}
+
+/**
+ * User.circleMemberships
+ */
+export type User$circleMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CircleMember
+   */
+  select?: Prisma.CircleMemberSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CircleMember
+   */
+  omit?: Prisma.CircleMemberOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CircleMemberInclude<ExtArgs> | null
+  where?: Prisma.CircleMemberWhereInput
+  orderBy?: Prisma.CircleMemberOrderByWithRelationInput | Prisma.CircleMemberOrderByWithRelationInput[]
+  cursor?: Prisma.CircleMemberWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CircleMemberScalarFieldEnum | Prisma.CircleMemberScalarFieldEnum[]
+}
+
+/**
+ * User.groupOrderSlots
+ */
+export type User$groupOrderSlotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the GroupOrderSlot
+   */
+  select?: Prisma.GroupOrderSlotSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the GroupOrderSlot
+   */
+  omit?: Prisma.GroupOrderSlotOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupOrderSlotInclude<ExtArgs> | null
+  where?: Prisma.GroupOrderSlotWhereInput
+  orderBy?: Prisma.GroupOrderSlotOrderByWithRelationInput | Prisma.GroupOrderSlotOrderByWithRelationInput[]
+  cursor?: Prisma.GroupOrderSlotWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.GroupOrderSlotScalarFieldEnum | Prisma.GroupOrderSlotScalarFieldEnum[]
+}
+
+/**
+ * User.createdGroupOrders
+ */
+export type User$createdGroupOrdersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the GroupOrder
+   */
+  select?: Prisma.GroupOrderSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the GroupOrder
+   */
+  omit?: Prisma.GroupOrderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupOrderInclude<ExtArgs> | null
+  where?: Prisma.GroupOrderWhereInput
+  orderBy?: Prisma.GroupOrderOrderByWithRelationInput | Prisma.GroupOrderOrderByWithRelationInput[]
+  cursor?: Prisma.GroupOrderWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.GroupOrderScalarFieldEnum | Prisma.GroupOrderScalarFieldEnum[]
 }
 
 /**
