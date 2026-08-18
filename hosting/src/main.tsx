@@ -8,6 +8,10 @@ import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
 import { AppProvider } from "./context/AppContext";
 import { CurrencyProvider } from "./context/CurrencyContext";
+import { registerSW } from 'virtual:pwa-register';
+
+// Register PWA service worker
+registerSW({ immediate: true });
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <StrictMode>
