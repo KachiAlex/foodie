@@ -10,6 +10,8 @@ import { ForgotPasswordPage } from "@/pages/auth/ForgotPassword";
 import { FoodCommunity } from "@/pages/community/FoodCommunity";
 import { BuyerMarket } from "@/pages/community/BuyerMarket";
 import { VendorMarket } from "@/pages/community/VendorMarket";
+import { VendorProfile } from "@/pages/community/VendorProfile";
+import { DishDetails } from "@/pages/community/DishDetails";
 import { VendorBids } from "@/pages/community/VendorBids";
 
 export default function App() {
@@ -23,6 +25,8 @@ export default function App() {
         <Route path="/community" element={<FoodCommunity />} />
         <Route path="/community/buyer-market" element={<BuyerMarket />} />
         <Route path="/community/vendor-market" element={<VendorMarket />} />
+        <Route path="/community/vendors/:id" element={<VendorProfile />} />
+        <Route path="/community/dishes/:id" element={<DishDetails />} />
         <Route path="/community/vendor-bids" element={<VendorBids />} />
         <Route path="/dashboard" element={<DashboardLanding />} />
         <Route path="/dashboard/:roleSlug" element={<DashboardGuard />} />

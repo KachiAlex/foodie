@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import {
   Search,
   SlidersHorizontal,
@@ -339,21 +340,21 @@ export function VendorMarket() {
           {filteredVendors.map((vendor) => (
             <div key={vendor.id} className="overflow-hidden rounded-3xl bg-white shadow-sm">
               {/* Vendor banner */}
-              <div className="relative h-40 sm:h-48">
+              <Link to={`/community/vendors/${vendor.id}`} className="block relative h-40 sm:h-48 group">
                 <img
                   src={vendorImage(vendor)}
                   alt={vendor.kitchenName}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
                   <div className="flex items-end justify-between gap-4">
                     <div className="flex items-end gap-4">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-500 text-lg font-bold text-white shadow-lg">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-500 text-lg font-bold text-white shadow-lg border-2 border-white/20">
                         {initials(vendor.user.name)}
                       </div>
                       <div>
-                        <h2 className="text-xl font-bold text-white">{vendor.kitchenName}</h2>
+                        <h2 className="text-xl font-bold text-white group-hover:text-orange-200 transition-colors">{vendor.kitchenName}</h2>
                         <p className="text-sm text-white/80">
                           {vendor.city || vendor.state ? [vendor.city, vendor.state].filter(Boolean).join(", ") : vendor.user.email}
                         </p>
@@ -368,7 +369,7 @@ export function VendorMarket() {
                     </span>
                   </div>
                 </div>
-              </div>
+              </Link>
 
               {/* Vendor profile details */}
               <div className="px-5 pb-2 pt-4 sm:px-6">
