@@ -8,6 +8,8 @@ export function setupCors() {
         "http://localhost:3000",
         "https://foodie-zeta-amber.vercel.app",
         "https://foodiemarket.vercel.app",
+        "https://foodie-marketplace.com",
+        "https://www.foodie-marketplace.com",
       ];
       if (!origin || allowed.includes(origin)) {
         callback(null, true);

@@ -113,7 +113,7 @@ export const requestPasswordReset = asyncHandler(async (req: Request, res: Respo
   }
 
   const resetToken = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: "1h" });
-  const resetLink = `${process.env.FRONTEND_URL ?? "https://foodiemarket.vercel.app"}/auth/reset-password?token=${resetToken}`;
+  const resetLink = `${process.env.FRONTEND_URL ?? "https://foodie-marketplace.com"}/auth/reset-password?token=${resetToken}`;
 
   if (isEmailConfigured()) {
     await sendPasswordResetEmail(email, resetLink);
