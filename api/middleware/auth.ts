@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma";
+import { getJwtSecret } from "../lib/security";
 
 export interface AuthUser {
   id: string;
@@ -9,7 +10,7 @@ export interface AuthUser {
   name: string;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || "foodie-market-dev-secret-change-in-production";
+const JWT_SECRET = getJwtSecret();
 
 export function authenticate(req: Request, _res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;

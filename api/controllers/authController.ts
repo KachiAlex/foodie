@@ -3,10 +3,11 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { asyncHandler } from "../utils/asyncHandler";
 import { prisma } from "../lib/prisma";
+import { getJwtSecret } from "../lib/security";
 import type { AuthUser } from "../middleware/auth";
 import { isEmailConfigured, sendPasswordResetEmail } from "../services/emailService";
 
-const JWT_SECRET = process.env.JWT_SECRET || "foodie-market-dev-secret-change-in-production";
+const JWT_SECRET = getJwtSecret();
 const JWT_EXPIRES_IN = "7d";
 
 function signToken(user: { id: string; email: string; name: string; role: string }) {
@@ -107,24 +108,22 @@ export const signIn = asyncHandler(async (req: Request, res: Response) => {
 export const requestPasswordReset = asyncHandler(async (req: Request, res: Response) => {
   const { email } = req.body;
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) {
-    res.status(404).json({ success: false, error: { message: "No account found with that email" } });
-    return;
-  }
+  
+  if (user) {
+    const resetToken = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: "1h" });
+    const resetLink = `${process.env.FRONTEND_URL ?? "https://foodie-marketplace.com"}/auth/reset-password?token=${resetToken}`;
 
-  const resetToken = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: "1h" });
-  const resetLink = `${process.env.FRONTEND_URL ?? "https://foodie-marketplace.com"}/auth/reset-password?token=${resetToken}`;
-
-  if (isEmailConfigured()) {
-    await sendPasswordResetEmail(email, resetLink);
-  } else {
-    console.log(`[dev] Password reset link for ${email}: ${resetLink}`);
+    if (isEmailConfigured()) {
+      await sendPasswordResetEmail(email, resetLink);
+    } else {
+      console.log(`[dev] Password reset link for ${email}: ${resetLink}`);
+    }
   }
 
   res.json({
     success: true,
     data: {
-      message: "Password reset link sent to your email",
+      message: "If an account exists with that email, a password reset link has been sent.",
     },
   });
 });
