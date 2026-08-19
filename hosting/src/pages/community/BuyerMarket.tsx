@@ -321,9 +321,10 @@ export function BuyerMarket() {
   const { user } = useAuth();
   const { showToast } = useToast();
   const { acceptBid } = useApp();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [requests, setRequests] = useState<MarketRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchParams.get("search") || "");
   const [category, setCategory] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [minBudget, setMinBudget] = useState<number | "">("");
@@ -370,10 +371,9 @@ export function BuyerMarket() {
 
   useEffect(() => {
     load();
-  }, [showToast]);
+  }, [showToast, load]);
 
   // Handle Paystack payment redirect callback
-  const [searchParams, setSearchParams] = useSearchParams();
   useEffect(() => {
     const payment = searchParams.get("payment");
     const ref = searchParams.get("ref");

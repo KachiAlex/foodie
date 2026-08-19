@@ -199,7 +199,6 @@ export function BuyerDashboard() {
         ],
       }}
       title="Buyer Control Center"
-      description="Coordinate custom food requests, bids, and direct orders."
       actions={
         <div className="flex gap-2">
           <Button variant="outline" className="gap-2" asChild>

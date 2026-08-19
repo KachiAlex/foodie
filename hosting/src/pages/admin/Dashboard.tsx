@@ -283,20 +283,19 @@ export function AdminDashboard() {
     ],
   };
 
-  const TAB_META: Record<string, { title: string; description: string }> = {
-    overview:   { title: "Marketplace Control",  description: "Monitor fulfillment health, vendor trust, and escalations." },
-    orders:     { title: "Orders & Payouts",     description: "Manage all marketplace orders and release vendor payouts." },
-    vendors:    { title: "Vendor Management",    description: "Approve KYC, review documents, flag or audit vendor accounts." },
-    users:      { title: "User Management",      description: "View, filter, suspend or remove platform users." },
-    compliance: { title: "Compliance",           description: "Resolve disputes and monitor escrow backlog alerts." },
+  const TAB_META: Record<string, { title: string }> = {
+    overview:   { title: "Marketplace Control" },
+    orders:     { title: "Orders & Payouts" },
+    vendors:    { title: "Vendor Management" },
+    users:      { title: "User Management" },
+    compliance: { title: "Compliance" },
   };
-  const { title: pageTitle, description: pageDesc } = TAB_META[activeTab] ?? TAB_META.overview;
+  const { title: pageTitle } = TAB_META[activeTab] ?? TAB_META.overview;
 
   return (
     <DashboardLayout
       sidebar={SIDEBAR}
       title={pageTitle}
-      description={pageDesc}
     >
       <section className="space-y-6">
 

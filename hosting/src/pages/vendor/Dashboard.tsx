@@ -144,7 +144,7 @@ export function VendorDashboard() {
 
   if (isLoading) {
     return (
-      <DashboardLayout sidebar={SIDEBAR} title="Chef Command Hub" description="Bid on custom requests, manage orders, and showcase your menu.">
+      <DashboardLayout sidebar={SIDEBAR} title="Chef Command Hub">
         <section className="space-y-8">
           <div className="grid gap-4 sm:grid-cols-3">
             {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 w-full rounded-3xl" />)}
@@ -167,7 +167,6 @@ export function VendorDashboard() {
     <DashboardLayout
       sidebar={SIDEBAR}
       title="Chef Command Hub"
-      description="Bid on custom requests, manage orders, and showcase your menu."
       actions={
         <div className="flex items-center gap-2">
           <Button

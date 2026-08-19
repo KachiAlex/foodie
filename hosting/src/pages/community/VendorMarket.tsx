@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   Search,
   SlidersHorizontal,
@@ -26,9 +26,10 @@ export function VendorMarket() {
   const { symbol } = useCurrency();
   const { user } = useAuth();
   const { showToast } = useToast();
+  const [searchParams] = useSearchParams();
   const [vendors, setVendors] = useState<CommunityVendor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchParams.get("search") || "");
   const [category, setCategory] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [minRating, setMinRating] = useState(0);
@@ -394,33 +395,40 @@ export function VendorMarket() {
 
               {/* Dishes */}
               <div className="p-5 sm:p-6">
-                <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-gray-400">Dishes</h3>
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400">Top Dishes</h3>
+                  {vendor.menuItems.length > 3 && (
+                    <Button variant="ghost" size="sm" className="text-xs text-orange-600 font-bold hover:bg-orange-50" asChild>
+                      <Link to={`/community/vendors/${vendor.id}`}>View all {vendor.menuItems.length} dishes</Link>
+                    </Button>
+                  )}
+                </div>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {vendor.menuItems.map((item) => (
+                  {vendor.menuItems.slice(0, 3).map((item) => (
                     <motion.div
                       key={item.id}
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="rounded-2xl border border-gray-100 p-4 transition-shadow hover:shadow-md"
+                      className="rounded-2xl border border-gray-100 p-4 transition-all hover:shadow-md hover:border-orange-100 bg-gray-50/30 group/item"
                     >
-                      <div className="aspect-video w-full overflow-hidden rounded-xl bg-gray-100">
+                      <div className="aspect-video w-full overflow-hidden rounded-xl bg-gray-100 relative">
                         {item.imageUrl ? (
-                          <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
+                          <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover transition-transform group-hover/item:scale-110" />
                         ) : (
-                          <div className="flex h-full items-center justify-center text-sm text-gray-400">No image</div>
+                          <div className="flex h-full items-center justify-center text-xs text-gray-400 font-medium italic">No photo available</div>
                         )}
+                        <div className="absolute top-2 right-2 rounded-full bg-white/90 backdrop-blur-sm px-2 py-1 text-[10px] font-bold text-gray-900 shadow-sm border border-gray-100">
+                          {symbol}{Number(item.price).toLocaleString()}
+                        </div>
                       </div>
                       <div className="mt-3">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-semibold text-gray-900">{item.name}</h3>
-                          <span className="shrink-0 text-sm font-semibold text-gray-900">
-                            {symbol}{Number(item.price).toLocaleString()}
-                          </span>
+                          <h3 className="font-bold text-gray-900 line-clamp-1 text-sm">{item.name}</h3>
                         </div>
-                        <p className="mt-1 line-clamp-2 text-sm text-gray-500">{item.description || item.category}</p>
+                        <p className="mt-1 line-clamp-2 text-[12px] text-gray-500 leading-relaxed min-h-[32px]">{item.description || item.category}</p>
                         <Button
                           size="sm"
-                          className="mt-3 w-full bg-orange-500 text-white hover:bg-orange-600"
+                          className="mt-3 w-full bg-orange-500 text-white hover:bg-orange-600 h-8 text-xs font-bold rounded-xl shadow-sm"
                           onClick={() => openRequest(vendor, item)}
                         >
                           Request dish
@@ -429,6 +437,11 @@ export function VendorMarket() {
                     </motion.div>
                   ))}
                 </div>
+                {vendor.menuItems.length > 3 && (
+                   <Link to={`/community/vendors/${vendor.id}`} className="mt-4 block w-full rounded-2xl bg-gray-50 py-3 text-center text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors border border-dashed border-gray-200">
+                     + {vendor.menuItems.length - 3} more dishes in this kitchen
+                   </Link>
+                )}
               </div>
             </div>
           ))}
